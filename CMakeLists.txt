@@ -1,17 +1,16 @@
-cmake_minimum_required(VERSION 4.2)
+cmake_minimum_required(VERSION 4.1.2)
 project(Awoken_Engine)
 project(Awoken_Engine_Test)
 
 set(CMAKE_CXX_STANDARD 20)
 
 include_directories(
-        ~/Documents/glfw/include
-        ~/Documents/glm/glm
-        ~/Documents/glad/include
-        ~/Documents/assimp/include
-        ~/Documents/freetype/include
-        ~/Documents/json/include
-        ~/Documents/Awoken-Engine
+        Dependencies/Assimp/include
+        Dependencies/freetype/include
+        Dependencies/glad/include
+        Dependencies/glfw/include
+        Dependencies/glm/glm
+        Dependencies/json/include
 )
 
 add_library(Awoken_Engine STATIC
@@ -29,10 +28,7 @@ add_library(Awoken_Engine STATIC
         Scene.cpp
         WindowManager.cpp
         WorldManager.cpp
-        glad.c
-        main.cpp
         TextRenderer.cpp
-        TextRenderer.h
 )
 
 link_directories(

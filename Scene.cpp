@@ -24,13 +24,6 @@ void Scene::Awake()
         camera = new Camera();
         std::cout << "Camera Created" << std::endl;
     }
-	for (int i = 0; i < inScene.size(); i++)
-	{
-		if (inScene[i]->getActiveState())
-		{
-			inScene[i]->Awake();
-		}
-	}
 }
 
 void Scene::Start()
@@ -58,14 +51,6 @@ void Scene::Update()
 
 void Scene::LateUpdate()
 {
-	for (int i = 0; i < inScene.size(); i++)
-	{
-		if (inScene[i]->getActiveState())
-		{
-			inScene[i]->LateUpdate();
-		}
-	}
-
 	for (int i = 0; i < toBeAdded.size(); i++)
 	{
 		inScene.push_back(toBeAdded[i]);

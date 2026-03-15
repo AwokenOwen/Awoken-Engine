@@ -21,18 +21,6 @@ Object::Object()
 	World.Instantiate(this);
 }
 
-//called once at the start of a scene
-void Object::Awake()
-{
-	for (int i = 0; i < componentsSize; i++)
-	{
-		if (components[i]->getActiveState())
-		{
-			components[i]->awake();
-		}
-	}
-}
-
 //called once at the start of the frame it is enabled on
 void Object::OnEnable()
 {
@@ -73,18 +61,6 @@ void Object::Update()
 		if (components[i]->getActiveState())
 		{
 			components[i]->update();
-		}
-	}
-}
-
-//called every frame after update
-void Object::LateUpdate()
-{
-	for (int i = 0; i < componentsSize; i++)
-	{
-		if (components[i]->getActiveState())
-		{
-			components[i]->lateUpdate();
 		}
 	}
 }

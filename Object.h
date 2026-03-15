@@ -20,16 +20,12 @@ public:
 	//Default contructor adds itself to the world list
 	Object();
 
-	//called once at the start of a scene
-	virtual void Awake();
 	//called once at the start of the frame it is enabled on
 	virtual void OnEnable();
 	//called on the first frame if enabled
 	virtual void Start();
 	//called every frame
 	virtual void Update();
-	//called every frame after update
-	virtual void LateUpdate();
 	//called on the last frame it is enabled
 	virtual void OnDisable();
 	//to be called when Destroying itself
