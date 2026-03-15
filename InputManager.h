@@ -1,6 +1,6 @@
 /*
  * Written by: AwokenOwen
- * Last Updated: March 13th 2026
+ * Last Updated: March 14th 2026
  */
 
 #pragma once
@@ -57,6 +57,9 @@ public:
 	}
 };
 
+/**
+ * @brief Used to send information about GLFW mouse button input through keyboard events
+ */
 struct MouseButtonContext
 {
 private:
@@ -87,25 +90,74 @@ public:
 	}
 };
 
+/**
+ * @brief Singleton class that handles the GLFW inputs into more user-friendly format
+ */
 class InputManager
 {
 public:
-	// start the input manager
+	/**
+	 * @brief Get Input Manager running for use in game
+	 *
+	 * Starts up and initializes everything the input manager needs to run. Returns 0 if successful and 1 if failed
+	 *
+	 * @return int
+	 */
 	int initialize(GLFWwindow* window);
 
-	// free any data on the heap
-	int terminate();
+	/**
+	 * @brief shuts down the input manager at the end of the game loop
+	 */
+	void terminate();
 
-	// singleton get function
+	/**
+	 * @brief InputManager Singleton get function
+	 *
+	 * @return static InputManager Instance
+	 */
 	static InputManager& getInstance();
 
-	// Input function for mouse movement
+	/**
+	 * @brief Function called by GLFW for when the mouse moves
+	 *
+	 * Takes in position of the mouse as two floats and calls the mouseMoveEvent with a vec2 for mouse position and vec2 for the mouse delta (the change in mouse position between frames)
+	 *
+	 * @param posX X position of the mouse
+	 * @param posY Y position of the mouse
+	 */
 	void mouseMoveInput(float posX, float posY);
-	// Input function for keyboard inputs
+
+	/**
+	 * @brief Function called by GLFW for all keyboard inputs
+	 *
+	 * Takes in the key, scancode, action, and mods and turns it into a KeyboardContext and calls the keyboardEvent sending the KeyboardContext
+	 *
+	 * @param key A code referring to which key was pressed on the keyboard
+	 * @param scancode A code referring to which key was pressed on the keyboard specific to OS
+	 * @param action A code referring to if the key was GLFW_PRESSED GLFW_RELEASED or GLFW_REPEAT
+	 * @param mods A code with bit modifiers to represent the mods of the input (Held Ctrl, Shift, ect.)
+	 */
 	void keyboardInputs(int key, int scancode, int action, int mods);
-	// Input function for mouse buttons
+
+	/**
+	 * @brief Function called by GLFW for all mouse button inputs
+	 *
+	 * Takes in the button, action, and mods and turns it into a MouseContext and calls the mouseButtonEvent sending the MouseContext
+	 *
+	 * @param button A code referring to the mouse button pressed
+	 * @param action A code referring to if the key was GLFW_PRESSED GLFW_RELEASED or GLFW_REPEAT
+	 * @param mods A code with bit modifiers to represent the mods of the input (Held Ctrl, Shift, ect.)
+	 */
 	void mouseButtonInputs(int button, int action, int mods);
-	// Input function for the scroll
+
+	/**
+	 * @brief Function called by GLFW for all scroll inputs
+	 *
+	 * Takes in the offset of the scroll through two floats, converts it to a vec2 and sends it in the scrollEvent
+	 *
+	 * @param xOffset The offset of the scroll on the X Axis
+	 * @param yOffset The offset of the scroll on the Y Axis
+	 */
 	void scrollInput(double xOffset, double yOffset);
 
 	// Event gives two vec2: Mouse Position, and Mouse Delta

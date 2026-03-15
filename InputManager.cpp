@@ -22,7 +22,7 @@ int InputManager::initialize(GLFWwindow* window)
 }
 
 //free any data on the heap
-int InputManager::terminate()
+void InputManager::terminate()
 {
 	return 0;
 }

@@ -1,6 +1,6 @@
 /*
  * Written by: AwokenOwen
- * Last Updated: March 13th 2026
+ * Last Updated: March 14th 2026
  */
 
 #pragma once
@@ -9,6 +9,7 @@
 
 using namespace std;
 
+class Object;
 /**
  * @brief Event class for all events needed
  *
@@ -18,10 +19,13 @@ template<typename... R>
 class Event
 {
 public:
+
 	/**
-	 * Event Constructor
+	 * @brief Event Constructor
+	 *
+	 * @param owner Object pointer to owner of event
 	 */
-	Event();
+	explicit Event(Object* owner = nullptr);
 
 	/**
 	 * @brief Add a function as a listeners to this event
@@ -38,23 +42,30 @@ public:
 	/**
 	 * @brief Call all the functions that are listeners to the event
 	 *
+	 * Call the event with the necessary information to be passed to all Objects. Will cause error if caller is not equal to p_owner
+	 *
 	 * @param args The inputs determined by R required to call the Event
+	 * @param caller pointer to the Object that calls the event
 	 */
-	void callEvent(R... args);
+	void callEvent(R... args, Object* caller = nullptr);
 
 private:
 	/**
 	 * @brief Vector of lambda functions ready to be called on callEvent()
 	 */
 	vector<function<void(R...)>> m_functions;
+
+	Object* p_owner;
 };
 
-template<typename ...R>
-Event<R...>::Event() = default;
+template<typename ... R>
+Event<R...>::Event(Object *owner) {
+	p_owner = owner;
+}
 
 template<typename ...R>
 template<typename T>
-inline void Event<R...>::add(T* object, void(T::* func)(R...))
+void Event<R...>::add(T* object, void(T::* func)(R...))
 {
 	function<void()> lambda = [object, func](R... args)
 	{
@@ -65,8 +76,9 @@ inline void Event<R...>::add(T* object, void(T::* func)(R...))
 }
 
 template<typename ...R>
-inline void Event<R...>::callEvent(R ...args)
+ void Event<R...>::callEvent(R ...args, Object* caller)
 {
+	static_assert(caller == p_owner || p_owner == nullptr, "Caller Object is required to be the Owner of the Event");
 	for (int i = 0; i < m_functions.size(); i++)
 	{
 		m_functions[i](args...);

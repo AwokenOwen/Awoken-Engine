@@ -37,7 +37,6 @@ public:
 	 */
 	static void terminate();
 
-	//
 	/**
 	 * @brief GameManager Singleton get function
 	 *
