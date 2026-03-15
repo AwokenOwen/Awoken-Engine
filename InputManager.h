@@ -25,7 +25,6 @@ private:
 	int m_action;
 	int m_scancode;
 	int m_mods;
-	std::string m_name;
 public:
 	KeyboardContext(const int key, const int action, const int mods) {
 		this->m_key = key;
@@ -33,7 +32,6 @@ public:
 		this->m_mods = mods;
 
 		m_scancode = glfwGetKeyScancode(key);
-		m_name = std::string(glfwGetKeyName(key, 0));
 	}
 
 	[[nodiscard]] int getKey() const {
@@ -50,10 +48,6 @@ public:
 
 	[[nodiscard]] int getMods() const {
 		return m_mods;
-	}
-
-	std::string getName() {
-		return m_name;
 	}
 };
 

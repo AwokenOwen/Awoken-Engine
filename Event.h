@@ -47,7 +47,7 @@ public:
 	 * @param args The inputs determined by R required to call the Event
 	 * @param caller pointer to the Object that calls the event
 	 */
-	void callEvent(R... args, Object* caller = nullptr);
+	void callEvent(R... args, const Object* caller = nullptr);
 
 private:
 	/**
@@ -76,9 +76,12 @@ void Event<R...>::add(T* object, void(T::* func)(R...))
 }
 
 template<typename ...R>
- void Event<R...>::callEvent(R ...args, Object* caller)
+ void Event<R...>::callEvent(R ...args, const Object* caller)
 {
-	static_assert(caller == p_owner || p_owner == nullptr, "Caller Object is required to be the Owner of the Event");
+	if (caller != p_owner && p_owner != nullptr) {
+		// print error "Caller Object is required to be the Owner of the Event"
+		return;
+	}
 	for (int i = 0; i < m_functions.size(); i++)
 	{
 		m_functions[i](args...);

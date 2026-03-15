@@ -24,7 +24,7 @@ int InputManager::initialize(GLFWwindow* window)
 //free any data on the heap
 void InputManager::terminate()
 {
-	return 0;
+
 }
 
 //singleton get function
@@ -44,13 +44,13 @@ void InputManager::mouseMoveInput(float posX, float posY)
 		firstMouse = false;
 	}
 
-	float offsetx = posX - lastX;
-	float offsety = posY - lastY;
+	const float offsetX = posX - lastX;
+	const float offsetY = posY - lastY;
 
 	lastX = posX;
 	lastY = posY;
 
-	mouseMoveEvent.callEvent(glm::vec2(posX, posY), glm::vec2(offsetx, offsety));
+	mouseMoveEvent.callEvent(glm::vec2(posX, posY), glm::vec2(offsetX, offsetY));
 }
 
 // Input function for keyboard inputs

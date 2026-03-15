@@ -51,7 +51,7 @@ public:
 	 */
 	static float getTime();
 	/**
-	 * @brief Returns the calulated delta time of the previous frame
+	 * @brief Returns the calculated delta time of the previous frame
 	 *
 	 * @return float
 	 */

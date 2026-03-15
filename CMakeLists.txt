@@ -32,10 +32,10 @@ add_library(Awoken_Engine STATIC
 )
 
 link_directories(
-        ~/Documents/Awoken-Engine/cmake-build-debug
-        ~/Documents/glfw/lib
-        ~/Documents/glm/lib
-        ~/Documents/freetype/lib
+        cmake-build-debug
+        Dependencies/glfw
+        Dependencies/glm
+        Dependencies/freetype
 )
 
 add_executable(Awoken_Engine_Test

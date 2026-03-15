@@ -1,5 +1,4 @@
-#include <GameManager.h>
-#include <WorldManager.h>
+#include "GameManager.h"
 
 int main() {
     Game.initialize();
