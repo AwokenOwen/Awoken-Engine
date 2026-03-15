@@ -106,10 +106,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\glad\include;C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\json\include;C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\glm\glm;C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\glfw\include;C:\Users\okniz\Documents\GitHub\Awoken-Engine;C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\freetype\include;C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\Assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\okniz\Documents\GitHub\Awoken-Engine\x64\Debug;C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\glfw;C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\freetype;C:\Users\okniz\Documents\GitHub\Awoken-Engine\Dependencies\Assimp;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc143-mt.lib;freetype.lib;glfw3.lib;opengl32.lib;Awoken-Engine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
