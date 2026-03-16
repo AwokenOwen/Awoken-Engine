@@ -20,7 +20,7 @@ public:
 	/**
 	 * @brief Get View Matrix from Camera Object
 	 *
-	 * Returns the View Matrix for the Objects Rendering in the Scene based off of the Position and Rotation
+	 * Returns the View Matrix for the Objects Rendering in the Scene based off of the Position and Rotation of the Camera
 	 *
 	 * @return mat4
 	 */
