@@ -31,22 +31,52 @@ add_library(Awoken_Engine STATIC
         TextRenderer.cpp
 )
 
-link_directories(
-        cmake-build-debug
-        Dependencies/glfw
-        Dependencies/glm
-        Dependencies/freetype
-)
+if(WIN32)
+
+    link_directories(
+            cmake-build-debug
+            Dependencies/Assimp/lib/windows
+            Dependencies/glfw/lib/windows
+            Dependencies/freetype/lib/windows
+    )
+
+elseif(UNIX)
+
+    link_directories(
+            cmake-build-debug
+            Dependencies/Assimp/lib/linux
+            Dependencies/glfw/lib/linux
+            Dependencies/glm/lib/linux
+            Dependencies/freetype/lib/linux
+    )
+
+endif()
+
+
 
 add_executable(Awoken_Engine_Test
         main.cpp
         glad.c
 )
 
-target_link_libraries(Awoken_Engine_Test
-        libAwoken_Engine.a
-        libglfw3.a
-        libglm.a
-        libassimp.so
-        libfreetype.a
-)
+if(WIN32)
+
+    target_link_libraries(Awoken_Engine_Test PRIVATE
+            Awoken_Engine.lib
+            assimp-vc143-mt.lib
+            freetype.lib
+            glfw3.lib
+    )
+
+elseif(UNIX)
+
+    target_link_libraries(Awoken_Engine_Test PRIVATE
+            libAwoken_Engine.a
+            libglfw3.a
+            libglm.a
+            libassimp.so
+            libfreetype.a
+    )
+
+endif()
+
