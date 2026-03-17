@@ -8,7 +8,7 @@
 
 Material::Material()
 {
-    setShaderProgram("assets/defaultAssets/default.vert", "assets/defaultAssets/default.frag");
+    setShaderProgram("assets/defaultAssets/Shaders/default.vert", "assets/defaultAssets/Shaders/default.frag");
     type = MaterialType::DEFAULT_LIT;
     anchorPoint = UIAnchorPoints::CENTER;
     twoSided = false;
@@ -78,7 +78,7 @@ void Material::setShaderProgram(const char* vertexShaderPath, const char* fragme
         vShaderFile.open(vertexShaderPath);
         fShaderFile.open(fragmentShaderPath);
         std::stringstream vShaderStream, fShaderStream;
-        // read file’s buffer contents into streams
+        // read fileï¿½s buffer contents into streams
         vShaderStream << vShaderFile.rdbuf();
         fShaderStream << fShaderFile.rdbuf();
         // close file handlers

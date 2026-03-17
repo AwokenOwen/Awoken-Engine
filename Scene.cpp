@@ -92,7 +92,7 @@ void Scene::setSkybox(vector<const char*> paths)
 		m = skybox->getComponent<MeshRenderer>();
 	}
 	m->loadCubeMap(paths);
-	m->material->setShaderProgram("assets/defaultAssets/skybox.vert", "assets/defaultAssets/skybox.frag");
+	m->material->setShaderProgram("assets/defaultAssets/Shaders/skybox.vert", "assets/defaultAssets/Shaders/skybox.frag");
 	skybox->setActive(false);
 }
 
