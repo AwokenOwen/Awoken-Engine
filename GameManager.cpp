@@ -11,7 +11,7 @@ int GameManager::initialize()
 {
 	cout << "Starting Engine...\n\n";
 
-	if (Window.Initialize())
+	if (Window.initialize())
 	{
 		cout << "WindowManager failed to start\n";
 	}
@@ -44,7 +44,7 @@ void GameManager::run()
 	while (!glfwWindowShouldClose(Window.getWindow()))
 	{
 		m_deltaTime = getTime() - m_timeOnLastFrame;
-		Window.Clear();
+		Window.clear();
 
 		glfwPollEvents();
 
@@ -60,7 +60,7 @@ void GameManager::terminate()
 {
 	cout << "Stopping Engine...\n\n";
 
-	Window.Terminate();
+	Window.terminate();
 	cout << "Shut Down Window Manager\n";
 	Input.terminate();
 	cout << "Shut Down Input Manager\n";

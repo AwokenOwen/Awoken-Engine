@@ -7,9 +7,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 int width;
 int height;
 bool fixedAspect;
+float aspectRatio;
 
 //Initialize the Window manager and call the create window function
-int WindowManager::Initialize()
+int WindowManager::initialize()
 {
 	glfwInit();
 	createWindow();
@@ -22,7 +23,7 @@ int WindowManager::Initialize()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	if (Input.initialize(window))
+	if (Input.initialize(p_window))
 	{
 		cout << "InputManager failed to start\n";
 	}
@@ -32,7 +33,7 @@ int WindowManager::Initialize()
 }
 
 //free any data on the heap
-void WindowManager::Terminate()
+void WindowManager::terminate()
 {
 }
 
@@ -46,9 +47,9 @@ WindowManager& WindowManager::getInstance()
 //get function for the private window variable
 GLFWwindow* WindowManager::getWindow()
 {
-	if (window == nullptr)
+	if (p_window == nullptr)
 		createWindow();
-	return window;
+	return p_window;
 }
 
 //get functions for the width and height of the screen
@@ -61,13 +62,13 @@ int WindowManager::getHeight()
 	return height;
 }
 
-float WindowManager::getPixelRatio()
+float WindowManager::getPixelRatio() const
 {
-	return float(getHeight()) / monitorHeight;
+	return static_cast<float>(getHeight()) / m_monitorHeight;
 }
 
 //Clear the color and depth buffers
-void WindowManager::Clear()
+void WindowManager::clear()
 {
 	//rendering commands 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -75,20 +76,18 @@ void WindowManager::Clear()
 }
 
 //Swap buffers and pollevents
-void WindowManager::Swap()
-{
-	glfwSwapBuffers(window); 
+void WindowManager::Swap() const {
+	glfwSwapBuffers(p_window);
 	glfwPollEvents(); 
 }
 
-void WindowManager::setMaximized(bool maximized)
-{
+void WindowManager::setMaximized(const bool maximized) const {
 	if (maximized)
 	{
-		glfwMaximizeWindow(window);
+		glfwMaximizeWindow(p_window);
 	}
 	else {
-		glfwRestoreWindow(window);
+		glfwRestoreWindow(p_window);
 	}
 }
 
@@ -108,11 +107,14 @@ void WindowManager::setFixedAspect(bool fixed)
 	fixedAspect = fixed;
 }
 
-//Private contructor for singleton functionallity
-WindowManager::WindowManager()
+void WindowManager::setAspectRatio(float aspect)
 {
-	
+	aspectRatio = aspect;
 }
+
+//Private constructor for singleton functionality
+WindowManager::WindowManager()
+= default;
 
 //creates the window by grabbing the primary monitor setting the window to be 
 //"windowed fullscreen", then initializing glad, then finally creating the window
@@ -129,29 +131,29 @@ int WindowManager::createWindow()
 
 	width = mode->width; 
 	height = mode->height; 
-	monitorHeight = (float)mode->height;
+	m_monitorHeight = static_cast<float>(mode->height);
 
-	window = glfwCreateWindow(width, height, "Game Engine", NULL, NULL);
+	p_window = glfwCreateWindow(width, height, "Game Engine", NULL, NULL);
 
-	if (window == NULL)
+	if (p_window == nullptr)
 	{
 		cout << "Failed to create GLFW window\n";
 		glfwTerminate();
 		return 0;
 	}
-	glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(p_window);
 
 	//NOTE: Init GLAD
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
-		return 0;
+		return -1;
 	}
 
 	//NOTE: Set OpenGL Viewport
 	glViewport(0, 0, width, height);
 
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetFramebufferSizeCallback(p_window, framebuffer_size_callback);
 
 	return 0;
 }
@@ -160,15 +162,15 @@ void framebuffer_size_callback(GLFWwindow* window, int _width, int _height)
 {
 	if (fixedAspect)
 	{
-		if ((float)_width / (float)_height > 16.0f / 9.0f)
+		if (static_cast<float>(_width) / static_cast<float>(_height) > aspectRatio)
 		{
 			height = _height;
-			width = int(height * (16.0f / 9.0f));
+			width = int(height * aspectRatio);
 		}
-		else if ((float)_width / (float)_height < 16.0f / 9.0f)
+		else if (static_cast<float>(_width) / static_cast<float>(_height) < aspectRatio)
 		{
 			width = _width;
-			height = int(width * (9.0f / 16.0f));
+			height = static_cast<int>(width * (1.0f/aspectRatio));
 		}
 		else
 		{
@@ -181,5 +183,5 @@ void framebuffer_size_callback(GLFWwindow* window, int _width, int _height)
 		width = _width;
 		height = _height;
 	}
-	glViewport(int((_width - width) / 2.0f), int((_height - height) / 2.0f), width, height);
+	glViewport(static_cast<int>((_width - width) / 2.0f), static_cast<int>((_height - height) / 2.0f), width, height);
 }

@@ -13,10 +13,10 @@ class WindowManager
 {
 public:
 	//Initialize the Window manager and call the create window function
-	int Initialize();
+	int initialize();
 
 	//free any data on the heap
-	void Terminate();
+	static void terminate();
 
 	//Singleton get function
 	static WindowManager& getInstance();
@@ -25,31 +25,32 @@ public:
 	GLFWwindow* getWindow();
 
 	//get functions for the width and height of the screen
-	int getWidth();
-	int getHeight();
-	float getPixelRatio();
+	static int getWidth();
+	static int getHeight();
+	[[nodiscard]] float getPixelRatio() const;
 
 	//Clear the color and depth buffers
-	void Clear();
+	static void clear();
 
-	//Swap buffers and pollevents
-	void Swap();
+	//Swap buffers and poll events
+	void Swap() const;
 
-	void setMaximized(bool maximized = true);
+	void setMaximized(bool maximized = true) const;
 
-	mat4 getPerspectiveMatrix();
+	static mat4 getPerspectiveMatrix();
 	mat4 getOrthographicMatrix();
 
-	void setFixedAspect(bool fixed = true);
+	static void setFixedAspect(bool fixed = true);
+	static void setAspectRatio(float aspect);
 
 private:
-	//Private contructor for singleton functionallity
+	//Private constructor for singleton functionality
 	WindowManager();
 
 	//creates the window by grabbing the primary monitor setting the window to be 
 	//"windowed fullscreen", then initializing glad, then finally creating the window
 	int createWindow();
-	GLFWwindow* window;
+	GLFWwindow* p_window{};
 
-	float monitorHeight;
+	float m_monitorHeight{};
 };
