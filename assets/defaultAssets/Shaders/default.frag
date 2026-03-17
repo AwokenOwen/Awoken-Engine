@@ -82,10 +82,7 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
     for(int i = 0; i < 4; ++i) 
     {
         Lo += CalcOtherLight(albedo, metallic, roughness, N, V, lightPositions[i], F0, lightColors[i], lightPowers[i]);
-    }   
-  
-    vec3 refl = reflect(normalize(WorldPos - camPos), normalize(Normal));
-    vec3 reflection = texture(skybox, refl).rgb;
+    }
 
     vec3 ambient = ambientPower * ambientColor;
     ambient *= albedo * ao;
