@@ -109,7 +109,7 @@ void Mesh::setUpShaderMatrices(unsigned int shaderProgram)
 
         mat4 transformMatrix = translate(mat4(1.0f), UIPos);
         mat4 rotationMatrix = rotate(mat4(1.0f), angle(rotation), axis(rotation));
-        mat4 scaleMatrix = scale(mat4(1.0), parent->GetWorldScale());
+        mat4 scaleMatrix = scale(mat4(1.0), parent->GetWorldScale() / 100.0f);
 
         modelMatrix = transformMatrix * rotationMatrix * scaleMatrix;
     }
