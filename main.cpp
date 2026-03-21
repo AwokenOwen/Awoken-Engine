@@ -34,8 +34,20 @@ int main(const int argc, char* argv[]) {
     Game.initialize();
     World.getActiveScene()->loadDefaultSkybox();
 
-    auto* a = new GuiObject(vec2(0,0), vec2(0.5, 1.0f));
+    auto* a = new GuiObject(vec2(0,0.25f), vec2(0.25f, 0.65f));
     a->getComponent<MeshRenderer>()->material->anchorPoint = UIAnchorPoints::LEFT;
+
+    auto* b = new GuiObject(vec2(0,0.25f), vec2(0.25f, 0.65f));
+    b->getComponent<MeshRenderer>()->material->anchorPoint = UIAnchorPoints::RIGHT;
+
+    auto* c = new GuiObject(vec2(0,0), vec2(1.0f, 0.3f));
+    c->getComponent<MeshRenderer>()->material->anchorPoint = UIAnchorPoints::BOTTOM;
+
+    auto* d = new GuiObject(vec2(0,0), vec2(1.0f, 0.05f));
+    d->getComponent<MeshRenderer>()->material->anchorPoint = UIAnchorPoints::TOP;
+
+    auto* e = new GuiObject(vec2(0.0f,0.25f), vec2(0.5f, 0.65f));
+    e->getComponent<MeshRenderer>()->material->anchorPoint = UIAnchorPoints::CENTER;
 
     Game.run();
     Game.terminate();
