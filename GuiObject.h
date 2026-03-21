@@ -2,7 +2,7 @@
 // Created by awokenowen on 3/21/26.
 //
 #pragma once
-#include "../Object.h"
+#include "Object.h"
 
 class GuiObject : public Object{
 

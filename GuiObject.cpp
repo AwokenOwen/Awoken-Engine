@@ -4,8 +4,8 @@
 
 #include "GuiObject.h"
 
-#include "../Material.h"
-#include "../MeshRenderer.h"
+#include "Material.h"
+#include "MeshRenderer.h"
 
 GuiObject::GuiObject() : Object(){
     init(vec2(0,0), vec2(1,1));
@@ -20,7 +20,7 @@ void GuiObject::init(const vec2 pos, const vec2 size) {
     localScale  = vec3(size, 1.0);
 
     auto* m = addComponent<MeshRenderer>();
-    m->loadModel("../assets/defaultAssets/Models/image.fbx");
+    m->loadModel("assets/defaultAssets/Models/image.fbx");
     m->material->type = MaterialType::UI;
-    m->material->setShaderProgram("../assets/defaultAssets/Shaders/defaultGUI.vert", "../assets/defaultAssets/Shaders/defaultGUI.frag");
+    m->material->setShaderProgram("assets/defaultAssets/Shaders/defaultGUI.vert", "assets/defaultAssets/Shaders/defaultGUI.frag");
 }

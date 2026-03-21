@@ -1,9 +1,12 @@
 #include "GameManager.h"
 #include "WorldManager.h"
 #include "WindowManager.h"
-#include "GUI-Classes/GuiObject.h"
+#include "GuiObject.h"
 #include "include/cef_app.h"
 #include <filesystem>
+
+#include "Material.h"
+#include "MeshRenderer.h"
 
 class AwokenApp : public CefApp {
     IMPLEMENT_REFCOUNTING(AwokenApp);
@@ -31,7 +34,8 @@ int main(const int argc, char* argv[]) {
     Game.initialize();
     World.getActiveScene()->loadDefaultSkybox();
 
-    //auto* a = new GuiObject(vec2(0.0f,0.0f), vec2(1.0f,1.0f));
+    auto* a = new GuiObject(vec2(0,0), vec2(0.5, 1.0f));
+    a->getComponent<MeshRenderer>()->material->anchorPoint = UIAnchorPoints::LEFT;
 
     Game.run();
     Game.terminate();

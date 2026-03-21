@@ -30,8 +30,8 @@ add_library(Awoken_Engine STATIC
         WindowManager.cpp
         WorldManager.cpp
         TextRenderer.cpp
-        GUI-Classes/GuiObject.cpp
-        GUI-Classes/GuiObject.h
+        GuiObject.cpp
+        GuiObject.h
 )
 
 if(WIN32)
