@@ -11,6 +11,7 @@ include_directories(
         Dependencies/glfw/include
         Dependencies/glm/glm
         Dependencies/json/include
+        Dependencies/CEF
 )
 
 add_library(Awoken_Engine STATIC
@@ -50,6 +51,7 @@ elseif(UNIX)
             Dependencies/glfw/lib/linux
             Dependencies/glm/lib/linux
             Dependencies/freetype/lib/linux
+            Dependencies/CEF/lib/linux
     )
 
 endif()
@@ -78,6 +80,8 @@ elseif(UNIX)
             libglm.a
             libassimp.so
             libfreetype.a
+            libcef_dll_wrapper.a
+            libcef.so
     )
 
 endif()
