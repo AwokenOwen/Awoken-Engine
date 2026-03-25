@@ -65,43 +65,42 @@ void Mesh::setUpShaderMatrices(unsigned int shaderProgram)
     if (material->type == MaterialType::UI)
     {
         projectionMatrix = Window.getOrthographicMatrix();
-        vec3 UIPos = getParent()->GetWorldPosition() * Window.getPixelRatio();
+        vec3 UIPos = getParent()->GetWorldPosition();
+        vec3 UIScale = parent->GetWorldScale();
 
         switch (material->anchorPoint)
         {
         case UIAnchorPoints::TOP:
-            UIPos.y += static_cast<float>(Window.getHeight()) / 2.0f;
+            UIPos.y += 1 - UIScale.y;
             break;
         case UIAnchorPoints::BOTTOM:
-            UIPos.y += -static_cast<float>(Window.getHeight()) / 2.0f;
+            UIPos.y += -(1 - UIScale.y);
             break;
         case UIAnchorPoints::RIGHT:
-            UIPos.x += static_cast<float>(Window.getWidth()) / 2.0f;
+            UIPos.x += 1 - UIScale.x;
             break;
         case UIAnchorPoints::LEFT:
-            UIPos.x += -static_cast<float>(Window.getWidth()) / 2.0f;
+            UIPos.x += -(1 - UIScale.x);
             break;
         case UIAnchorPoints::TOP_RIGHT:
-            UIPos.x += static_cast<float>(Window.getWidth()) / 2.0f;
-            UIPos.y += static_cast<float>(Window.getHeight()) / 2.0f;
+            UIPos.x += 1 - UIScale.x;
+            UIPos.y += 1 - UIScale.y;
             break;
         case UIAnchorPoints::BOTTOM_RIGHT:
-            UIPos.x += static_cast<float>(Window.getWidth()) / 2.0f;
-            UIPos.y += -static_cast<float>(Window.getHeight()) / 2.0f;
+            UIPos.x += 1 - UIScale.x;
+            UIPos.y += -(1 - UIScale.y);
             break;
         case UIAnchorPoints::TOP_LEFT:
-            UIPos.y += static_cast<float>(Window.getHeight()) / 2.0f;
-            UIPos.x += -static_cast<float>(Window.getWidth()) / 2.0f;
+            UIPos.y += 1 - UIScale.y;
+            UIPos.x += -(1 - UIScale.x);
             break;
         case UIAnchorPoints::BOTTOM_LEFT:
-            UIPos.y += -static_cast<float>(Window.getHeight()) / 2.0f;
-            UIPos.x += -static_cast<float>(Window.getWidth()) / 2.0f;
+            UIPos.y += -(1 - UIScale.y);
+            UIPos.x += -(1 - UIScale.x);
             break;
         default:
             break;
         }
-
-        UIPos = vec3(2.0f * UIPos.x / static_cast<float>(Window.getHeight()), 2.0f * UIPos.y / static_cast<float>(Window.getHeight()), 0);
 
         vec3 rotationVec = eulerAngles(getParent()->GetWorldRotation());
         rotationVec.z = 0;
@@ -109,15 +108,12 @@ void Mesh::setUpShaderMatrices(unsigned int shaderProgram)
 
         mat4 transformMatrix = translate(mat4(1.0f), UIPos);
         mat4 rotationMatrix = rotate(mat4(1.0f), angle(rotation), axis(rotation));
-        mat4 scaleMatrix = scale(mat4(1.0), parent->GetWorldScale() / 500.0f);
+        mat4 scaleMatrix = scale(mat4(1.0), UIScale);
 
         modelMatrix = transformMatrix * rotationMatrix * scaleMatrix;
     }
 
     material->setUniform<mat4>("model", modelMatrix);
-
-    //int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
     int viewLoc = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
