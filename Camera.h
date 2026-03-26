@@ -1,6 +1,6 @@
 ﻿/*
  * Written by: AwokenOwen
- * Last Updated: March 12th 2026
+ * Last Updated: March 25th 2026
  */
 
 #pragma once
@@ -18,9 +18,7 @@ public:
 	Camera();
 
 	/**
-	 * @brief Get View Matrix from Camera Object
-	 *
-	 * Returns the View Matrix for the Objects Rendering in the Scene based off of the Position and Rotation of the Camera
+	 * @brief Returns the View Matrix for the Objects Rendering in the Scene based off of the Position and Rotation of the Camera
 	 *
 	 * @return mat4
 	 */

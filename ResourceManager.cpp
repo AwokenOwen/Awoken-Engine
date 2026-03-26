@@ -7,14 +7,14 @@
 #include "Scene.h"
 #include "glad/glad.h"
 
-int ResourceManager::Initialize()
+int ResourceManager::initialize()
 {
 	return 0;
 }
 
-void ResourceManager::Terminate()
+void ResourceManager::terminate()
 {
-	return;
+
 }
 
 ResourceManager& ResourceManager::getInstance()
@@ -31,8 +31,8 @@ int ResourceManager::loadScene(string name)
 unsigned int ResourceManager::loadImage(const char* path)
 {
 	// If Texture already loaded grab loaded texture
-	auto mapTexture = textureMap.find(string(path));
-	if (mapTexture != textureMap.end())
+	auto mapTexture = m_textureMap.find(string(path));
+	if (mapTexture != m_textureMap.end())
 	{
 		return mapTexture->second;
 	}
@@ -81,16 +81,16 @@ unsigned int ResourceManager::loadImage(const char* path)
 	}
 	stbi_image_free(data);
 
-	textureMap.insert({string(path), texture});
+	m_textureMap.insert({string(path), texture});
 
 	return texture;
 }
 
-unsigned int ResourceManager::loadCubeMap(vector<const char*> paths)
+unsigned int ResourceManager::loadCubeMap(const vector<const char*> &paths)
 {
 	if (paths.size() != 6)
 	{
-		cout << "Number of cube map images is incorrect imput 6" << endl;
+		cout << "Number of cube map images is incorrect... Input 6" << endl;
 		return -1;
 	}
 
@@ -99,10 +99,9 @@ unsigned int ResourceManager::loadCubeMap(vector<const char*> paths)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
 	int width, height, nrChannels;
-	unsigned char* data;
 	for (unsigned int i = 0; i < paths.size(); i++)
 	{
-		data = stbi_load(paths[i], &width, &height, &nrChannels, 0);
+		const unsigned char *data = stbi_load(paths[i], &width, &height, &nrChannels, 0);
 		glTexImage2D(
 			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 			0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
@@ -122,24 +121,24 @@ unsigned int ResourceManager::loadCubeMap(vector<const char*> paths)
 vector<Mesh*> ResourceManager::getMeshFromMap(string path)
 {
 	// If Texture already loaded grab loaded texture
-	auto mapMesh = meshMap.find(string(path));
-	if (mapMesh != meshMap.end())
+	auto mapMesh = m_meshMap.find(string(path));
+	if (mapMesh != m_meshMap.end())
 	{
 		return mapMesh->second;
 	}
 	return {};
 }
 
-void ResourceManager::addMeshToMap(string path, vector<Mesh*> mesh)
+void ResourceManager::addMeshToMap(string path, vector<Mesh*> meshes)
 {
-	meshMap.insert({ path, mesh });
+	m_meshMap.insert({ path, meshes });
 }
 
 unsigned int ResourceManager::getShaderProgramFromMap(string path)
 {
 	// If Texture already loaded grab loaded texture
-	auto mapShader = shaderMap.find(string(path));
-	if (mapShader != shaderMap.end())
+	auto mapShader = m_shaderMap.find(string(path));
+	if (mapShader != m_shaderMap.end())
 	{
 		return mapShader->second;
 	}
@@ -149,7 +148,7 @@ unsigned int ResourceManager::getShaderProgramFromMap(string path)
 
 void ResourceManager::addShaderProgramToMap(string path, unsigned int shaderProgram)
 {
-	shaderMap.insert({ path, shaderProgram });
+	m_shaderMap.insert({ path, shaderProgram });
 }
 
 ResourceManager::ResourceManager()

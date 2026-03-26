@@ -1,71 +1,180 @@
+/*
+ * Written by: AwokenOwen
+ * Last Updated: March 25th 2026
+ */
+
 #pragma once
 #include <vector>
-#include <string>
 #include "glm.hpp"
 
 using namespace glm;
 using namespace std;
 
+/**
+ * @brief Forward Declaration of Material class
+ */
 class Material;
+/**
+ * @brief Forward Declaration of Object class
+ */
 class Object;
+/**
+ * @brief Forward Declaration of MeshRenderer Component
+ */
+class MeshRenderer;
+/**
+ * @brief Class to hold data for objects to be drawn to the screen
+ */
 class Mesh
 {
 public:
+	/**
+	 * @brief Struct for vertex to store the position, normal and texCoords
+	 */
 	struct Vertex
 	{
-		vec3 position;
-		vec3 normal;
-		vec2 texCoords;
+		/**
+		 * @brief Position data for the vertex to be pushed to the shader
+		 */
+		vec3 m_position;
+		/**
+		 * @brief Normal data for the vertex to be pushed to the shader
+		 */
+		vec3 m_normal;
+		/**
+		 * @brief TexCoords data for the vertex to be pushed to the shader
+		 */
+		vec2 m_texCoords;
 
-		Vertex() 
+		/**
+		 * @brief Default constructor setting all to 0
+		 */
+		Vertex()
 		{
-			position = vec3(0.0f);
-			normal = vec3(0.0f);
-			texCoords = vec2(0.0f);
+			m_position = vec3(0.0f);
+			m_normal = vec3(0.0f);
+			m_texCoords = vec2(0.0f);
 		}
 
-		Vertex(vec3 position) 
+		/**
+		 * @brief Constructor where position is set, where everything else is set to 0
+		 *
+		 * @param position The Position data for the vertex
+		 */
+		explicit Vertex(const vec3 position)
 		{
-			this->position = position;
-			normal = vec3(0.0f);
-			texCoords = vec2(0.0f);
+			m_position = position;
+			m_normal = vec3(0.0f);
+			m_texCoords = vec2(0.0f);
 		}
 
-		Vertex(vec3 position, vec3 normal, vec2 texCoords) {
-			this->position = position;
-			this->normal = normal;
-			this->texCoords = texCoords;
+		/**
+		 * @brief Constructor where all data needs to be set
+		 *
+		 * @param position The Position data for the vertex
+		 * @param normal The Normal data for the vertex
+		 * @param texCoords The TexCoords data for the vertex
+		 */
+		explicit Vertex(const vec3 position, const vec3 normal, const vec2 texCoords) {
+			m_position = position;
+			m_normal = normal;
+			m_texCoords = texCoords;
 		}
 	};
 
-	// mesh data
-	vector<Vertex>       vertices;
-	vector<unsigned int> indices;
+	/**
+	 * @brief Constructor for a vector of vertices and indices to create the mesh
+	 *
+	 * @param vertices The vector of vertices
+	 * @param indices The vector of indices
+	 */
+	Mesh(const vector<Vertex> &vertices, const vector<unsigned int> &indices);
+	/**
+	 * @brief Default deconstructor
+	 */
+	virtual ~Mesh() = default;
 
-	Mesh(vector<Vertex> vertices, vector<unsigned int> indices);
+	/**
+	 * @brief Getter for parent MeshRenderer
+	 *
+	 * @return MeshRenderer
+	 */
+	MeshRenderer* getParent() const;
+	/**
+	 * @brief Setter for the parent variable
+	 *
+	 * @param parent The MeshRenderer component that holds the meshes to be rendered
+	 */
+	void setParent(MeshRenderer* parent);
 
-	Object* getParent();
-	void setParent(Object* parent);
+	/**
+	 * @brief Getter for the material variable
+	 *
+	 * @return Material
+	 */
+	Material* getMaterial() const;
+	/**
+	 * @brief Setter for the material variable
+	 *
+	 * @param material Material instance
+	 */
+	void setMaterial(Material* material);
 
-	Material* material;
-
-	virtual void Draw();
+	/**
+	 * @brief For the draw call
+	 */
+	virtual void draw();
 
 protected:
-	//  render data
+	/**
+	 * @brief Mesh variables
+	 */
 	unsigned int VAO, VBO, EBO;
 
 private:
-
-	bool materialOwner;
-
+	/**
+	 * @brief Creating the OpenGL buffers and pushing vertices (position, normal, texCoords)
+	 */
 	void setupMesh();
-	void setUpShaderMatrices(unsigned int shaderProgram);
-	void setUpShaderVariables(unsigned int shaderProgram);
-	void setUpDirectionalLight(unsigned int shaderProgram);
-	void setUpPointLights(unsigned int shaderProgram);
+	/**
+	 * @brief Helper function to push the matrices for the vertex shader
+	 *
+	 * @param shaderProgram The shader program to push the matrices to
+	 */
+	void setUpShaderMatrices(unsigned int shaderProgram) const;
+	/**
+	 * @brief Helper function to push the other uniforms
+	 *
+	 * @param shaderProgram The shader program to push the uniforms to
+	 */
+	static void setUpShaderVariables(unsigned int shaderProgram);
+	/**
+	 * @brief Helper function to push the uniforms for the directional light
+	 *
+	 * @param shaderProgram The shader program to push the directional light variables to
+	 */
+	static void setUpDirectionalLight(unsigned int shaderProgram);
+	/**
+	 * @brief Helper function to push all the point lights to
+	 *
+	 * @param shaderProgram The shader program to push the point light data to
+	 */
+	static void setUpPointLights(unsigned int shaderProgram);
 
-	Object* parent;
-
-	bool once;
+	/**
+	 * @brief Material variable that handles this mesh
+	 */
+	Material* m_material;
+	/**
+	 * @brief The MeshRenderer parent variable of this mesh
+	 */
+	MeshRenderer* m_parent;
+	/**
+	 * @brief The vertice vector for the mesh
+	 */
+	vector<Vertex> m_vertices;
+	/**
+	 * @brief The indices vector for the mesh
+	 */
+	vector<unsigned int> m_indices;
 };

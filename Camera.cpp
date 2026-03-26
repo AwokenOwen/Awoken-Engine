@@ -12,5 +12,5 @@ Camera::Camera() : Object()
 
 mat4 Camera::getViewMatrix() {
 	// Calculate Matrix using lookAt function where the camera is looking with it's forward vector
-	return lookAt(GetWorldPosition(), GetWorldPosition() + forward, up);
+	return lookAt(getWorldPosition(), getWorldPosition() + m_forward, m_up);
 }

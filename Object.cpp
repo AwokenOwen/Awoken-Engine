@@ -4,159 +4,147 @@
 #include <gtx/matrix_decompose.hpp>
 #include "WorldManager.h"
 
-//Default contructor adds itself to the world list
 Object::Object()
 {
 	//set default variables and instantiate
-	enabled = true;
+	m_localPosition = vec3(0, 0, 0);
+	m_localRotation = quat(vec3(0, 0, 0));
+	m_localScale = vec3(1, 1, 1);
 
-	localPosition = vec3(0, 0, 0);
-	localRotation = quat(vec3(0, 0, 0));
-	localScale = vec3(1, 1, 1);
-
-	worldPosition = vec3(0, 0, 0);
-	worldRotation = quat(vec3(0, 0, 0));
-	worldScale = vec3(1, 1, 1);
+	m_worldPosition = vec3(0, 0, 0);
+	m_worldRotation = quat(vec3(0, 0, 0));
+	m_worldScale = vec3(1, 1, 1);
 
 	World.Instantiate(this);
+
+	setActive(true);
 }
 
 //called once at the start of the frame it is enabled on
-void Object::OnEnable()
+void Object::onEnable()
 {
-	for (int i = 0; i < componentsSize; i++)
+	for (int i = 0; i < m_components.size(); i++)
 	{
-		if (components[i]->getActiveState())
+		if (m_components[i]->getActiveState())
 		{
-			components[i]->onEnable();
+			m_components[i]->onEnable();
 		}
 	}
 
-	enabled = true;
+	m_activeState = true;
 }
 
 //called on the first frame if enabled
-void Object::Start()
+void Object::start()
 {
-	for (int i = 0; i < componentsSize; i++)
+	for (int i = 0; i < m_components.size(); i++)
 	{
-		if (components[i]->getActiveState())
+		if (m_components[i]->getActiveState())
 		{
-			components[i]->start();
+			m_components[i]->start();
 		}
 	}
 }
 
 //called every frame
-void Object::Update()
+void Object::update()
 {
-	worldModelMatrix();
-	if (firstFrame)
-	{
-		OnEnable();
-		firstFrame = false;
+	mat4 worldModelMatrix = localModelMatrix();
+	Object* current = m_parent;
+	while (current != nullptr) {
+		worldModelMatrix = current->localModelMatrix() * worldModelMatrix;
+		current = current->m_parent;
 	}
-	for (int i = 0; i < componentsSize; i++)
+
+	m_forward = vec3(worldModelMatrix[0][2], worldModelMatrix[1][2], worldModelMatrix[2][2]);
+	m_up = vec3(worldModelMatrix[0][1], worldModelMatrix[1][1], worldModelMatrix[2][1]);
+	m_right = vec3(worldModelMatrix[0][0], worldModelMatrix[1][0], worldModelMatrix[2][0]);
+
+	vec3 skew;
+	vec4 perspective;
+
+	decompose(worldModelMatrix, m_worldScale, m_worldRotation, m_worldPosition, skew, perspective);
+
+	for (int i = 0; i < m_components.size(); i++)
 	{
-		if (components[i]->getActiveState())
+		if (m_components[i]->getActiveState())
 		{
-			components[i]->update();
+			m_components[i]->update();
 		}
 	}
 }
 
 //called on the last frame it is enabled
-void Object::OnDisable()
+void Object::onDisable()
 {
-	for (int i = 0; i < componentsSize; i++)
+	for (int i = 0; i < m_components.size(); i++)
 	{
-		if (components[i]->getActiveState())
+		if (m_components[i]->getActiveState())
 		{
-			components[i]->onDisable();
+			m_components[i]->onDisable();
 		}
 	}
-	enabled = false;
+	m_activeState = false;
 }
 
-void Object::Destroy()
+void Object::destroy()
 {
-	OnDisable();
+	onDisable();
 
-	components.clear();
+	m_components.clear();
 
-	for (int i = 0; i < children.size(); i++)
+	for (int i = 0; i < m_children.size(); i++)
 	{
-		children[i]->Destroy();
+		m_children[i]->destroy();
 	}
 	delete this;
 }
 
 //return parent object if there is one
-Object* Object::getParent()
-{
-	return parent;
+Object* Object::getParent() const {
+	return m_parent;
 }
 
 void Object::setActive(bool activeState)
 {
-	if (activeState != enabled)
+	if (activeState != m_activeState)
 	{
 		if (activeState)
 		{
-			OnEnable();
+			onEnable();
 		}
 		else
 		{
-			OnDisable();
+			onDisable();
 		}
-		enabled = activeState;
+		m_activeState = activeState;
 	}
 }
 
-bool Object::getActiveState()
-{
-	return enabled;
+bool Object::getActiveState() const {
+	return m_activeState;
 }
 
 mat4 Object::localModelMatrix()
 {
 	mat4 model = mat4(1.0f);
 
-	model = translate(model, GetLocalPosition());
-	model = rotate(model, glm::angle(GetLocalRotation()), glm::axis(GetLocalRotation()));
-	model = scale(model, GetLocalScale());
+	model = translate(model, getLocalPosition());
+	model = rotate(model, angle(getLocalRotation()), axis(getLocalRotation()));
+	model = scale(model, getLocalScale());
 
 	return model;
 }
 
-mat4 Object::worldModelMatrix()
-{
-	mat4 worldModelMatrix = localModelMatrix();
-
-	Object* current = parent;
-	while (current != nullptr) {
-		worldModelMatrix = current->localModelMatrix() * worldModelMatrix;
-		current = current->parent;
-	}
-	
-	forward = vec3(worldModelMatrix[0][2], worldModelMatrix[1][2], worldModelMatrix[2][2]);
-	up = vec3(worldModelMatrix[0][1], worldModelMatrix[1][1], worldModelMatrix[2][1]);
-	right = vec3(worldModelMatrix[0][0], worldModelMatrix[1][0], worldModelMatrix[2][0]);
-
-	decompose(worldModelMatrix, worldScale, worldRotation, worldPosition, skew, perspective);
-
-	return worldModelMatrix;
-}
-
 void Object::setParent(Object* parent)
 {
-	this->parent = parent;
+	m_parent = parent;
 }
 
 
 int Object::addChild(Object* child) 
 {
-	Object* current = parent;
+	auto current = this;
 	while (current != nullptr)
 	{
 		if (current == child)
@@ -168,84 +156,57 @@ int Object::addChild(Object* child)
 	}
 
 	child->setParent(this); 
-	children.push_back(child);
+	m_children.push_back(child);
 	return 0;
 }
 
-vec3 Object::GetWorldPosition()
-{
-	worldModelMatrix();
-	return worldPosition;
+vec3 Object::getWorldPosition() const {
+	return m_worldPosition;
 }
 
-quat Object::GetWorldRotation()
-{
-	worldModelMatrix();
-	return worldRotation;
+quat Object::getWorldRotation() const {
+	return m_worldRotation;
 }
 
-vec3 Object::GetWorldScale()
-{
-	worldModelMatrix();
-	return worldScale;
+vec3 Object::getWorldScale() const {
+	return m_worldScale;
 }
 
-vec3 Object::GetForward()
-{
-	return forward;
+vec3 Object::getForward() const {
+	return m_forward;
 }
 
-vec3 Object::GetRight()
-{
-	return right;
+vec3 Object::getRight() const {
+	return m_right;
 }
 
-vec3 Object::GetUp()
-{
-	return up;
+vec3 Object::getUp() const {
+	return m_up;
 }
 
-vec3 Object::GetLocalPosition()
-{
-	return localPosition;
+vec3 Object::getLocalPosition() const {
+	return m_localPosition;
 }
 
-quat Object::GetLocalRotation()
-{
-	return localRotation;
+quat Object::getLocalRotation() const {
+	return m_localRotation;
 }
 
-vec3 Object::GetLocalScale()
-{
-	return localScale;
+vec3 Object::getLocalScale() const {
+	return m_localScale;
 }
 
-void Object::SetLocalPosition(vec3 location)
+void Object::setLocalPosition(const vec3 position)
 {
-	localPosition = location;
+	m_localPosition = position;
 }
 
-void Object::SetLocalRotation(quat rotation)
+void Object::setLocalRotation(const quat rotation)
 {
-	localRotation = rotation;
+	m_localRotation = rotation;
 }
 
-void Object::SetLocalScale(vec3 scale)
+void Object::setLocalScale(const vec3 scale)
 {
-	localScale = scale;
-}
-
-void Object::Translate(vec3 translation)
-{
-	SetLocalPosition(GetLocalPosition() + translation);
-}
-
-void Object::Rotate(vec3 eularRotation)
-{
-	SetLocalRotation(GetLocalRotation() + quat(eularRotation));
-}
-
-void Object::Scale(vec3 scaleFactors)
-{
-	SetLocalScale(GetLocalScale() * scaleFactors);
+	m_localScale = scale;
 }

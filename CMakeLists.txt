@@ -64,7 +64,7 @@ add_executable(Awoken_Engine_Test
 if(WIN32)
 
     target_link_libraries(Awoken_Engine_Test PRIVATE
-            Awoken_Engine.lib
+            Awoken_Engine
             assimp-vc143-mt.lib
             freetype.lib
             glfw3.lib
@@ -73,7 +73,7 @@ if(WIN32)
 elseif(UNIX)
 
     target_link_libraries(Awoken_Engine_Test PRIVATE
-            libAwoken_Engine.a
+            Awoken_Engine
             libglfw3.a
             libglm.a
             libassimp.so

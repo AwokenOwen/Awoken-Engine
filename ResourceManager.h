@@ -1,44 +1,120 @@
+/*
+ * Written by: AwokenOwen
+ * Last Updated: March 25th 2026
+ */
+
 #pragma once
-#include <fstream>
 #include <string>
 #include <map>
-#include <assimp/mesh.h>
 #include <vector>
 
 using namespace std;
 
+/**
+ * @brief Singleton macro
+ */
 #define Resource ResourceManager::getInstance()
 
+
+/**
+ * @brief Forward Declaration for the Mesh class
+ */
 class Mesh;
+/**
+ * @brief Manger that handles loading models, images, and shaders from files on the hard drive
+ */
 class ResourceManager
 {
 public:
-	//Start the Resource Manager make folders and files nessesary for running the game if not made already
-	int Initialize();
+	/**
+	 * @brief Start the Resource Manager make folders and files necessary for running the game if not made already. Return 0 if successful, -1 if unsuccessful
+	 *
+	 * @return int
+	 */
+	static int initialize();
 
-	//close files and stop the Resource Manager
-	void Terminate();
+	/**
+	 * @brief close files and stop the Resource Manager
+	 */
+	static void terminate();
 
-	//Singleton get function
+	/**
+	 * @brief Singleton get function
+	 *
+	 * @return ResourceManager
+	 */
 	static ResourceManager& getInstance();
 
-	//grab a scene from the assets folder and load it into the World Manager
-	int loadScene(string name);
+	/**
+	 * @brief grab a scene from the assets folder and load it into the World Manager. Return 0 if successful and -1 if unsuccessful
+	 *
+	 * @param name name of the scene
+	 * @return int
+	 */
+	static int loadScene(string name);
 
+	/**
+	 * @brief Loads image from file and returns an unsigned int representing the OpenGL texture
+	 *
+	 * @param path Path to image file
+	 * @return unsigned int
+	 */
 	unsigned int loadImage(const char* path);
 
-	unsigned int loadCubeMap(vector<const char*> paths);
+	/**
+	 * @brief Loads image files from folder and turns it into a cube map. Returns an unsigned int representing the OpenGL cube map
+	 *
+	 * @param paths Path to the folder holding the cube map images
+	 * @return unsigned int
+	 */
+	static unsigned int loadCubeMap(const vector<const char*> &paths);
 
+	/**
+	 * @brief Tries to get meshes from the Map of OpenGL mesh vectors using the path as a key. If found returns the vector if not return an empty vector.
+	 *
+	 * @param path Path to the meshes
+	 * @return vector<Mesh*>
+	 */
 	vector<Mesh*> getMeshFromMap(string path);
-	void addMeshToMap(string path, vector<Mesh*> mesh);
+	/**
+	 * @brief Inserts a vector of meshes into the mesh map using the path to the meshes as the key
+	 *
+	 * @param path Path to the meshes
+	 * @param meshes The vector of meshes from that path
+	 */
+	void addMeshToMap(string path, vector<Mesh*> meshes);
 
+	/**
+	 * @brief Tries to get an unsigned int representing an OpenGL shader program from map using a combination of the vertex and fragment shader paths as a key
+	 *
+	 * @param path A combination of the vertex and fragment shader paths
+	 * @return unsigned int
+	 */
 	unsigned int getShaderProgramFromMap(string path);
+	/**
+	 * @brief Inserts an unsigned int representing an OpenGL shader program into the map using the combination of the vertex and fragment shader paths as a key
+	 *
+	 * @param path A combination of the vertex and fragment shader paths
+	 * @param shaderProgram An unsigned int representing an OpenGL shader program
+	 */
 	void addShaderProgramToMap(string path, unsigned int shaderProgram);
 
 private:
+	/**
+	 * @brief Private constructor
+	 */
 	ResourceManager();
 
-	map<string, vector<Mesh*>> meshMap;
-	map<string, unsigned int> textureMap;
-	map<string, unsigned int> shaderMap;
+	/**
+	 * @brief Map for already loaded meshes to save time on file loading
+	 */
+	map<string, vector<Mesh*>> m_meshMap;
+	/**
+	 * @brief Map for already loaded textures to save time on file loading
+	 */
+	map<string, unsigned int> m_textureMap;
+	/**
+	 * @brief Map for already loaded shaders to save time on file loading
+	 */
+	map<string, unsigned int> m_shaderMap;
 };

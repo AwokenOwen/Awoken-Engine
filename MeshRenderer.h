@@ -1,35 +1,83 @@
+/*
+ * Written by: AwokenOwen
+ * Last Updated: March 25th 2026
+ */
+
 #pragma once
 #include "Component.h"
-#include "Mesh.h"
 #include <vector>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 using namespace std;
 
+/**
+ * @brief Forward Declaration of Material class
+ */
 class Material;
+/**
+ * @brief Forward Declaration of Mesh class
+ */
+class Mesh;
+/**
+ * @brief Component that draws meshes to the screen
+ */
 class MeshRenderer : public Component
 {
 public:
-	MeshRenderer(Object* _parent);
+	/**
+	 * @brief Constructor of MeshRenderer used to call parent constructor
+	 *
+	 * @param parent The parent object of the component
+	 */
+	explicit MeshRenderer(Object* parent);
 
-	// called every frame
+	/**
+	 * @brief Component override called every frame used to draw the meshes in the m_meshes vector
+	 */
 	void update() override;
 
-	void Draw();
+	/**
+	 * @brief Alternate to loadModel it's used to load specifically a cube as an inverted cube map
+	 *
+	 * @param paths Paths to the images used in the cube map
+	 */
+	void loadCubeMap(const vector<const char*> &paths);
 
-	void loadCubeMap(vector<const char*> paths);
+	/**
+	 * @brief Used to load a 3D or 2D model into the engine and attach it to the m_meshes vector
+	 *
+	 * @param path Path to the model
+	 */
+	void loadModel(const string &path);
 
-	void loadModel(string path);
-
-	Material* material;
+	void setShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath, int index = 0) const;
 
 private:
-	vector<Mesh*> meshes;
-	string directory;
+	/**
+	 * @brief Vector of 3D models to draw
+	 */
+	vector<Mesh*> m_meshes;
+	/**
+	 * @brief Vector of material associated with the 3D models
+	 */
+	vector<Material*> m_materials;
 
-	void processNode(aiNode* node, const aiScene* scene, string path);
+	/**
+	 * @brief Helper function for loading models
+	 *
+	 * @param node Assimp node
+	 * @param scene Assimp scene
+	 * @param path path to model
+	 */
+	void processNode(const aiNode* node, const aiScene* scene, const string &path);
+	/**
+	 * @brief Helper function for loading models
+	 *
+	 * @param mesh Assimp mesh
+	 * @param scene Assimp scene
+	 * @return Mesh*
+	 */
 	Mesh* processMesh(aiMesh* mesh, const aiScene* scene);
 };
 

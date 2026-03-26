@@ -13,7 +13,7 @@ DirectionalLight::DirectionalLight(const vec3 color, const float power) : Object
 
 vec3 DirectionalLight::getDirection()
 {
-	return normalize(GetForward());
+	return normalize(getForward());
 }
 
 float DirectionalLight::getPower() const
@@ -28,7 +28,7 @@ vec3 DirectionalLight::getColor() const {
 void DirectionalLight::setDirection(const vec3 direction)
 {
 	// maybe flip eye and center
-	SetLocalRotation(quat(lookAt(normalize(direction), vec3(0.0), vec3(0.0, 1.0, 0.0))));
+	setLocalRotation(quat(lookAt(normalize(direction), vec3(0.0), vec3(0.0, 1.0, 0.0))));
 }
 
 void DirectionalLight::setPower(const float power)

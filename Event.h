@@ -1,6 +1,6 @@
 /*
  * Written by: AwokenOwen
- * Last Updated: March 14th 2026
+ * Last Updated: March 25th 2026
  */
 
 #pragma once
@@ -28,9 +28,7 @@ public:
 	explicit Event(Object* owner = nullptr);
 
 	/**
-	 * @brief Add a function as a listeners to this event
-	 *
-	 * Turns all functions into lambda functions so they can be stored as listeners
+	 * @brief Turns all functions into lambda functions so they can be stored as listeners
 	 *
 	 * @tparam T Class of member function
 	 * @param object Pointer to the Object
@@ -40,9 +38,7 @@ public:
 	void add(T* object, void(T::* func)(R...));
 
 	/**
-	 * @brief Call all the functions that are listeners to the event
-	 *
-	 * Call the event with the necessary information to be passed to all Objects. Will cause error if caller is not equal to p_owner
+	 * @brief Call the event with the necessary information to be passed to all Objects. Will cause error if caller is not equal to p_owner
 	 *
 	 * @param args The inputs determined by R required to call the Event
 	 * @param caller pointer to the Object that calls the event
@@ -76,7 +72,7 @@ void Event<R...>::add(T* object, void(T::* func)(R...))
 }
 
 template<typename ...R>
- void Event<R...>::callEvent(R ...args, const Object* caller)
+ void Event<R...>::callEvent(R... args, const Object* caller)
 {
 	if (caller != p_owner && p_owner != nullptr) {
 		// print error "Caller Object is required to be the Owner of the Event"

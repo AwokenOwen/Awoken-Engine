@@ -1,5 +1,9 @@
-#pragma once
+/*
+ * Written by: AwokenOwen
+ * Last Updated: March 25th 2026
+ */
 
+#pragma once
 #include "glm.hpp"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
@@ -11,91 +15,236 @@
 using namespace glm;
 using namespace std;
 
+/**
+ * @brief Forward Declaration of Component
+ */
 class Component;
+/**
+ * @brief Base class for all Objects that will be added to the game
+ */
 class Object
 {
 public:
 	virtual ~Object() = default;
 
-	//Default contructor adds itself to the world list
+	/**
+	 * @brief Default constructor adds itself to the world list
+	 */
 	Object();
 
-	//called once at the start of the frame it is enabled on
-	virtual void OnEnable();
-	//called on the first frame if enabled
-	virtual void Start();
-	//called every frame
-	virtual void Update();
-	//called on the last frame it is enabled
-	virtual void OnDisable();
-	//to be called when Destroying itself
-	virtual void Destroy();
+	/**
+	 * @brief Called once at the start of the frame it is enabled on
+	 */
+	virtual void onEnable();
+	/**
+	 * @brief Called on the first frame if enabled
+	 */
+	virtual void start();
+	/**
+	 * @brief Called every frame
+	 */
+	virtual void update();
+	/**
+	 * @brief called on the last frame it is enabled
+	 */
+	virtual void onDisable();
+	/**
+	 * @brief to be called when destroying itself
+	 */
+	virtual void destroy();
 
-	//get the parent object if there is one
-	Object* getParent();
+	/**
+	 * @brief get the parent object if there is one
+	 *
+	 * @return Object*
+	 */
+	Object* getParent() const;
 
+	/**
+	 * @brief Adds a component to an Object and returns that component or of the component it already added returns already added component
+	 *
+	 * @tparam T Class of the component
+	 * @return T*
+	 */
 	template <typename T> T* addComponent();
+	/**
+	 * @brief Getter for any component added to the Object
+	 *
+	 * @tparam T Component being looked for
+	 * @return T*
+	 */
 	template <typename T> T* getComponent();
 
+	/**
+	 * @brief sets the current active state of the object to enabled or disabled and calls the correlated functions
+	 *
+	 * @param activeState new bool determining new active state
+	 */
 	void setActive(bool activeState);
-	bool getActiveState();
+	/**
+	 * @brief Getter for the current active state
+	 *
+	 * @return bool
+	 */
+	bool getActiveState() const;
 
+	/**
+	 * @brief Function to add a child object to another object returns 0 if successful and -1 if unsuccessful. Unsuccessful if there is a loop
+	 *
+	 * @param child The child object wanted to be added
+	 * @return int
+	 */
 	int addChild(Object* child);
 
-	vec3 GetWorldPosition();
-	quat GetWorldRotation();
-	vec3 GetWorldScale();
+	/**
+	 * @brief Getter for world position
+	 *
+	 * @return vec3
+	 */
+	vec3 getWorldPosition() const;
+	/**
+	 * @brief Getter for world rotation
+	 *
+	 * @return quat
+	 */
+	quat getWorldRotation() const;
+	/**
+	 * @brief Getter for world scale
+	 *
+	 * @return vec3
+	 */
+	vec3 getWorldScale() const;
 
-	vec3 GetForward();
-	vec3 GetRight();
-	vec3 GetUp();
+	/**
+	 * @brief Getter for Forward Vector
+	 *
+	 * @return vec3
+	 */
+	vec3 getForward() const;
+	/**
+	 * @brief Getter for Right Vector
+	 *
+	 * @return vec3
+	 */
+	vec3 getRight() const;
+	/**
+	 * @brief Getter for Up Vector
+	 *
+	 * @return vec3
+	 */
+	vec3 getUp() const;
 
-	mat4 worldModelMatrix();
+	/**
+	 * @brief Getter for Local Position
+	 *
+	 * @return vec3
+	 */
+	vec3 getLocalPosition() const;
+	/**
+	 * @brief Getter for Local Rotation
+	 *
+	 * @return quat
+	 */
+	quat getLocalRotation() const;
+	/**
+	 * @brief Getter for Local Scale
+	 *
+	 * @return vec3
+	 */
+	vec3 getLocalScale() const;
 
-	vec3 GetLocalPosition();
-	quat GetLocalRotation();
-	vec3 GetLocalScale();
-
-	mat4 localModelMatrix();
-
-	void SetLocalPosition(vec3 location);
-	void SetLocalRotation(quat rotation);
-	void SetLocalScale(vec3 scale);
-
-	void Translate(vec3 translation);
-	void Rotate(vec3 eularRotation);
-	void Scale(vec3 scaleFactors);
+	/**
+	 * @brief Setter for Local Position
+	 *
+	 * @param position new position
+	 */
+	void setLocalPosition(vec3 position);
+	/**
+	 * @brief Setter for Local Rotation
+	 *
+	 * @param rotation new rotation
+	 */
+	void setLocalRotation(quat rotation);
+	/**
+	 * @brief Setter for Local Scale
+	 *
+	 * @param scale new scale
+	 */
+	void setLocalScale(vec3 scale);
 
 protected:
-	Object* parent = nullptr;
+	/**
+	 * @brief Helper function for creating the world variables and forward, right, and up
+	 *
+	 * @return mat4
+	 */
+	mat4 localModelMatrix();
 
-	vector<Object*> children;
-
+	/**
+	 * @brief Setter for the parent Object of this object
+	 *
+	 * @param parent new Parent Object
+	 */
 	void setParent(Object* parent);
 
-	vector<Component*> components;
-	int componentsSize = 0;
+	/**
+	 * @brief Parent object of this object, nullptr if no parent
+	 */
+	Object* m_parent = nullptr;
 
-	bool enabled;
+	/**
+	 * @brief Vector of child objects connected to this Object
+	 */
+	vector<Object*> m_children;
 
-	vec3 localPosition;
-	//pitch, yaw, roll, rotations
-	quat localRotation;
-	vec3 localScale;
+	/**
+	 * @brief Vector of components on this Object
+	 */
+	vector<Component*> m_components;
 
-	vec3 worldPosition;
-	//pitch, yaw, roll, rotations
-	quat worldRotation;
-	vec3 worldScale;
+	/**
+	 * @brief Holder of the active state of the object
+	 */
+	bool m_activeState;
 
-	vec3 forward;
-	vec3 right;
-	vec3 up;
+	/**
+	 * @brief The position of the Object in local space
+	 */
+	vec3 m_localPosition;
+	/**
+	 * @brief The rotation of the Object in local space and in a quaternion to avoid gimble lock
+	 */
+	quat m_localRotation;
+	/**
+	 * @brief The scale of the Object in local space
+	 */
+	vec3 m_localScale;
 
-	vec3 skew;
-	vec4 perspective;
+	/**
+	 * @brief The position of the Object in world space
+	 */
+	vec3 m_worldPosition;
+	/**
+	 * @brief The rotation of the Object in world pace and in a quaternion to avoid gimble lock
+	 */
+	quat m_worldRotation;
+	/**
+	 * @brief The scale of the Object in world space
+	 */
+	vec3 m_worldScale;
 
-	bool firstFrame = true;
+	/**
+	 * @brief The forward vector of the Object in world space
+	 */
+	vec3 m_forward;
+	/**
+	 * @brief The right vector of the Object in world space
+	 */
+	vec3 m_right;
+	/**
+	 * @brief The up vector of the Object in world space
+	 */
+	vec3 m_up;
 };
 
 template<typename T>
@@ -103,10 +252,17 @@ inline T* Object::addComponent()
 {
 	static_assert(std::is_base_of<Component, T>());
 
+	for (int i = 0; i < m_components.size(); i++)
+	{
+		if (reinterpret_cast<T*>(m_components[i]))
+		{
+			return reinterpret_cast<T*>(m_components[i]);
+		}
+	}
+
 	T* a = new T(this);
 
-	components.push_back(a);
-	componentsSize++;
+	m_components.push_back(a);
 	return a;
 }
 
@@ -115,11 +271,11 @@ inline T* Object::getComponent()
 {
 	static_assert(std::is_base_of<Component, T>());
 
-	for (int i = 0; i < componentsSize; i++)
+	for (int i = 0; i < m_components.size(); i++)
 	{
-		if (reinterpret_cast<T*>(components[i]))
+		if (reinterpret_cast<T*>(m_components[i]))
 		{
-			return reinterpret_cast<T*>(components[i]);
+			return reinterpret_cast<T*>(m_components[i]);
 		}
 	}
 

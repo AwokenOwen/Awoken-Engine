@@ -32,7 +32,7 @@ void Scene::Start()
 	{
 		if (inScene[i]->getActiveState())
 		{
-			inScene[i]->Start();
+			inScene[i]->start();
 		}
 	}
 }
@@ -44,7 +44,7 @@ void Scene::Update()
 	{
 		if (inScene[i]->getActiveState())
 		{
-			inScene[i]->Update();
+			inScene[i]->update();
 		}
 	}
 }
@@ -59,7 +59,7 @@ void Scene::LateUpdate()
 
 	for (int i = 0; i < toBeDeleted.size(); i++)
 	{
-		toBeDeleted[i]->Destroy();
+		toBeDeleted[i]->destroy();
 	}
 	toBeDeleted.clear();
 }
@@ -92,7 +92,7 @@ void Scene::setSkybox(vector<const char*> paths)
 		m = skybox->getComponent<MeshRenderer>();
 	}
 	m->loadCubeMap(paths);
-	m->material->setShaderProgram("assets/defaultAssets/Shaders/skybox.vert", "assets/defaultAssets/Shaders/skybox.frag");
+	m->setShaderProgram("assets/defaultAssets/Shaders/skybox.vert", "assets/defaultAssets/Shaders/skybox.frag");
 	skybox->setActive(false);
 }
 
@@ -114,6 +114,6 @@ void Scene::DrawSkybox()
 {
 	if (skybox != nullptr)
 	{
-		skybox->Update();
+		skybox->update();
 	}
 }

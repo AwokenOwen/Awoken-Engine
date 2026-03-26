@@ -4,20 +4,16 @@
 #include "WorldManager.h"
 #include "WindowManager.h"
 #include "Camera.h"
-#include "Object.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include <gtc/type_ptr.hpp>
 #include "MeshRenderer.h"
 #include "GameManager.h"
 
-Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices)
+Mesh::Mesh(const vector<Vertex> &vertices, const vector<unsigned int> &indices)
 {
-    this->vertices = vertices;
-    this->indices = indices;
-
-    once = true;
-    materialOwner = false;
+    m_vertices = vertices;
+    m_indices = indices;
 
     setupMesh();
 }
@@ -31,70 +27,72 @@ void Mesh::setupMesh()
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Mesh::Vertex), &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Mesh::Vertex), &m_vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
-        &indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int),
+        &m_indices[0], GL_STATIC_DRAW);
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), static_cast<void *>(nullptr));
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), reinterpret_cast<void *>(offsetof(Mesh::Vertex, m_normal)));
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), (void*)offsetof(Mesh::Vertex, texCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Mesh::Vertex), reinterpret_cast<void *>(offsetof(Mesh::Vertex, m_texCoords)));
 
     glBindVertexArray(0);
 }
 
-void Mesh::setUpShaderMatrices(unsigned int shaderProgram)
-{
+void Mesh::setUpShaderMatrices(const unsigned int shaderProgram) const {
     // Vertex Matrix Stuff
-    mat4 modelMatrix = getParent()->worldModelMatrix();
+    mat4 modelMatrix = getParent()->getParent()->worldModelMatrix();
     mat4 projectionMatrix = Window.getPerspectiveMatrix();
     mat4 viewMatrix = World.getActiveScene()->getCamera()->getViewMatrix();
 
-    if (material->type == MaterialType::CUBEMAP)
+    if (m_material->getMaterialType() == CUBE_MAP)
     {
-        viewMatrix = glm::mat4(glm::mat3(viewMatrix));
+        viewMatrix = mat4(mat3(viewMatrix));
     }
 
-    if (material->type == MaterialType::UI)
+    if (m_material->getMaterialType() == GUI || m_material->getMaterialType() == UI)
     {
-        projectionMatrix = Window.getOrthographicMatrix();
-        vec3 UIPos = getParent()->GetWorldPosition();
-        vec3 UIScale = parent->GetWorldScale();
+        auto UIPos = m_parent->getParent()->getWorldPosition();
+        vec3 UIScale = m_parent->getParent()->getWorldScale();
+        if (m_material->getMaterialType() == UI) {
+            UIPos = vec3(UIPos.x / Window.getWidth(), UIPos.y / Window.getHeight(), UIPos.z);
+            UIScale = vec3(UIScale.x / Window.getWidth(), UIScale.y / Window.getHeight(), UIScale.z);
+        }
 
-        switch (material->anchorPoint)
+        switch (m_material->getUIAnchorPoint())
         {
-        case UIAnchorPoints::TOP:
+        case TOP:
             UIPos.y += 1 - UIScale.y;
             break;
-        case UIAnchorPoints::BOTTOM:
+        case BOTTOM:
             UIPos.y += -(1 - UIScale.y);
             break;
-        case UIAnchorPoints::RIGHT:
+        case RIGHT:
             UIPos.x += 1 - UIScale.x;
             break;
-        case UIAnchorPoints::LEFT:
+        case LEFT:
             UIPos.x += -(1 - UIScale.x);
             break;
-        case UIAnchorPoints::TOP_RIGHT:
+        case TOP_RIGHT:
             UIPos.x += 1 - UIScale.x;
             UIPos.y += 1 - UIScale.y;
             break;
-        case UIAnchorPoints::BOTTOM_RIGHT:
+        case BOTTOM_RIGHT:
             UIPos.x += 1 - UIScale.x;
             UIPos.y += -(1 - UIScale.y);
             break;
-        case UIAnchorPoints::TOP_LEFT:
+        case TOP_LEFT:
             UIPos.y += 1 - UIScale.y;
             UIPos.x += -(1 - UIScale.x);
             break;
-        case UIAnchorPoints::BOTTOM_LEFT:
+        case BOTTOM_LEFT:
             UIPos.y += -(1 - UIScale.y);
             UIPos.x += -(1 - UIScale.x);
             break;
@@ -102,42 +100,44 @@ void Mesh::setUpShaderMatrices(unsigned int shaderProgram)
             break;
         }
 
-        vec3 rotationVec = eulerAngles(getParent()->GetWorldRotation());
-        rotationVec.z = 0;
-        quat rotation = quat(rotationVec);
+        UIPos += getParent()->getParent()->getWorldPosition();
 
-        mat4 transformMatrix = translate(mat4(1.0f), UIPos);
-        mat4 rotationMatrix = rotate(mat4(1.0f), angle(rotation), axis(rotation));
-        mat4 scaleMatrix = scale(mat4(1.0), UIScale);
+        vec3 rotationVec = eulerAngles(getParent()->getParent()->getWorldRotation());
+        rotationVec.z = 0;
+        const auto rotation = quat(rotationVec);
+
+        const mat4 transformMatrix = translate(mat4(1.0f), UIPos);
+        const mat4 rotationMatrix = rotate(mat4(1.0f), angle(rotation), axis(rotation));
+        const mat4 scaleMatrix = scale(mat4(1.0), UIScale);
 
         modelMatrix = transformMatrix * rotationMatrix * scaleMatrix;
     }
 
-    material->setUniform<mat4>("model", modelMatrix);
+    m_material->setUniform<mat4>("model", modelMatrix);
 
-    int viewLoc = glGetUniformLocation(shaderProgram, "view");
+    const int viewLoc = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
-    int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+    const int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 }
 
-void Mesh::setUpShaderVariables(unsigned int shaderProgram)
+void Mesh::setUpShaderVariables(const unsigned int shaderProgram)
 {
     // Ambient Light
-    vec3 ambientColor = World.getActiveScene()->ambientColor;
+    const vec3 ambientColor = World.getActiveScene()->ambientColor;
 
-    int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
+    const int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
     glUniform3f(ambientColorLoc, ambientColor.x, ambientColor.y, ambientColor.z);
 
     float ambientPower = World.getActiveScene()->ambientPower;
 
-    int ambienPowertLoc = glGetUniformLocation(shaderProgram, "ambientPower");
-    glUniform1f(ambienPowertLoc, ambientPower);
+    const int ambienPowerLoc = glGetUniformLocation(shaderProgram, "ambientPower");
+    glUniform1f(ambienPowerLoc, ambientPower);
 
-    vec3 cameraPosition = World.getActiveScene()->getCamera()->GetWorldPosition();
+    const vec3 cameraPosition = World.getActiveScene()->getCamera()->getWorldPosition();
 
-    int cameraLoc = glGetUniformLocation(shaderProgram, "camPos");
+    const int cameraLoc = glGetUniformLocation(shaderProgram, "camPos");
     glUniform3f(cameraLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 }
 
@@ -146,17 +146,17 @@ void Mesh::setUpDirectionalLight(unsigned int shaderProgram)
     // Directional Light
     if (World.getActiveScene()->directionalLight != nullptr)
     {
-        vec3 direction = -World.getActiveScene()->directionalLight->getDirection();
-        float power = World.getActiveScene()->directionalLight->getPower();
-        vec3 color = World.getActiveScene()->directionalLight->getColor();
+        const vec3 direction = -World.getActiveScene()->directionalLight->getDirection();
+        const float power = World.getActiveScene()->directionalLight->getPower();
+        const vec3 color = World.getActiveScene()->directionalLight->getColor();
 
-        int directionLoc = glGetUniformLocation(shaderProgram, "dirLightDir");
+        const int directionLoc = glGetUniformLocation(shaderProgram, "dirLightDir");
         glUniform3f(directionLoc, direction.x, direction.y, direction.z);
 
-        int powerLoc = glGetUniformLocation(shaderProgram, "dirLightPow");
+        const int powerLoc = glGetUniformLocation(shaderProgram, "dirLightPow");
         glUniform1f(powerLoc, power);
 
-        int colorLoc = glGetUniformLocation(shaderProgram, "dirLightColor");
+        const int colorLoc = glGetUniformLocation(shaderProgram, "dirLightColor");
         glUniform3f(colorLoc, color.x, color.y, color.z);
     }
 }
@@ -166,32 +166,32 @@ void Mesh::setUpPointLights(unsigned int shaderProgram)
     for (int i = 0; i < World.getActiveScene()->pointLights.size(); i++)
     {
         // Point Lights
-        vec3 position = World.getActiveScene()->pointLights[i]->GetWorldPosition();
-        float power = World.getActiveScene()->pointLights[i]->getPower();
-        vec3 color = World.getActiveScene()->pointLights[i]->getColor();
+        const vec3 position = World.getActiveScene()->pointLights[i]->getWorldPosition();
+        const float power = World.getActiveScene()->pointLights[i]->getPower();
+        const vec3 color = World.getActiveScene()->pointLights[i]->getColor();
 
         string command = string("lightPositions[") + to_string(i).c_str() + "]";
-        int positionLoc = glGetUniformLocation(shaderProgram, command.c_str());
+        const int positionLoc = glGetUniformLocation(shaderProgram, command.c_str());
         glUniform3f(positionLoc, position.x, position.y, position.z);
 
         command = string("lightPowers[") + to_string(i).c_str() + "]";
-        int powerLoc = glGetUniformLocation(shaderProgram, command.c_str());
+        const int powerLoc = glGetUniformLocation(shaderProgram, command.c_str());
         glUniform1f(powerLoc, power);
 
         command = string("lightColors[") + to_string(i).c_str() + "]";
-        int colorLoc = glGetUniformLocation(shaderProgram, command.c_str());
+        const int colorLoc = glGetUniformLocation(shaderProgram, command.c_str());
         glUniform3f(colorLoc, color.x, color.y, color.z);
     }
 }
 
-void Mesh::Draw()
+void Mesh::draw()
 {
     // draw mesh
-    if (!material->twoSided)
+    if (!m_material->getTwoSided())
     {
         glEnable(GL_CULL_FACE);
 
-        if (material->type == MaterialType::CUBEMAP)
+        if (m_material->getMaterialType() == MaterialType::CUBE_MAP)
         {
             glCullFace(GL_FRONT);
         }
@@ -203,15 +203,14 @@ void Mesh::Draw()
     {
         glDisable(GL_CULL_FACE);
     }
-    unsigned int shaderProgram = material->getShaderProgram();
+    const unsigned int shaderProgram = m_material->getShaderProgram();
 
     glUseProgram(shaderProgram);
 
     // Load Textures
-    material->loadTextures();
-
-    material->setUniform<vec3>("objectPos", parent->GetLocalPosition());
-    material->setUniform<float>("time", Game.getTime());
+    m_material->loadTextures();
+    m_material->setUniform<vec3>("objectPos", m_parent->getParent()->getLocalPosition());
+    m_material->setUniform<float>("time", Game.getTime());
 
     setUpShaderMatrices(shaderProgram);
     setUpShaderVariables(shaderProgram);
@@ -219,17 +218,24 @@ void Mesh::Draw()
     setUpPointLights(shaderProgram);
 
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }
 
 
-Object* Mesh::getParent() 
-{
-    return parent;
+MeshRenderer* Mesh::getParent() const {
+    return m_parent;
 }
 
-void Mesh::setParent(Object* parent) 
+void Mesh::setParent(MeshRenderer* parent)
 {
-    this->parent = parent;
+    this->m_parent = parent;
+}
+
+Material * Mesh::getMaterial() const {
+    return m_material;
+}
+
+void Mesh::setMaterial(Material *material) {
+    m_material = material;
 }

@@ -9,58 +9,84 @@
 Material::Material()
 {
     setShaderProgram("assets/defaultAssets/Shaders/default.vert", "assets/defaultAssets/Shaders/default.frag");
-    type = MaterialType::DEFAULT_LIT;
-    anchorPoint = UIAnchorPoints::CENTER;
-    twoSided = false;
+    m_type = MaterialType::DEFAULT_LIT;
+    m_anchorPoint = UIAnchorPoints::CENTER;
+    m_twoSided = false;
 }
 
 Material::Material(const char* vertexShaderPath, const char* fragmentShaderPath)
 {
     setShaderProgram(vertexShaderPath, fragmentShaderPath);
-    type = MaterialType::DEFAULT_LIT;
+    m_type = MaterialType::DEFAULT_LIT;
 }
 
-unsigned int Material::getShaderProgram()
-{
-    return shaderProgram;
+unsigned int Material::getShaderProgram() const {
+    return m_shaderProgram;
 }
 
-void Material::setTexture(const char* path)
+void Material::addTexture(const char* path)
 {
-    textures.push_back(Resource.loadImage(path));
+    m_textures.push_back(Resource.loadImage(path));
 }
 
-void Material::setTexture(const char* path, int index)
+void Material::setTexture(const char* path, const int index)
 {
-    textures[index] = Resource.loadImage(path);
+    m_textures[index] = Resource.loadImage(path);
 }
 
-void Material::setCubeMapTexture(vector<const char*> paths)
+void Material::setSkyboxTexture(const vector<const char*> &paths)
 {
-    skyboxTexture = Resource.loadCubeMap(paths);
+    m_skyboxTexture = Resource.loadCubeMap(paths);
+}
+
+void Material::setMaterialType(const MaterialType materialType)
+{
+    m_type = materialType;
+}
+
+MaterialType Material::getMaterialType() const {
+    return m_type;
+}
+
+void Material::setUIAnchorPoint(const UIAnchorPoints anchorPoint)
+{
+    m_anchorPoint = anchorPoint;
+}
+
+UIAnchorPoints Material::getUIAnchorPoint() const {
+    return m_anchorPoint;
+}
+
+void Material::setTwoSided(const bool twoSided)
+{
+    m_twoSided = twoSided;
+}
+
+bool Material::getTwoSided() const {
+    return m_twoSided;
 }
 
 void Material::loadTextures()
 {
-    for (int i = 0; i < textures.size(); i++)
+    for (int i = 0; i < m_textures.size(); i++)
     {
         setUniform<int>(string("texture[" + to_string(i) + "]"), i);
 
         glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textures[i]);
+        glBindTexture(GL_TEXTURE_2D, m_textures[i]);
     }
 
-    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxTexture);
 }
 
 void Material::setShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath)
 {
-    std::string path = std::string(vertexShaderPath);
+    auto path = std::string(vertexShaderPath);
     path += fragmentShaderPath;
     unsigned int result = Resource.getShaderProgramFromMap(path);
     if (result != -1)
     {
-        shaderProgram = result;
+        m_shaderProgram = result;
         return;
     }
 
@@ -78,7 +104,7 @@ void Material::setShaderProgram(const char* vertexShaderPath, const char* fragme
         vShaderFile.open(vertexShaderPath);
         fShaderFile.open(fragmentShaderPath);
         std::stringstream vShaderStream, fShaderStream;
-        // read file�s buffer contents into streams
+        // read file's buffer contents into streams
         vShaderStream << vShaderFile.rdbuf();
         fShaderStream << fShaderFile.rdbuf();
         // close file handlers
@@ -90,14 +116,14 @@ void Material::setShaderProgram(const char* vertexShaderPath, const char* fragme
     }
     catch (std::ifstream::failure e)
     {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
     const char* vertexShaderSource = vertexCode.c_str();
     const char* fragmentShaderSource = fragmentCode.c_str();
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
     glCompileShader(vertexShader);
 
     int  success;
@@ -105,35 +131,35 @@ void Material::setShaderProgram(const char* vertexShaderPath, const char* fragme
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
     glCompileShader(fragmentShader);
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    shaderProgram = glCreateProgram();
+    m_shaderProgram = glCreateProgram();
 
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+    glAttachShader(m_shaderProgram, vertexShader);
+    glAttachShader(m_shaderProgram, fragmentShader);
+    glLinkProgram(m_shaderProgram);
 
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::COMILATION_FAILED\n" << infoLog << std::endl;
+        glGetProgramInfoLog(m_shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    Resource.addShaderProgramToMap(path, shaderProgram);
+    Resource.addShaderProgramToMap(path, m_shaderProgram);
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);

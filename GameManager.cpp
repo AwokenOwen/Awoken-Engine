@@ -16,7 +16,7 @@ int GameManager::initialize()
 		cout << "WindowManager failed to start\n";
 	}
 	cout << "WindowManager started\n";
-	if (Resource.Initialize())
+	if (Resource.initialize())
 	{
 		cout << "ResourceManager failed to start\n";
 	}
@@ -64,7 +64,7 @@ void GameManager::terminate()
 	cout << "Shut Down Window Manager\n";
 	Input.terminate();
 	cout << "Shut Down Input Manager\n";
-	Resource.Terminate(); 
+	Resource.terminate(); 
 	cout << "Shut Down Resource Manager\n";
 	World.Terminate();
 	cout << "Shut Down World Manager\n";

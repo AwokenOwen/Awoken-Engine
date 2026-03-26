@@ -17,18 +17,14 @@ class GameManager
 {
 public:
 	/**
-	 * @brief Start all other Managers and get them ready to run the game
-	 *
-	 * Starts up all managers and returns 0 if successful and 1 if failed
+	 * @brief Starts up all managers and returns 0 if successful and 1 if failed
 	 *
 	 * @return int
 	 */
 	static int initialize();
 
 	/**
-	 * @brief Run the game loop
-	 *
-	 * Starts the while loop that keeps the window open and sends updates to all Objects
+	 * @brief Starts the while loop that keeps the window open and sends updates to all Objects
 	 */
 	void run();
 
@@ -69,15 +65,11 @@ private:
 	GameManager();
 
 	/**
-	 * @brief helper variable used to calculate m_deltaTime
-	 *
-	 * The result of getTime at the end of the last frame is used to find the difference between that and the time of the current frame to calculate m_deltaTime
+	 * @brief The result of getTime at the end of the last frame is used to find the difference between that and the time of the current frame to calculate m_deltaTime
 	 */
 	float m_timeOnLastFrame = 0;
 	/**
-	 * @brief The change in time updated between frames
-	 *
-	 * The difference between getTime() last frame and the current frame
+	 * @brief The difference between getTime() last frame and the current frame
 	 */
 	float m_deltaTime = 0;
 };
