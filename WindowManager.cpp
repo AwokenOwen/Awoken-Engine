@@ -4,8 +4,10 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-int width;
-int height;
+int m_windowWidth;
+int m_windowHeight;
+int m_viewportWidth;
+int m_viewportHeight;
 bool fixedAspect;
 float aspectRatio;
 
@@ -53,18 +55,13 @@ GLFWwindow* WindowManager::getWindow()
 }
 
 //get functions for the width and height of the screen
-int WindowManager::getWidth()
+int WindowManager::getWindowWidth()
 {
-	return width;
+	return m_windowWidth;
 }
-int WindowManager::getHeight()
+int WindowManager::getWindowHeight()
 {
-	return height;
-}
-
-float WindowManager::getPixelRatio() const
-{
-	return static_cast<float>(getHeight()) / m_monitorHeight;
+	return m_windowHeight;
 }
 
 //Clear the color and depth buffers
@@ -75,8 +72,7 @@ void WindowManager::clear()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-//Swap buffers and pollevents
-void WindowManager::Swap() const {
+void WindowManager::swap() const {
 	glfwSwapBuffers(p_window);
 	glfwPollEvents(); 
 }
@@ -93,13 +89,7 @@ void WindowManager::setMaximized(const bool maximized) const {
 
 mat4 WindowManager::getPerspectiveMatrix()
 {
-	return glm::perspective(glm::radians(80.0f), (float)Window.getWidth() / (float)Window.getHeight(), 0.1f, 100.0f);;
-}
-
-mat4 WindowManager::getOrthographicMatrix()
-{
-	float aspect = static_cast<float>(getWidth()) / static_cast<float>(getHeight());
-	return glm::ortho(-aspect, aspect, -1.0f, 1.0f, 0.1f, 100.0f);
+	return glm::perspective(glm::radians(80.0f), static_cast<float>(Window.getWindowWidth()) / static_cast<float>(Window.getWindowHeight()), 0.1f, 100.0f);;
 }
 
 void WindowManager::setFixedAspect(bool fixed)
@@ -129,11 +119,10 @@ int WindowManager::createWindow()
 	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
 	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-	width = mode->width; 
-	height = mode->height; 
-	m_monitorHeight = static_cast<float>(mode->height);
+	m_windowWidth = mode->width;
+	m_windowHeight = mode->height;
 
-	p_window = glfwCreateWindow(width, height, "Game Engine", NULL, NULL);
+	p_window = glfwCreateWindow(m_windowWidth, m_windowHeight, "Game Engine", nullptr, nullptr);
 
 	if (p_window == nullptr)
 	{
@@ -151,37 +140,39 @@ int WindowManager::createWindow()
 	}
 
 	//NOTE: Set OpenGL Viewport
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, m_windowWidth, m_windowHeight);
 
 	glfwSetFramebufferSizeCallback(p_window, framebuffer_size_callback);
 
 	return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int _width, int _height)
+void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
+	m_windowWidth = width;
+	m_windowHeight = height;
 	if (fixedAspect)
 	{
-		if (static_cast<float>(_width) / static_cast<float>(_height) > aspectRatio)
+		if (static_cast<float>(width) / static_cast<float>(height) > aspectRatio)
 		{
-			height = _height;
-			width = int(height * aspectRatio);
+			m_viewportHeight = height;
+			m_viewportWidth = static_cast<int>(m_windowHeight * aspectRatio);
 		}
-		else if (static_cast<float>(_width) / static_cast<float>(_height) < aspectRatio)
+		else if (static_cast<float>(width) / static_cast<float>(height) < aspectRatio)
 		{
-			width = _width;
-			height = static_cast<int>(width * (1.0f/aspectRatio));
+			m_viewportWidth = width;
+			m_viewportHeight = static_cast<int>(m_windowWidth * (1.0f/aspectRatio));
 		}
 		else
 		{
-			width = _width;
-			height = _height;
+			m_viewportWidth = width;
+			m_viewportHeight = height;
 		}
 	}
 	else
 	{
-		width = _width;
-		height = _height;
+		m_viewportWidth = width;
+		m_viewportHeight = height;
 	}
-	glViewport(static_cast<int>((_width - width) / 2.0f), static_cast<int>((_height - height) / 2.0f), width, height);
+	glViewport(static_cast<int>((width - m_viewportWidth) / 2.0f), static_cast<int>((height - m_viewportHeight) / 2.0f), m_viewportWidth, m_viewportHeight);
 }

@@ -1,12 +1,14 @@
 #include "PointLight.h"
-#include "WorldManager.h"
+
+#include "GameManager.h"
+#include "Scene.h"
 
 PointLight::PointLight(const vec3 color, const float power) : Object()
 {
 	m_color = color;
 	m_power = power;
 
-	World.getActiveScene()->pointLights.push_back(this);
+	Game.getActiveScene()->addPointLight(this);
 }
 
 vec3 PointLight::getColor() const {

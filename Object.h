@@ -1,16 +1,13 @@
 /*
  * Written by: AwokenOwen
- * Last Updated: March 25th 2026
+ * Last Updated: March 26th 2026
  */
 
 #pragma once
 #include "glm.hpp"
 #include "gtc/matrix_transform.hpp"
 #include "gtc/quaternion.hpp"
-#define GLM_ENABLE_EXPERIMENTAL
-#include <gtx/euler_angles.hpp>
 #include <vector>
-#include <string>
 
 using namespace glm;
 using namespace std;
@@ -58,7 +55,7 @@ public:
 	 *
 	 * @return Object*
 	 */
-	Object* getParent() const;
+	[[nodiscard]] Object* getParent() const;
 
 	/**
 	 * @brief Adds a component to an Object and returns that component or of the component it already added returns already added component
@@ -86,7 +83,7 @@ public:
 	 *
 	 * @return bool
 	 */
-	bool getActiveState() const;
+	[[nodiscard]] bool getActiveState() const;
 
 	/**
 	 * @brief Function to add a child object to another object returns 0 if successful and -1 if unsuccessful. Unsuccessful if there is a loop
@@ -97,61 +94,67 @@ public:
 	int addChild(Object* child);
 
 	/**
+	 * @brief Getter for the World Model Matrix of Object
+	 *
+	 * @return
+	 */
+	[[nodiscard]] mat4 getModelMatrix() const;
+	/**
 	 * @brief Getter for world position
 	 *
 	 * @return vec3
 	 */
-	vec3 getWorldPosition() const;
+	[[nodiscard]] vec3 getWorldPosition() const;
 	/**
 	 * @brief Getter for world rotation
 	 *
 	 * @return quat
 	 */
-	quat getWorldRotation() const;
+	[[nodiscard]] quat getWorldRotation() const;
 	/**
 	 * @brief Getter for world scale
 	 *
 	 * @return vec3
 	 */
-	vec3 getWorldScale() const;
+	[[nodiscard]] vec3 getWorldScale() const;
 
 	/**
 	 * @brief Getter for Forward Vector
 	 *
 	 * @return vec3
 	 */
-	vec3 getForward() const;
+	[[nodiscard]] vec3 getForward() const;
 	/**
 	 * @brief Getter for Right Vector
 	 *
 	 * @return vec3
 	 */
-	vec3 getRight() const;
+	[[nodiscard]] vec3 getRight() const;
 	/**
 	 * @brief Getter for Up Vector
 	 *
 	 * @return vec3
 	 */
-	vec3 getUp() const;
+	[[nodiscard]] vec3 getUp() const;
 
 	/**
 	 * @brief Getter for Local Position
 	 *
 	 * @return vec3
 	 */
-	vec3 getLocalPosition() const;
+	[[nodiscard]] vec3 getLocalPosition() const;
 	/**
 	 * @brief Getter for Local Rotation
 	 *
 	 * @return quat
 	 */
-	quat getLocalRotation() const;
+	[[nodiscard]] quat getLocalRotation() const;
 	/**
 	 * @brief Getter for Local Scale
 	 *
 	 * @return vec3
 	 */
-	vec3 getLocalScale() const;
+	[[nodiscard]] vec3 getLocalScale() const;
 
 	/**
 	 * @brief Setter for Local Position
@@ -178,7 +181,7 @@ protected:
 	 *
 	 * @return mat4
 	 */
-	mat4 localModelMatrix();
+	[[nodiscard]] mat4 localModelMatrix() const;
 
 	/**
 	 * @brief Setter for the parent Object of this object
@@ -205,46 +208,50 @@ protected:
 	/**
 	 * @brief Holder of the active state of the object
 	 */
-	bool m_activeState;
+	bool m_activeState{};
 
+	/**
+	 * @brief The World Model Matrix of the object updated every frame
+	 */
+	mat4 worldModelMatrix{};
 	/**
 	 * @brief The position of the Object in local space
 	 */
-	vec3 m_localPosition;
+	vec3 m_localPosition{};
 	/**
 	 * @brief The rotation of the Object in local space and in a quaternion to avoid gimble lock
 	 */
-	quat m_localRotation;
+	quat m_localRotation{};
 	/**
 	 * @brief The scale of the Object in local space
 	 */
-	vec3 m_localScale;
+	vec3 m_localScale{};
 
 	/**
 	 * @brief The position of the Object in world space
 	 */
-	vec3 m_worldPosition;
+	vec3 m_worldPosition{};
 	/**
 	 * @brief The rotation of the Object in world pace and in a quaternion to avoid gimble lock
 	 */
-	quat m_worldRotation;
+	quat m_worldRotation{};
 	/**
 	 * @brief The scale of the Object in world space
 	 */
-	vec3 m_worldScale;
+	vec3 m_worldScale{};
 
 	/**
 	 * @brief The forward vector of the Object in world space
 	 */
-	vec3 m_forward;
+	vec3 m_forward{};
 	/**
 	 * @brief The right vector of the Object in world space
 	 */
-	vec3 m_right;
+	vec3 m_right{};
 	/**
 	 * @brief The up vector of the Object in world space
 	 */
-	vec3 m_up;
+	vec3 m_up{};
 };
 
 template<typename T>
@@ -252,11 +259,11 @@ inline T* Object::addComponent()
 {
 	static_assert(std::is_base_of<Component, T>());
 
-	for (int i = 0; i < m_components.size(); i++)
+	for (auto & m_component : m_components)
 	{
-		if (reinterpret_cast<T*>(m_components[i]))
+		if (reinterpret_cast<T*>(m_component))
 		{
-			return reinterpret_cast<T*>(m_components[i]);
+			return reinterpret_cast<T*>(m_component);
 		}
 	}
 
@@ -271,11 +278,11 @@ inline T* Object::getComponent()
 {
 	static_assert(std::is_base_of<Component, T>());
 
-	for (int i = 0; i < m_components.size(); i++)
+	for (auto & m_component : m_components)
 	{
-		if (reinterpret_cast<T*>(m_components[i]))
+		if (reinterpret_cast<T*>(m_component))
 		{
-			return reinterpret_cast<T*>(m_components[i]);
+			return reinterpret_cast<T*>(m_component);
 		}
 	}
 

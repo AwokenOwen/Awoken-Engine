@@ -1,5 +1,4 @@
 #include "MeshRenderer.h"
-#include "WorldManager.h"
 #include "WindowManager.h"
 #include "ResourceManager.h"
 #include "Mesh.h"

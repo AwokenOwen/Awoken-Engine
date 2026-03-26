@@ -1,3 +1,8 @@
+/*
+ * Written by: AwokenOwen
+ * Last Updated: March 26th 2026
+ */
+
 #pragma once
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
@@ -7,50 +12,107 @@
 using namespace glm;
 using namespace std;
 
+/**
+ * @brief Window Manager singleton macro
+ */
 #define Window WindowManager::getInstance()
 
+/**
+ * @brief Manager in charge of creating, destroying, and maintaining the window
+ */
 class WindowManager
 {
 public:
-	//Initialize the Window manager and call the create window function
+	/**
+	 * Initialize the Window manager and call the create window function. Return 0 if successful and -1 if unsuccessful
+	 *
+	 * @return int
+	 */
 	int initialize();
 
-	//free any data on the heap
+	/**
+	 * @brief free any data on the heap
+	 */
 	static void terminate();
 
-	//Singleton get function
+	/**
+	 * @brief Getter for singleton
+	 *
+	 * @return WindowManager
+	 */
 	static WindowManager& getInstance();
 
-	//get function for the private window variable
+	/**
+	 * G@brief Getter for the GLFW window
+	 *
+	 * @return GLFW window*
+	 */
 	GLFWwindow* getWindow();
 
-	//get functions for the width and height of the screen
-	static int getWidth();
-	static int getHeight();
-	[[nodiscard]] float getPixelRatio() const;
+	/**
+	 * @brief Getter for the width in pixels of the current window
+	 *
+	 * @return int
+	 */
+	static int getWindowWidth();
+	/**
+	 * @brief Getter for the height in pixels of the current window
+	 *
+	 * @return int
+	 */
+	static int getWindowHeight();
 
-	//Clear the color and depth buffers
+	/**
+	 * @brief Clear the color and depth buffers
+	 */
 	static void clear();
 
-	//Swap buffers and poll events
-	void Swap() const;
+	/**
+	 * @brief Swap buffers and poll events
+	 */
+	void swap() const;
 
+	/**
+	 * @brief Function to set the window as maximized or not.
+	 *
+	 * @param maximized The new bool for whether to maximize the window
+	 */
 	void setMaximized(bool maximized = true) const;
 
+	/**
+	 * @brief Calculate and returns the perspective projection matrix
+	 *
+	 * @return mat4
+	 */
 	static mat4 getPerspectiveMatrix();
-	mat4 getOrthographicMatrix();
 
+	/**
+	 * @brief Setter for whether the viewport has a fixed aspect ratio putting black bars where it's too big
+	 *
+	 * @param fixed The new bool for whether the viewport has a fixed aspect ratio
+	 */
 	static void setFixedAspect(bool fixed = true);
+	/**
+	 * @brief Setter for the fixed aspect ratio
+	 *
+	 * @param aspect The new fixed aspect ratio
+	 */
 	static void setAspectRatio(float aspect);
 
 private:
-	//Private constructor for singleton functionality
+	/**
+	 * @brief Private constructor for singleton functionality
+	 */
 	WindowManager();
 
-	//creates the window by grabbing the primary monitor setting the window to be 
-	//"windowed fullscreen", then initializing glad, then finally creating the window
+	/**
+	 * creates the window by grabbing the primary monitor then initializing glad, then finally creating the window. Return 0 if successful -1 if unsuccessful
+	 *
+	 * @return int
+	 */
 	int createWindow();
+	/**
+	 * @brief Variable that holds the GLFW window
+	 */
 	GLFWwindow* p_window{};
-
-	float m_monitorHeight{};
 };

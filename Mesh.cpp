@@ -1,7 +1,6 @@
 ﻿#include "Mesh.h"
 #include "Material.h"
 #include "glad/glad.h"
-#include "WorldManager.h"
 #include "WindowManager.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
@@ -9,6 +8,7 @@
 #include <gtc/type_ptr.hpp>
 #include "MeshRenderer.h"
 #include "GameManager.h"
+#include "Scene.h"
 
 Mesh::Mesh(const vector<Vertex> &vertices, const vector<unsigned int> &indices)
 {
@@ -48,9 +48,9 @@ void Mesh::setupMesh()
 
 void Mesh::setUpShaderMatrices(const unsigned int shaderProgram) const {
     // Vertex Matrix Stuff
-    mat4 modelMatrix = getParent()->getParent()->worldModelMatrix();
+    mat4 modelMatrix = getParent()->getParent()->getModelMatrix();
     mat4 projectionMatrix = Window.getPerspectiveMatrix();
-    mat4 viewMatrix = World.getActiveScene()->getCamera()->getViewMatrix();
+    mat4 viewMatrix = Game.getActiveScene()->getCamera()->getViewMatrix();
 
     if (m_material->getMaterialType() == CUBE_MAP)
     {
@@ -62,8 +62,8 @@ void Mesh::setUpShaderMatrices(const unsigned int shaderProgram) const {
         auto UIPos = m_parent->getParent()->getWorldPosition();
         vec3 UIScale = m_parent->getParent()->getWorldScale();
         if (m_material->getMaterialType() == UI) {
-            UIPos = vec3(UIPos.x / Window.getWidth(), UIPos.y / Window.getHeight(), UIPos.z);
-            UIScale = vec3(UIScale.x / Window.getWidth(), UIScale.y / Window.getHeight(), UIScale.z);
+            UIPos = vec3(UIPos.x / Window.getWindowWidth(), UIPos.y / Window.getWindowHeight(), UIPos.z);
+            UIScale = vec3(UIScale.x / Window.getWindowWidth(), UIScale.y / Window.getWindowHeight(), UIScale.z);
         }
 
         switch (m_material->getUIAnchorPoint())
@@ -125,30 +125,30 @@ void Mesh::setUpShaderMatrices(const unsigned int shaderProgram) const {
 void Mesh::setUpShaderVariables(const unsigned int shaderProgram)
 {
     // Ambient Light
-    const vec3 ambientColor = World.getActiveScene()->ambientColor;
+    const vec3 ambientColor = Game.getActiveScene()->getAmbientColor();
 
     const int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
     glUniform3f(ambientColorLoc, ambientColor.x, ambientColor.y, ambientColor.z);
 
-    float ambientPower = World.getActiveScene()->ambientPower;
+    float ambientPower = Game.getActiveScene()->getAmbientPower();
 
     const int ambienPowerLoc = glGetUniformLocation(shaderProgram, "ambientPower");
     glUniform1f(ambienPowerLoc, ambientPower);
 
-    const vec3 cameraPosition = World.getActiveScene()->getCamera()->getWorldPosition();
+    const vec3 cameraPosition = Game.getActiveScene()->getCamera()->getWorldPosition();
 
     const int cameraLoc = glGetUniformLocation(shaderProgram, "camPos");
     glUniform3f(cameraLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 }
 
-void Mesh::setUpDirectionalLight(unsigned int shaderProgram)
+void Mesh::setUpDirectionalLight(const unsigned int shaderProgram)
 {
     // Directional Light
-    if (World.getActiveScene()->directionalLight != nullptr)
+    if (Game.getActiveScene()->getDirectionalLight() != nullptr)
     {
-        const vec3 direction = -World.getActiveScene()->directionalLight->getDirection();
-        const float power = World.getActiveScene()->directionalLight->getPower();
-        const vec3 color = World.getActiveScene()->directionalLight->getColor();
+        const vec3 direction = -Game.getActiveScene()->getDirectionalLight()->getDirection();
+        const float power = Game.getActiveScene()->getDirectionalLight()->getPower();
+        const vec3 color = Game.getActiveScene()->getDirectionalLight()->getColor();
 
         const int directionLoc = glGetUniformLocation(shaderProgram, "dirLightDir");
         glUniform3f(directionLoc, direction.x, direction.y, direction.z);
@@ -161,24 +161,24 @@ void Mesh::setUpDirectionalLight(unsigned int shaderProgram)
     }
 }
 
-void Mesh::setUpPointLights(unsigned int shaderProgram)
+void Mesh::setUpPointLights(const unsigned int shaderProgram)
 {
-    for (int i = 0; i < World.getActiveScene()->pointLights.size(); i++)
+    for (int i = 0; i < Game.getActiveScene()->getPointLights().size(); i++)
     {
         // Point Lights
-        const vec3 position = World.getActiveScene()->pointLights[i]->getWorldPosition();
-        const float power = World.getActiveScene()->pointLights[i]->getPower();
-        const vec3 color = World.getActiveScene()->pointLights[i]->getColor();
+        const vec3 position = Game.getActiveScene()->getPointLights()[i]->getWorldPosition();
+        const float power = Game.getActiveScene()->getPointLights()[i]->getPower();
+        const vec3 color = Game.getActiveScene()->getPointLights()[i]->getColor();
 
-        string command = string("lightPositions[") + to_string(i).c_str() + "]";
+        string command = string("lightPositions[") + to_string(i) + "]";
         const int positionLoc = glGetUniformLocation(shaderProgram, command.c_str());
         glUniform3f(positionLoc, position.x, position.y, position.z);
 
-        command = string("lightPowers[") + to_string(i).c_str() + "]";
+        command = string("lightPowers[") + to_string(i) + "]";
         const int powerLoc = glGetUniformLocation(shaderProgram, command.c_str());
         glUniform1f(powerLoc, power);
 
-        command = string("lightColors[") + to_string(i).c_str() + "]";
+        command = string("lightColors[") + to_string(i) + "]";
         const int colorLoc = glGetUniformLocation(shaderProgram, command.c_str());
         glUniform3f(colorLoc, color.x, color.y, color.z);
     }

@@ -28,7 +28,6 @@ add_library(Awoken_Engine STATIC
         ResourceManager.cpp
         Scene.cpp
         WindowManager.cpp
-        WorldManager.cpp
         TextRenderer.cpp
 )
 

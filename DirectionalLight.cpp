@@ -1,5 +1,7 @@
 #include "DirectionalLight.h"
-#include "WorldManager.h"
+
+#include "GameManager.h"
+#include "Scene.h"
 
 DirectionalLight::DirectionalLight(const vec3 color, const float power) : Object()
 {
@@ -8,7 +10,7 @@ DirectionalLight::DirectionalLight(const vec3 color, const float power) : Object
 
 	setDirection(vec3(-1.0, -1.0, -1.0));
 
-	World.getActiveScene()->directionalLight = this;
+	Game.getActiveScene()->setDirectionalLight(this);
 }
 
 vec3 DirectionalLight::getDirection()

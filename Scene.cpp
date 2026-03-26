@@ -1,9 +1,7 @@
 #include "Scene.h"
-#include <glad/glad.h>
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <sstream>
 #include "Camera.h"
 #include "Object.h"
 #include "DirectionalLight.h"
@@ -12,93 +10,112 @@
 
 Scene::Scene()
 {
-	ambientColor = vec3(1.0f);
-	ambientPower = 0.1f;
-	directionalLight = nullptr;
+	m_ambientColor = vec3(1.0f);
+	m_ambientPower = 0.1f;
+	m_directionalLight = nullptr;
 }
 
-void Scene::Awake()
+void Scene::awake()
 {
-    if (camera == nullptr)
+    if (m_camera == nullptr)
     {
-        camera = new Camera();
+        m_camera = new Camera();
         std::cout << "Camera Created" << std::endl;
     }
 }
 
-void Scene::Start()
-{
-	for (int i = 0; i < inScene.size(); i++)
+void Scene::start() const {
+	for (const auto i : m_inScene)
 	{
-		if (inScene[i]->getActiveState())
+		if (i->getActiveState())
 		{
-			inScene[i]->start();
+			i->start();
 		}
 	}
 }
 
-void Scene::Update()
-{
-	DrawSkybox();
-	for (int i = 0; i < inScene.size(); i++)
+void Scene::update() const {
+	for (const auto i : m_inScene)
 	{
-		if (inScene[i]->getActiveState())
+		if (i->getActiveState())
 		{
-			inScene[i]->update();
+			i->update();
 		}
 	}
 }
 
-void Scene::LateUpdate()
+void Scene::lateUpdate()
 {
-	for (int i = 0; i < toBeAdded.size(); i++)
+	for (auto i : m_toBeAdded)
 	{
-		inScene.push_back(toBeAdded[i]);
+		m_inScene.push_back(i);
 	}
-	toBeAdded.clear();
+	m_toBeAdded.clear();
 
-	for (int i = 0; i < toBeDeleted.size(); i++)
+	for (const auto & i : m_toBeDeleted)
 	{
-		toBeDeleted[i]->destroy();
+		i->destroy();
 	}
-	toBeDeleted.clear();
+	m_toBeDeleted.clear();
 }
 
 string Scene::getName()
 {
-	return name;
+	return m_name;
 }
 
-void Scene::Instantiate(Object* obj)
+void Scene::instantiate(Object* obj)
 {
-	toBeAdded.push_back(obj);
+	m_toBeAdded.push_back(obj);
 }
 
-Camera* Scene::getCamera()
-{
-    return camera;
+vec3 Scene::getAmbientColor() const {
+	return m_ambientColor;
 }
 
-void Scene::setSkybox(vector<const char*> paths)
+float Scene::getAmbientPower() const {
+	return m_ambientPower;
+}
+
+void Scene::setDirectionalLight(DirectionalLight *directionalLight) {
+	m_directionalLight = directionalLight;
+}
+
+DirectionalLight * Scene::getDirectionalLight() const {
+	return m_directionalLight;
+}
+
+void Scene::addPointLight(PointLight *pointLight) {
+	m_pointLights.push_back(pointLight);
+}
+
+vector<PointLight *> Scene::getPointLights() {
+	return m_pointLights;
+}
+
+Camera* Scene::getCamera() const {
+    return m_camera;
+}
+
+void Scene::setSkybox(const vector<const char*> &paths)
 {
 	MeshRenderer* m;
-	if (skybox == nullptr)
+	if (m_skybox == nullptr)
 	{
-		skybox = new Object;
-		m = skybox->addComponent<MeshRenderer>();
+		m_skybox = new Object;
+		m = m_skybox->addComponent<MeshRenderer>();
 	}
 	else
 	{
-		m = skybox->getComponent<MeshRenderer>();
+		m = m_skybox->getComponent<MeshRenderer>();
 	}
 	m->loadCubeMap(paths);
 	m->setShaderProgram("assets/defaultAssets/Shaders/skybox.vert", "assets/defaultAssets/Shaders/skybox.frag");
-	skybox->setActive(false);
 }
 
 void Scene::loadDefaultSkybox()
 {
-	vector<const char*> paths = {
+	const vector<const char*> paths = {
 	"assets/defaultAssets/Skybox/right.jpg",
 	"assets/defaultAssets/Skybox/left.jpg",
 	"assets/defaultAssets/Skybox/top.jpg",
@@ -108,12 +125,4 @@ void Scene::loadDefaultSkybox()
 	};
 
 	setSkybox(paths);
-}
-
-void Scene::DrawSkybox()
-{
-	if (skybox != nullptr)
-	{
-		skybox->update();
-	}
 }

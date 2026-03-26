@@ -129,7 +129,7 @@ protected:
 	/**
 	 * @brief Mesh variables
 	 */
-	unsigned int VAO, VBO, EBO;
+	unsigned int VAO{}, VBO{}, EBO{};
 
 private:
 	/**
@@ -164,11 +164,11 @@ private:
 	/**
 	 * @brief Material variable that handles this mesh
 	 */
-	Material* m_material;
+	Material* m_material{};
 	/**
 	 * @brief The MeshRenderer parent variable of this mesh
 	 */
-	MeshRenderer* m_parent;
+	MeshRenderer* m_parent{};
 	/**
 	 * @brief The vertice vector for the mesh
 	 */

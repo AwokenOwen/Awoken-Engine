@@ -2,7 +2,7 @@
 #include "WindowManager.h"
 #include "InputManager.h"
 #include "ResourceManager.h"
-#include "WorldManager.h"
+#include "Scene.h"
 #include "iostream"
 
 using namespace std;
@@ -21,16 +21,11 @@ int GameManager::initialize()
 		cout << "ResourceManager failed to start\n";
 	}
 	cout << "ResourceManager started\n";
-	if (World.Initialize())
-	{
-		cout << "WorldManger failed to start\n";
-	}
-	cout << "WorldManager started\n";
 
 	cout << "GameManager Started\n\n";
 
-	cout << "Loading game with scene " << World.getBaseScene() << "\n\n";
-	World.loadScene(World.getBaseScene());
+	cout << "Loading game with scene " << Game.getBaseScene() << "\n\n";
+	Game.loadScene(Game.m_nameOfBaseScene);
 
 	return 0;
 }
@@ -38,8 +33,6 @@ int GameManager::initialize()
 void GameManager::run()
 {
 	cout << "Starting Game...\n\n";
-	
-	World.Start();
 
 	while (!glfwWindowShouldClose(Window.getWindow()))
 	{
@@ -48,10 +41,10 @@ void GameManager::run()
 
 		glfwPollEvents();
 
-		World.Update();
-		World.LateUpdate();
+		p_activeScene->update();
+		p_activeScene->lateUpdate();
 
-		Window.Swap();
+		Window.swap();
 		m_timeOnLastFrame = getTime();
 	}
 }
@@ -66,8 +59,6 @@ void GameManager::terminate()
 	cout << "Shut Down Input Manager\n";
 	Resource.terminate(); 
 	cout << "Shut Down Resource Manager\n";
-	World.Terminate();
-	cout << "Shut Down World Manager\n";
 
 	cout << "Shut Down Game Manager\n";
 }
@@ -76,6 +67,32 @@ GameManager& GameManager::getInstance()
 {
 	static GameManager single;
 	return single;
+}
+
+int GameManager::loadScene(const std::string& name) {
+	//do stuff (set active Scene to the scene with name)
+	//load all objects in the scene
+	//this is the first frame technically
+	p_activeScene = new Scene();
+	p_activeScene->awake();
+	p_activeScene->start();
+	return 0;
+}
+
+Scene* GameManager::getActiveScene() const {
+	return p_activeScene;
+}
+
+void GameManager::setBaseScene(const std::string &name) {
+	m_nameOfBaseScene = name;
+}
+
+std::string GameManager::getBaseScene() {
+	return m_nameOfBaseScene;
+}
+
+void GameManager::instantiate(Object *obj) const {
+	p_activeScene->instantiate(obj);
 }
 
 float GameManager::getTime()

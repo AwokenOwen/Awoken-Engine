@@ -1,8 +1,10 @@
 #include "Object.h"
 #include "Component.h"
 #include "iostream"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <gtx/matrix_decompose.hpp>
-#include "WorldManager.h"
+
+#include "GameManager.h"
 
 Object::Object()
 {
@@ -15,7 +17,7 @@ Object::Object()
 	m_worldRotation = quat(vec3(0, 0, 0));
 	m_worldScale = vec3(1, 1, 1);
 
-	World.Instantiate(this);
+	Game.instantiate(this);
 
 	setActive(true);
 }
@@ -23,11 +25,11 @@ Object::Object()
 //called once at the start of the frame it is enabled on
 void Object::onEnable()
 {
-	for (int i = 0; i < m_components.size(); i++)
+	for (const auto & m_component : m_components)
 	{
-		if (m_components[i]->getActiveState())
+		if (m_component->getActiveState())
 		{
-			m_components[i]->onEnable();
+			m_component->onEnable();
 		}
 	}
 
@@ -37,11 +39,11 @@ void Object::onEnable()
 //called on the first frame if enabled
 void Object::start()
 {
-	for (int i = 0; i < m_components.size(); i++)
+	for (const auto & m_component : m_components)
 	{
-		if (m_components[i]->getActiveState())
+		if (m_component->getActiveState())
 		{
-			m_components[i]->start();
+			m_component->start();
 		}
 	}
 }
@@ -49,7 +51,7 @@ void Object::start()
 //called every frame
 void Object::update()
 {
-	mat4 worldModelMatrix = localModelMatrix();
+	worldModelMatrix = localModelMatrix();
 	Object* current = m_parent;
 	while (current != nullptr) {
 		worldModelMatrix = current->localModelMatrix() * worldModelMatrix;
@@ -65,11 +67,11 @@ void Object::update()
 
 	decompose(worldModelMatrix, m_worldScale, m_worldRotation, m_worldPosition, skew, perspective);
 
-	for (int i = 0; i < m_components.size(); i++)
+	for (const auto & m_component : m_components)
 	{
-		if (m_components[i]->getActiveState())
+		if (m_component->getActiveState())
 		{
-			m_components[i]->update();
+			m_component->update();
 		}
 	}
 }
@@ -77,11 +79,11 @@ void Object::update()
 //called on the last frame it is enabled
 void Object::onDisable()
 {
-	for (int i = 0; i < m_components.size(); i++)
+	for (const auto & m_component : m_components)
 	{
-		if (m_components[i]->getActiveState())
+		if (m_component->getActiveState())
 		{
-			m_components[i]->onDisable();
+			m_component->onDisable();
 		}
 	}
 	m_activeState = false;
@@ -93,9 +95,9 @@ void Object::destroy()
 
 	m_components.clear();
 
-	for (int i = 0; i < m_children.size(); i++)
+	for (const auto & i : m_children)
 	{
-		m_children[i]->destroy();
+		i->destroy();
 	}
 	delete this;
 }
@@ -105,7 +107,10 @@ Object* Object::getParent() const {
 	return m_parent;
 }
 
-void Object::setActive(bool activeState)
+/*
+ *	CHANGE THIS || MAKE IT EVENT BASED TO RUN THOSE EVENTS
+ */
+void Object::setActive(const bool activeState)
 {
 	if (activeState != m_activeState)
 	{
@@ -125,9 +130,9 @@ bool Object::getActiveState() const {
 	return m_activeState;
 }
 
-mat4 Object::localModelMatrix()
+mat4 Object::localModelMatrix() const
 {
-	mat4 model = mat4(1.0f);
+	auto model = mat4(1.0f);
 
 	model = translate(model, getLocalPosition());
 	model = rotate(model, angle(getLocalRotation()), axis(getLocalRotation()));
@@ -158,6 +163,10 @@ int Object::addChild(Object* child)
 	child->setParent(this); 
 	m_children.push_back(child);
 	return 0;
+}
+
+mat4 Object::getModelMatrix() const {
+	return worldModelMatrix;
 }
 
 vec3 Object::getWorldPosition() const {

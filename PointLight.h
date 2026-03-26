@@ -53,7 +53,7 @@ private:
     /**
      * @brief The color of the light in RGB
      */
-    vec3 m_color;
+    vec3 m_color{};
     /**
      * @brief The power of the light
      */
