@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "Scene.h"
+
 
 Material::Material()
 {
@@ -19,6 +21,10 @@ Material::Material(const char* vertexShaderPath, const char* fragmentShaderPath)
 {
     setShaderProgram(vertexShaderPath, fragmentShaderPath);
     m_type = MaterialType::DEFAULT_LIT;
+}
+
+void Material::setParent(Object *parent) {
+    m_parent = parent;
 }
 
 unsigned int Material::getShaderProgram() const {
@@ -71,9 +77,10 @@ void Material::setTransparent(const bool transparent) {
     if (m_transparent == transparent)
         return;
     if (transparent) {
-        Game.getActiveScene()
+        Game.getActiveScene()->makeTransparent(m_parent);
+    }else {
+        Game.getActiveScene()->makeOpaque(m_parent);
     }
-
     m_transparent = transparent;
 }
 

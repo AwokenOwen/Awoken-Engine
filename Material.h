@@ -54,6 +54,7 @@ enum UIAnchorPoints {
 	BOTTOM_RIGHT
 };
 
+class Object;
 /**
  * @brief Class that holds the shaders and handles the uniform loading of the default shaders
  */
@@ -72,6 +73,13 @@ public:
 	 * @param fragmentShaderPath Path to the fragment shader
 	 */
 	Material(const char* vertexShaderPath, const char* fragmentShaderPath);
+
+	/**
+	 * @brief Setter for the Parent Object Variable
+	 *
+	 * @param parent The new Parent object
+	 */
+	void setParent(Object *parent);
 
 	/**
 	 * @brief Sets the shader of the material, loads if not loaded before or grabs from the resource manager if loaded before
@@ -175,6 +183,10 @@ public:
 	bool getTransparent() const;
 private:
 
+	/**
+	 * @brief Parent Object Variable
+	 */
+	Object* m_parent;
 	/**
 	 * @brief Vector of textures to be added to the shader
 	 */
