@@ -46,11 +46,11 @@ public:
 	/**
 	 * @brief Called on the first frame if enabled
 	 */
-	void start();
+	void start() const;
 	/**
 	 * @brief Called every frame
 	 */
-	void update();
+	void update() const;
 	/**
 	 * @brief Called every frame after update
 	 */
