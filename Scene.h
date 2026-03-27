@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "glm.hpp"
+#include "Event.h"
 
 using namespace glm;
 using namespace std;
@@ -45,11 +46,11 @@ public:
 	/**
 	 * @brief Called on the first frame if enabled
 	 */
-	void start() const;
+	void start();
 	/**
 	 * @brief Called every frame
 	 */
-	void update() const;
+	void update();
 	/**
 	 * @brief Called every frame after update
 	 */
@@ -73,13 +74,13 @@ public:
 	 *
 	 * @return vec3
 	 */
-	vec3 getAmbientColor() const;
+	[[nodiscard]] vec3 getAmbientColor() const;
 	/**
 	 * @brief Getter for ambient light power
 	 *
 	 * @return float
 	 */
-	float getAmbientPower() const;
+	[[nodiscard]] float getAmbientPower() const;
 
 	/**
 	 * @brief Setter for the single Directional light in the scene
@@ -92,7 +93,7 @@ public:
 	 *
 	 * @return DirectionalLight
 	 */
-	DirectionalLight* getDirectionalLight() const;
+	[[nodiscard]] DirectionalLight* getDirectionalLight() const;
 
 	/**
 	 * @brief Function to add a point light into the scene
@@ -112,7 +113,7 @@ public:
 	 *
 	 * @return Camera*
 	 */
-	Camera* getCamera() const;
+	[[nodiscard]] Camera* getCamera() const;
 
 	/**
 	 * @brief Setter for the active skybox
