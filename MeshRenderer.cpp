@@ -49,6 +49,10 @@ void MeshRenderer::setShaderProgram(const char *vertexShaderPath, const char *fr
     m_materials[index]->setShaderProgram(vertexShaderPath, fragmentShaderPath);
 }
 
+vector<Material *> MeshRenderer::getMaterials() const {
+    return m_materials;
+}
+
 void MeshRenderer::processNode(const aiNode* node, const aiScene* scene, const string &path)
 {
     // process all the node's meshes (if any)

@@ -161,6 +161,18 @@ public:
 	 * @return bool
 	 */
 	bool getTwoSided() const;
+	/**
+	 * @brief Setter for the transparent variable, will put the object into the transparent list if turned on and put it in the opaque list if not
+	 *
+	 * @param transparent The new transparent variable
+	 */
+	void setTransparent(bool transparent);
+	/**
+	 * @brief Getter for the transparent variable
+	 *
+	 * @return Bool
+	 */
+	bool getTransparent() const;
 private:
 
 	/**
@@ -187,6 +199,10 @@ private:
 	 * @brief Bool determining where to cull a face or not
 	 */
 	bool m_twoSided;
+	/**
+	 * @brief Bool variable for whether to turn on transparency
+	 */
+	bool m_transparent = false;
 };
 
 template<typename T>

@@ -203,6 +203,13 @@ void Mesh::draw()
     {
         glDisable(GL_CULL_FACE);
     }
+
+    if (m_material->getTransparent()) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }else {
+        glDisable(GL_BLEND);
+    }
     const unsigned int shaderProgram = m_material->getShaderProgram();
 
     glUseProgram(shaderProgram);

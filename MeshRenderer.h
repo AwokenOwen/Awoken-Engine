@@ -51,7 +51,21 @@ public:
 	 */
 	void loadModel(const string &path);
 
+	/**
+	 * @brief Setter for the shader program for a specific material
+	 *
+	 * @param vertexShaderPath Path to vertex shader
+	 * @param fragmentShaderPath Path to fragment shader
+	 * @param index index of the material in the material vector
+	 */
 	void setShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath, int index = 0) const;
+
+	/**
+	 * @brief Getter for Material vector
+	 *
+	 * @return vector<Material*>
+	 */
+	vector<Material*> getMaterials() const;
 
 private:
 	/**

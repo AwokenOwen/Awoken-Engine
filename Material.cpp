@@ -1,5 +1,6 @@
 ﻿#include "Material.h"
 #include "ResourceManager.h"
+#include "GameManager.h"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -64,6 +65,20 @@ void Material::setTwoSided(const bool twoSided)
 
 bool Material::getTwoSided() const {
     return m_twoSided;
+}
+
+void Material::setTransparent(const bool transparent) {
+    if (m_transparent == transparent)
+        return;
+    if (transparent) {
+        Game.getActiveScene()
+    }
+
+    m_transparent = transparent;
+}
+
+bool Material::getTransparent() const {
+    return m_transparent;
 }
 
 void Material::loadTextures()

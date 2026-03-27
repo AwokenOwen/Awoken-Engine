@@ -7,6 +7,7 @@
 #include "DirectionalLight.h"
 #include "MeshRenderer.h"
 #include "Material.h"
+#include <algorithm>
 
 Scene::Scene()
 {
@@ -25,7 +26,14 @@ void Scene::awake()
 }
 
 void Scene::start() const {
-	for (const auto i : m_inScene)
+	for (const auto i : m_inSceneOpaque)
+	{
+		if (i->getActiveState())
+		{
+			i->start();
+		}
+	}
+	for (const auto i : m_inSceneTransparent)
 	{
 		if (i->getActiveState())
 		{
@@ -35,7 +43,14 @@ void Scene::start() const {
 }
 
 void Scene::update() const {
-	for (const auto i : m_inScene)
+	for (const auto i : m_inSceneOpaque)
+	{
+		if (i->getActiveState())
+		{
+			i->update();
+		}
+	}
+	for (const auto i : m_inSceneTransparent)
 	{
 		if (i->getActiveState())
 		{
@@ -48,7 +63,7 @@ void Scene::lateUpdate()
 {
 	for (auto i : m_toBeAdded)
 	{
-		m_inScene.push_back(i);
+		m_inSceneOpaque.push_back(i);
 	}
 	m_toBeAdded.clear();
 
@@ -125,4 +140,19 @@ void Scene::loadDefaultSkybox()
 	};
 
 	setSkybox(paths);
+}
+
+void Scene::makeTransparent(Object *object) {
+	erase(m_inSceneOpaque, object);
+	m_inSceneTransparent.push_back(object);
+	ranges::sort(m_inSceneTransparent, [this](const Object* a, const Object* b) {
+		const float distance_a = glm::length(m_camera->getWorldPosition() - a->getWorldPosition());
+		const float distance_b = glm::length(m_camera->getWorldPosition() - b->getWorldPosition());
+		return distance_a > distance_b;
+	});
+}
+
+void Scene::makeOpaque(Object *object) {
+	erase(m_inSceneTransparent, object);
+	m_inSceneOpaque.push_back(object);
 }
