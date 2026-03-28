@@ -4,14 +4,43 @@ project(Awoken_Engine_Test)
 
 set(CMAKE_CXX_STANDARD 20)
 
+include(FetchContent)
+
+# Declare and make Assimp available
+FetchContent_Declare(
+        assimp
+        GIT_REPOSITORY https://github.com/assimp/assimp.git
+        GIT_TAG v5.3.1 # Recommended to use a specific version tag
+)
+
+# Optional: Disable unnecessary Assimp features for faster builds
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(assimp)
+
+FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG        "3.4" # Use the desired version tag, e.g., "3.4"
+        GIT_SHALLOW    ON    # Use shallow clone to save time and space
+)
+
+set(GLFW_BUILD_DOCS OFF CACHE INTERNAL BOOL "") # Disable building documentation
+set(GLFW_BUILD_TESTS OFF CACHE INTERNAL BOOL "") # Disable building tests
+set(GLFW_INSTALL OFF CACHE INTERNAL BOOL "")   # Disable the install target
+
+FetchContent_MakeAvailable(glfw)
+
+
+find_package(Freetype REQUIRED)
+
 include_directories(
-        Dependencies/Assimp/include
         Dependencies/freetype/include
         Dependencies/glad/include
         Dependencies/glfw/include
         Dependencies/glm/glm
         Dependencies/json/include
-        Dependencies/CEF
 )
 
 add_library(Awoken_Engine STATIC
@@ -31,55 +60,15 @@ add_library(Awoken_Engine STATIC
         TextRenderer.cpp
 )
 
-if(WIN32)
-
-    link_directories(
-            cmake-build-debug
-            Dependencies/Assimp/lib/windows
-            Dependencies/glfw/lib/windows
-            Dependencies/freetype/lib/windows
-    )
-
-elseif(UNIX)
-
-    link_directories(
-            cmake-build-debug
-            Dependencies/Assimp/lib/linux
-            Dependencies/glfw/lib/linux
-            Dependencies/glm/lib/linux
-            Dependencies/freetype/lib/linux
-            Dependencies/CEF/lib/linux
-    )
-
-endif()
-
-
-
 add_executable(Awoken_Engine_Test
         main.cpp
         glad.c
 )
 
-if(WIN32)
 
-    target_link_libraries(Awoken_Engine_Test PRIVATE
-            Awoken_Engine
-            assimp-vc143-mt.lib
-            freetype.lib
-            glfw3.lib
-    )
-
-elseif(UNIX)
-
-    target_link_libraries(Awoken_Engine_Test PRIVATE
-            Awoken_Engine
-            libglfw3.a
-            libglm.a
-            libassimp.so
-            libfreetype.a
-            libcef_dll_wrapper.a
-            libcef.so
-    )
-
-endif()
-
+target_link_libraries(Awoken_Engine_Test PRIVATE
+        Awoken_Engine
+        assimp::assimp
+        Freetype::Freetype
+        glfw
+)
