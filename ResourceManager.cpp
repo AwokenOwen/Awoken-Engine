@@ -2,6 +2,10 @@
 #include "stb_image.h"
 
 #include "ResourceManager.h"
+
+#include <cstring>
+#include <fstream>
+
 #include "Mesh.h"
 #include <iostream>
 #include "Scene.h"
@@ -151,6 +155,165 @@ void ResourceManager::addShaderProgramToMap(string path, unsigned int shaderProg
 	m_shaderMap.insert({ path, shaderProgram });
 }
 
+SoundData* ResourceManager::loadSound(string path) {
+	// If Texture already loaded grab loaded sound
+	auto mapSound = m_soundMap.find(string(path));
+	if (mapSound != m_soundMap.end())
+	{
+		return mapSound->second;
+	}
+
+	std::ifstream file(path, std::ios::binary);
+    if (!file) {
+        std::cerr << "Error: Unable to open the file" << std::endl;
+    }
+
+    char buffer[4];
+    // the RIFF
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read RIFF" << std::endl;
+    }
+    if(std::strncmp(buffer, "RIFF", 4) != 0)
+    {
+        std::cerr << "ERROR: file is not a valid WAVE file (header doesn't begin with RIFF)" << std::endl;
+    }
+
+    // the size of the file
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read size of file" << std::endl;
+    }
+
+    // the WAVE
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read WAVE" << std::endl;
+    }
+    if(std::strncmp(buffer, "WAVE", 4) != 0)
+    {
+        std::cerr << "ERROR: file is not a valid WAVE file (header doesn't contain WAVE)" << std::endl;
+    }
+
+    // "fmt/0"
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read fmt/0" << std::endl;
+    }
+
+    // this is always 16, the size of the fmt data chunk
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read the 16" << std::endl;
+    }
+
+    // PCM should be 1?
+    if(!file.read(buffer, 2))
+    {
+        std::cerr << "ERROR: could not read PCM" << std::endl;
+    }
+
+    // the number of channels
+    if(!file.read(buffer, 2))
+    {
+        std::cerr << "ERROR: could not read number of channels" << std::endl;
+    }
+    int channels = convert_to_int(buffer, 2);
+
+    // sample rate
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read sample rate" << std::endl;
+    }
+    int sampleRate = convert_to_int(buffer, 4);
+
+    // (sampleRate * bitsPerSample * channels) / 8
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read (sampleRate * bitsPerSample * channels) / 8" << std::endl;
+    }
+
+    // ?? dafaq
+    if(!file.read(buffer, 2))
+    {
+        std::cerr << "ERROR: could not read dafaq" << std::endl;
+    }
+
+    // bitsPerSample
+    if(!file.read(buffer, 2))
+    {
+        std::cerr << "ERROR: could not read bits per sample" << std::endl;
+    }
+    int bitsPerSample = convert_to_int(buffer, 2);
+
+    // data or list chunk header
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read data or list chunk header" << std::endl;
+    }
+    if(std::strncmp(buffer, "LIST", 4) == 0) {
+        if(!file.read(buffer, 4)) {
+            std::cerr << "ERROR: could not read list chunk header size" << std::endl;
+        }
+
+        int32_t listSize = convert_to_int(buffer, 4);
+
+        char listChunk[listSize];
+        if(!file.read(listChunk, listSize)) {
+            std::cerr << "ERROR: could not read list chunk" << std::endl;
+        }
+        if(!file.read(buffer, 4))
+        {
+            std::cerr << "ERROR: could not read data chunk header" << std::endl;
+        }
+        if(std::strncmp(buffer, "data", 4) != 0)
+        {
+            std::cerr << "ERROR: file is not a valid WAVE file (doesn't have 'data' tag)" << std::endl;
+        }
+    }else {
+        if(std::strncmp(buffer, "data", 4) != 0)
+        {
+            std::cerr << "ERROR: file is not a valid WAVE file (doesn't have 'data' tag)" << std::endl;
+        }
+    }
+    // size of data
+    if(!file.read(buffer, 4))
+    {
+        std::cerr << "ERROR: could not read data size" << std::endl;
+    }
+    int size = convert_to_int(buffer, 4);
+
+    /* cannot be at the end of file */
+    if(file.eof())
+    {
+        std::cerr << "ERROR: reached EOF on the file" << std::endl;
+    }
+    if(file.fail())
+    {
+        std::cerr << "ERROR: fail state set on the file" << std::endl;
+    }
+
+	auto soundData = new SoundData(channels, sampleRate, bitsPerSample, size);
+
+    file.read(soundData->m_data, size);
+
+	m_soundMap.insert(std::make_pair(path, soundData));
+
+	file.close();
+
+	return soundData;
+}
+
 ResourceManager::ResourceManager()
 {
+}
+
+std::int32_t ResourceManager::convert_to_int(char *buffer, std::size_t len) {
+	std::int32_t a = 0;
+	if(std::endian::native == std::endian::little)
+		std::memcpy(&a, buffer, len);
+	else
+		for(std::size_t i = 0; i < len; ++i)
+			reinterpret_cast<char*>(&a)[3 - i] = buffer[i];
+	return a;
 }

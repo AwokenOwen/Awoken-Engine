@@ -42,6 +42,13 @@ set(GLFW_INSTALL OFF CACHE INTERNAL BOOL "")   # Disable the install target
 
 FetchContent_MakeAvailable(glfw)
 
+FetchContent_Declare(
+        AudioFile
+        GIT_REPOSITORY https://github.com/adamstark/AudioFile.git
+        GIT_TAG        master # or a specific release tag like v1.1.4
+)
+
+FetchContent_MakeAvailable(AudioFile)
 
 find_package(Freetype REQUIRED)
 
@@ -51,6 +58,8 @@ include_directories(
         cmake-build-debug/_deps/glfw-src/include
         Dependencies/glm/glm
         Dependencies/json/include
+        cmake-build-debug/_deps/openal-src/include
+        cmake-build-debug/_deps/audiofile-src
 )
 
 add_library(Awoken_Engine STATIC
@@ -69,6 +78,8 @@ add_library(Awoken_Engine STATIC
         WindowManager.cpp
         TextRenderer.cpp
         AudioManager.cpp
+        AudioSource.cpp
+        AudioSource.h
 )
 
 add_executable(Awoken_Engine_Test
@@ -83,4 +94,5 @@ target_link_libraries(Awoken_Engine_Test PRIVATE
         Freetype::Freetype
         glfw
         OpenAL::OpenAL
+        AudioFile
 )

@@ -70,6 +70,12 @@ public:
      * @param text The new text to be displayed
      */
     void setText(const std::string& text);
+    /**
+     * @brief Setter for the color of the text
+     *
+     * @param color The new color of the text
+     */
+    void setColor(glm::vec3 color);
 private:
     /**
      * @brief Map of chars to C++ struct characters used to print to the screen

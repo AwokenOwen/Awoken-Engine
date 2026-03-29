@@ -79,7 +79,7 @@ int TextRenderer::setFont(const char *path) {
 
 void TextRenderer::update() {
 
-    m_material->setUniform<vec3>("color", vec3(1,1,1));
+    m_material->setUniform<vec3>("color", m_color);
 
     for (int i = 0; i < m_meshes.size(); ++i) {
         m_material->setTexture(m_text[i].TextureID, 0);
@@ -163,4 +163,8 @@ void TextRenderer::setText(const std::string& text) {
 
         x += (character.Advance >> 6);
     }
+}
+
+void TextRenderer::setColor(const glm::vec3 color) {
+    m_color = color;
 }

@@ -2,6 +2,7 @@
 #include "WindowManager.h"
 #include "InputManager.h"
 #include "ResourceManager.h"
+#include "AudioManager.h"
 #include "Scene.h"
 #include "iostream"
 
@@ -21,6 +22,10 @@ int GameManager::initialize()
 		cout << "ResourceManager failed to start\n";
 	}
 	cout << "ResourceManager started\n";
+	if (Audio.initialize()) {
+		cout << "AudioManager failed to start\n";
+	}
+	cout << "AudioManager started\n";
 
 	cout << "GameManager Started\n\n";
 
@@ -34,6 +39,8 @@ void GameManager::run()
 {
 	cout << "Starting Game...\n\n";
 
+	Audio.PlaySoundTest();
+
 	while (!glfwWindowShouldClose(Window.getWindow()))
 	{
 		m_deltaTime = getTime() - m_timeOnLastFrame;
@@ -43,6 +50,7 @@ void GameManager::run()
 
 		p_activeScene->update();
 		p_activeScene->lateUpdate();
+		//Audio.update();
 
 		Window.swap();
 		m_timeOnLastFrame = getTime();

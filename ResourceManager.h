@@ -4,6 +4,7 @@
  */
 
 #pragma once
+#include <cstdint>
 #include <string>
 #include <map>
 #include <vector>
@@ -15,6 +16,27 @@ using namespace std;
  */
 #define Resource ResourceManager::getInstance()
 
+struct SoundData {
+	std::uint8_t m_channels;
+	std::int32_t m_sampleRate;
+	std::uint8_t m_bitsPerSample;
+	int m_data_size;
+
+	char* m_data;
+
+	SoundData(std::uint8_t channels, std::int32_t sampleRate, std::uint8_t bitsPerSample, int dataSize) {
+		m_channels = channels;
+		m_sampleRate = sampleRate;
+		m_bitsPerSample = bitsPerSample;
+		m_data_size = dataSize;
+
+		m_data = new char[m_data_size];
+	};
+
+	~SoundData() {
+		delete[] m_data;
+	}
+};
 
 /**
  * @brief Forward Declaration for the Mesh class
@@ -99,12 +121,21 @@ public:
 	 */
 	void addShaderProgramToMap(string path, unsigned int shaderProgram);
 
+	/**
+	 * @brief Loading function for the sounds
+	 *
+	 * @param path Path to the WAV file
+	 * @return SoundData
+	 */
+	SoundData* loadSound(string path);
+
 private:
 	/**
 	 * @brief Private constructor
 	 */
 	ResourceManager();
 
+	std::int32_t convert_to_int(char *buffer, std::size_t len);
 	/**
 	 * @brief Map for already loaded meshes to save time on file loading
 	 */
@@ -117,4 +148,8 @@ private:
 	 * @brief Map for already loaded shaders to save time on file loading
 	 */
 	map<string, unsigned int> m_shaderMap;
+	/**
+	 * @brief Map for already loaded sounds to save time on file loading
+	 */
+	map<string, SoundData*> m_soundMap;
 };
