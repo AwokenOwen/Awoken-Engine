@@ -35,12 +35,11 @@ Then open the solution and build the solution to get the .lib file and .exe file
 ## To-Do List
 Here is a to-do this of the features being added to Awoken Engine not in any particular order
 
-1. Text Rendering
-2. Audio
-3. IBL Rendering with the current PBR
+1. Audio
+2. IBL Rendering with the current PBR
+3. Post-Processing
 4. Emission in the shader
-5. Post-Processing 
-6. Collision Components
-7. Networking
-8. Animation System
-9. Additional Input Events (Controllers and others)
+5. Collision Components
+6. Networking
+7. Animation System
+8. Additional Input Events (Controllers and others)
