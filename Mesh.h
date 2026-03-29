@@ -1,6 +1,6 @@
 /*
  * Written by: AwokenOwen
- * Last Updated: March 25th 2026
+ * Last Updated: March 28th 2026
  */
 
 #pragma once
@@ -112,7 +112,7 @@ public:
 	 *
 	 * @return Material
 	 */
-	Material* getMaterial() const;
+	[[nodiscard]] Material* getMaterial() const;
 	/**
 	 * @brief Setter for the material variable
 	 *
