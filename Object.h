@@ -175,6 +175,19 @@ public:
 	 */
 	void setLocalScale(vec3 scale);
 
+	/**
+	 * @brief Setter for the transparent variable
+	 *
+	 * @param transparent The new transparent variable
+	 */
+	void setTransparent(bool transparent);
+	/**
+	 * @brief Getter for the transparent variable. True if the object renders and is transparent. False otherwise
+	 *
+	 * @return bool
+	 */
+	[[nodiscard]] bool getTransparent() const;
+
 protected:
 	/**
 	 * @brief Helper function for creating the world variables and forward, right, and up
@@ -252,6 +265,11 @@ protected:
 	 * @brief The up vector of the Object in world space
 	 */
 	vec3 m_up{};
+
+	/**
+	 * @brief Bool representing if the Object renders and is transparent, false otherwise
+	 */
+	bool m_transparent{};
 };
 
 template<typename T>

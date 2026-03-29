@@ -38,7 +38,7 @@ find_package(Freetype REQUIRED)
 include_directories(
         Dependencies/freetype/include
         Dependencies/glad/include
-        Dependencies/glfw/include
+        cmake-build-debug/_deps/glfw-src/include
         Dependencies/glm/glm
         Dependencies/json/include
 )

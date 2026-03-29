@@ -219,3 +219,11 @@ void Object::setLocalScale(const vec3 scale)
 {
 	m_localScale = scale;
 }
+
+void Object::setTransparent(const bool transparent) {
+	m_transparent = transparent;
+}
+
+bool Object::getTransparent() const {
+	return m_transparent;
+}

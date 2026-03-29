@@ -61,11 +61,15 @@ void Scene::update() const {
 
 void Scene::lateUpdate()
 {
-	for (auto i : m_toBeAdded)
-	{
-		m_inSceneOpaque.push_back(i);
+	if (m_toBeAdded.size() > 0) {
+		for (auto i : m_toBeAdded)
+		{
+			m_inScene.push_back(i);
+		}
+		m_toBeAdded.clear();
+		m_toBeAdded.clear();
+		refreshTransparency();
 	}
-	m_toBeAdded.clear();
 
 	for (const auto & i : m_toBeDeleted)
 	{
@@ -142,17 +146,19 @@ void Scene::loadDefaultSkybox()
 	setSkybox(paths);
 }
 
-void Scene::makeTransparent(Object *object) {
-	erase(m_inSceneOpaque, object);
-	m_inSceneTransparent.push_back(object);
+void Scene::refreshTransparency() {
+	m_inSceneOpaque.clear();
+	m_inSceneTransparent.clear();
+	for (const auto i : m_inScene) {
+		if (i->getTransparent()) {
+			m_inSceneTransparent.push_back(i);
+		}else {
+			m_inSceneOpaque.push_back(i);
+		}
+	}
 	ranges::sort(m_inSceneTransparent, [this](const Object* a, const Object* b) {
 		const float distance_a = glm::length(m_camera->getWorldPosition() - a->getWorldPosition());
 		const float distance_b = glm::length(m_camera->getWorldPosition() - b->getWorldPosition());
 		return distance_a > distance_b;
 	});
-}
-
-void Scene::makeOpaque(Object *object) {
-	erase(m_inSceneTransparent, object);
-	m_inSceneOpaque.push_back(object);
 }

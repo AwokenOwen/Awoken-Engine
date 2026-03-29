@@ -19,9 +19,9 @@ class Material;
  */
 class Object;
 /**
- * @brief Forward Declaration of MeshRenderer Component
+ * @brief Forward Declaration of Component
  */
-class MeshRenderer;
+class Component;
 /**
  * @brief Class to hold data for objects to be drawn to the screen
  */
@@ -36,15 +36,15 @@ public:
 		/**
 		 * @brief Position data for the vertex to be pushed to the shader
 		 */
-		vec3 m_position;
+		vec3 m_position{};
 		/**
 		 * @brief Normal data for the vertex to be pushed to the shader
 		 */
-		vec3 m_normal;
+		vec3 m_normal{};
 		/**
 		 * @brief TexCoords data for the vertex to be pushed to the shader
 		 */
-		vec2 m_texCoords;
+		vec2 m_texCoords{};
 
 		/**
 		 * @brief Default constructor setting all to 0
@@ -95,17 +95,17 @@ public:
 	virtual ~Mesh() = default;
 
 	/**
-	 * @brief Getter for parent MeshRenderer
+	 * @brief Getter for parent Component
 	 *
-	 * @return MeshRenderer
+	 * @return Component
 	 */
-	MeshRenderer* getParent() const;
+	Component* getParent() const;
 	/**
 	 * @brief Setter for the parent variable
 	 *
-	 * @param parent The MeshRenderer component that holds the meshes to be rendered
+	 * @param parent The new Component Parent
 	 */
-	void setParent(MeshRenderer* parent);
+	void setParent(Component* parent);
 
 	/**
 	 * @brief Getter for the material variable
@@ -166,9 +166,9 @@ private:
 	 */
 	Material* m_material{};
 	/**
-	 * @brief The MeshRenderer parent variable of this mesh
+	 * @brief The Component parent variable of this mesh
 	 */
-	MeshRenderer* m_parent{};
+	Component* m_parent{};
 	/**
 	 * @brief The vertice vector for the mesh
 	 */

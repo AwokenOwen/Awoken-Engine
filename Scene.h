@@ -127,20 +127,15 @@ public:
 	void loadDefaultSkybox();
 
 	/**
-	 * @brief Switch an object from opaque vector to the transparent vector
-	 *
-	 * @param object Object to be moved
+	 * @brief When the transparency of an Object is changed it refreshes the vectors that draw them to draw them in the correct order
 	 */
-	void makeTransparent(Object* object);
-
-	/**
-	 * @brief Switch an object from transparent vector to the opaque vector
-	 *
-	 * @param object Object to be moved
-	 */
-	void makeOpaque(Object* object);
+	void refreshTransparency();
 
 private:
+	/**
+	 * @brief Vector of all objects in the scene
+	 */
+	vector<Object*> m_inScene;
 	/**
 	 * @brief Vector of objects in the scene
 	 */

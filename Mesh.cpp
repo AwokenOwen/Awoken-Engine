@@ -66,7 +66,7 @@ void Mesh::setUpShaderMatrices(const unsigned int shaderProgram) const {
             UIScale = vec3(UIScale.x / Window.getWindowWidth(), UIScale.y / Window.getWindowHeight(), UIScale.z);
         }
 
-        switch (m_material->getUIAnchorPoint())
+        switch (m_material->getScreenAnchorPoint())
         {
         case TOP:
             UIPos.y += 1 - UIScale.y;
@@ -230,11 +230,11 @@ void Mesh::draw()
 }
 
 
-MeshRenderer* Mesh::getParent() const {
+Component* Mesh::getParent() const {
     return m_parent;
 }
 
-void Mesh::setParent(MeshRenderer* parent)
+void Mesh::setParent(Component* parent)
 {
     this->m_parent = parent;
 }

@@ -4,7 +4,8 @@
 #include <map>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <iostream>
+#include <vector>
+#include <string>
 
 struct Character {
     unsigned int TextureID;  // ID handle of the glyph texture
@@ -13,13 +14,24 @@ struct Character {
     long Advance;    // Offset to advance to next glyph
 };
 
+class Mesh;
+class Material;
 class TextRenderer : public Component{
 public:
     TextRenderer(Object* parent);
     int setFont(const char* path);
     void update() override;
+    void setText(const std::string& text);
 private:
     std::map<char, Character> Characters;
     FT_Library ft{};
     FT_Face face{};
+
+    Material* material{};
+
+    std::vector<Mesh*> meshes{};
+    std::vector<Character> characters{};
+
+    std::string m_text;
+    glm::vec3 color{};
 };

@@ -1,4 +1,7 @@
 ﻿#include "Material.h"
+
+#include <filesystem>
+
 #include "ResourceManager.h"
 #include "GameManager.h"
 #include <iostream>
@@ -6,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "Object.h"
 #include "Scene.h"
 
 
@@ -13,7 +17,7 @@ Material::Material()
 {
     setShaderProgram("assets/defaultAssets/Shaders/default.vert", "assets/defaultAssets/Shaders/default.frag");
     m_type = MaterialType::DEFAULT_LIT;
-    m_anchorPoint = UIAnchorPoints::CENTER;
+    m_screenAnchorPoint = UIAnchorPoints::CENTER;
     m_twoSided = false;
 }
 
@@ -24,7 +28,7 @@ Material::Material(const char* vertexShaderPath, const char* fragmentShaderPath)
 }
 
 void Material::setParent(Object *parent) {
-    m_parent = parent;
+    p_parent = parent;
 }
 
 unsigned int Material::getShaderProgram() const {
@@ -36,9 +40,17 @@ void Material::addTexture(const char* path)
     m_textures.push_back(Resource.loadImage(path));
 }
 
+void Material::addTexture(const unsigned int texture) {
+    m_textures.push_back(texture);
+}
+
 void Material::setTexture(const char* path, const int index)
 {
     m_textures[index] = Resource.loadImage(path);
+}
+
+void Material::setTexture(const unsigned int texture, const int index) {
+    m_textures[index] = texture;
 }
 
 void Material::setSkyboxTexture(const vector<const char*> &paths)
@@ -55,13 +67,21 @@ MaterialType Material::getMaterialType() const {
     return m_type;
 }
 
-void Material::setUIAnchorPoint(const UIAnchorPoints anchorPoint)
+void Material::setScreenAnchorPoint(const UIAnchorPoints anchorPoint)
 {
-    m_anchorPoint = anchorPoint;
+    m_screenAnchorPoint = anchorPoint;
 }
 
-UIAnchorPoints Material::getUIAnchorPoint() const {
-    return m_anchorPoint;
+UIAnchorPoints Material::getScreenAnchorPoint() const {
+    return m_screenAnchorPoint;
+}
+
+void Material::setTextAnchorPoint(const UIAnchorPoints anchorPoint) {
+    m_textureAnchorPoint = anchorPoint;
+}
+
+UIAnchorPoints Material::getTextAnchorPoint() const {
+    return m_textureAnchorPoint;
 }
 
 void Material::setTwoSided(const bool twoSided)
@@ -74,14 +94,9 @@ bool Material::getTwoSided() const {
 }
 
 void Material::setTransparent(const bool transparent) {
-    if (m_transparent == transparent)
-        return;
-    if (transparent) {
-        Game.getActiveScene()->makeTransparent(m_parent);
-    }else {
-        Game.getActiveScene()->makeOpaque(m_parent);
-    }
+    p_parent->setTransparent(transparent);
     m_transparent = transparent;
+    Game.getActiveScene()->refreshTransparency();
 }
 
 bool Material::getTransparent() const {
@@ -177,7 +192,7 @@ void Material::setShaderProgram(const char* vertexShaderPath, const char* fragme
 
     glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(m_shaderProgram, 512, NULL, infoLog);
+        glGetProgramInfoLog(m_shaderProgram, 512, nullptr, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 

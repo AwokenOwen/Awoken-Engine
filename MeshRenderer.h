@@ -1,6 +1,6 @@
 /*
  * Written by: AwokenOwen
- * Last Updated: March 25th 2026
+ * Last Updated: March 28th 2026
  */
 
 #pragma once
@@ -65,7 +65,7 @@ public:
 	 *
 	 * @return vector<Material*>
 	 */
-	vector<Material*> getMaterials() const;
+	[[nodiscard]] vector<Material*> getMaterials() const;
 
 private:
 	/**

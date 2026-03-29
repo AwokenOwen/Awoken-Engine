@@ -1,8 +1,22 @@
 #include "TextRenderer.h"
+#include "Material.h"
+#include "Mesh.h"
+#include "Object.h"
+#include <iostream>
+#include <bits/fs_fwd.h>
+
 #include "glad/glad.h"
 
 TextRenderer::TextRenderer(Object* parent) : Component(parent){
-    setFont("assets/defaultAssets/fonts/arial.ttf");
+    setFont("assets/defaultAssets/Fonts/arial.ttf");
+
+    material = new Material("assets/defaultAssets/Shaders/defaultUI.vert", "assets/defaultAssets/Shaders/text.frag");
+    material->setMaterialType(UI);
+    material->setParent(getParent());
+    material->setTransparent(true);
+    material->addTexture(static_cast<unsigned int>(0));
+
+    color = vec3(1, 1, 1);
 }
 
 int TextRenderer::setFont(const char *path) {
@@ -65,5 +79,89 @@ int TextRenderer::setFont(const char *path) {
 
 void TextRenderer::update() {
 
+    material->setUniform<vec3>("color", vec3(1,1,1));
+
+    for (int i = 0; i < meshes.size(); ++i) {
+        material->setTexture(characters[i].TextureID, 0);
+
+        meshes[i]->draw();
+    }
+
     Component::update();
+}
+
+void TextRenderer::setText(const std::string& text) {
+    float x = 0, y = 0;
+
+    float maxY = Characters.at(text[0]).Size.y;
+    float fullX = 0;
+    for (int i = 0; i < text.size(); ++i) {
+        const Character character = Characters.at(text[i]);
+        fullX += character.Advance >> 6;
+    }
+
+    switch (material->getTextAnchorPoint()) {
+        case CENTER:
+            x = -(fullX / 2.0f);
+            y = -(maxY / 2.0f);
+            break;
+        case LEFT:
+            y = -(maxY / 2.0f);
+            break;
+        case RIGHT:
+            x = -fullX;
+            y = -(maxY / 2.0f);
+            break;
+        case TOP:
+            x = -(fullX / 2.0f);
+            y = -maxY;
+            break;
+        case BOTTOM:
+            x = -(fullX / 2.0f);
+            break;
+        case TOP_LEFT:
+            y = -maxY;
+            break;
+        case TOP_RIGHT:
+            x = -fullX;
+            y = -maxY;
+            break;
+        case BOTTOM_LEFT:
+            break;
+        case BOTTOM_RIGHT:
+            x = fullX;
+            break;
+        default:
+            break;
+    }
+
+    characters.clear();
+    for (int i = 0; i < text.size(); ++i) {
+        Character character = Characters.at(text[i]);
+
+        float xpos = x + character.Bearing.x * 1;
+        float ypos = y - (character.Size.y - character.Bearing.y) * 1;
+
+        float w = character.Size.x * 1;
+        float h = character.Size.y * 1;
+
+        vector<Mesh::Vertex> vertices {
+            Mesh::Vertex(vec3(xpos, ypos, 0), vec3(0, 0, 1), vec2(0, 1)),
+            Mesh::Vertex(vec3(xpos + w, ypos, 0), vec3(0, 0, 1), vec2(1, 1)),
+            Mesh::Vertex(vec3(xpos + w, ypos + h, 0), vec3(0, 0, 1), vec2(1, 0)),
+            Mesh::Vertex(vec3(xpos, ypos + h, 0), vec3(0, 0, 1), vec2(0, 0)),
+        };
+        vector<unsigned int> indices {
+            0, 1, 2,
+            0, 2, 3,
+        };
+        auto m = new Mesh(vertices, indices);
+        m->setMaterial(material);
+        m->setParent(this);
+        meshes.push_back(m);
+        characters.push_back(character);
+
+        x += (character.Advance >> 6);
+    }
+    m_text = text;
 }
