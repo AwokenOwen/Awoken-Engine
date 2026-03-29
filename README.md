@@ -1,5 +1,5 @@
 # Awoken-Engine
-Awoken Engine is a C++ library 3D Game Engine that uses GLFW, GLM, Assimp, freetype, and nlohmann_JSON 
+Awoken Engine is a C++ library 3D Game Engine that uses GLFW, GLM, Assimp, freetype, OpenAL and nlohmann_JSON 
 as dependencies. 
 
 ## Usage

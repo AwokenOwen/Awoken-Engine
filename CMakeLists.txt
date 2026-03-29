@@ -19,6 +19,16 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(assimp)
 
+# Declare the OpenAL Soft dependency from its GitHub repository
+FetchContent_Declare(
+        OpenAL
+        GIT_REPOSITORY https://github.com/kcat/openal-soft.git
+        GIT_TAG        master # You can specify a specific release tag or commit hash here
+)
+
+# Make the content available and add its CMake targets to the project
+FetchContent_MakeAvailable(OpenAL)
+
 FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
@@ -58,6 +68,7 @@ add_library(Awoken_Engine STATIC
         Scene.cpp
         WindowManager.cpp
         TextRenderer.cpp
+        AudioManager.cpp
 )
 
 add_executable(Awoken_Engine_Test
@@ -71,4 +82,5 @@ target_link_libraries(Awoken_Engine_Test PRIVATE
         assimp::assimp
         Freetype::Freetype
         glfw
+        OpenAL::OpenAL
 )
