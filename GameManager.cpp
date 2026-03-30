@@ -39,8 +39,6 @@ void GameManager::run()
 {
 	cout << "Starting Game...\n\n";
 
-	Audio.PlaySoundTest();
-
 	while (!glfwWindowShouldClose(Window.getWindow()))
 	{
 		m_deltaTime = getTime() - m_timeOnLastFrame;

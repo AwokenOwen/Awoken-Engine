@@ -298,9 +298,9 @@ inline T* Object::getComponent()
 
 	for (auto & m_component : m_components)
 	{
-		if (reinterpret_cast<T*>(m_component))
+		if (dynamic_cast<T*>(m_component))
 		{
-			return reinterpret_cast<T*>(m_component);
+			return dynamic_cast<T*>(m_component);
 		}
 	}
 

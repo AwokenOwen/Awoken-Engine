@@ -17,10 +17,27 @@
  */
 #define Audio AudioManager::getInstance()
 
+#define NUM_BUFFERS 4
+#define BUFFER_SIZE 65536
+
 /**
  * @brief Forward Declaration of Object
  */
 class Object;
+struct SourceData {
+    ALuint source{};
+    ALuint buffer{};
+    ALint state{};
+    SoundData* sound{};
+    Object* p_sourceObject{};
+    SourceData(Object* sourceObject) {
+        alGenSources(1, &source);
+        alGenBuffers(NUM_BUFFERS, &buffer);
+        state = AL_STOPPED;
+        sound = nullptr;
+        p_sourceObject = sourceObject;
+    }
+};
 /**
  * @brief Manager that handles Audio device
  */
@@ -54,24 +71,20 @@ public:
 
     void setListener(Object* listener);
 
-    void PlaySoundTest();
+    void playSource(int index);
+
+    int registerSource(Object* sourceObject);
+
+    void loadSound(int index, string path);
 private:
     AudioManager();
-
-    const int NUM_BUFFERS = 4;
-    const int BUFFER_SIZE = 65536;
 
     ALCdevice* p_device{};
     ALCcontext* p_context{};
 
     Object* p_listener{};
 
-    ALuint source{};
+    vector<SourceData*> sources;
 
-    ALenum format;
-    SoundData* sound;
-
-    ALint state{};
-
-    void update_stream();
+    void update_stream(SourceData* source);
 };

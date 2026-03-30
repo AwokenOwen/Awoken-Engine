@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "AL/al.h"
 
 using namespace std;
 
@@ -21,6 +22,7 @@ struct SoundData {
 	std::int32_t m_sampleRate;
 	std::uint8_t m_bitsPerSample;
 	int m_data_size;
+	ALenum m_format;
 
 	char* m_data;
 
@@ -29,6 +31,15 @@ struct SoundData {
 		m_sampleRate = sampleRate;
 		m_bitsPerSample = bitsPerSample;
 		m_data_size = dataSize;
+
+		if(m_channels == 1 && m_bitsPerSample == 8)
+			m_format = AL_FORMAT_MONO8;
+		else if(m_channels  == 1 && m_bitsPerSample == 16)
+			m_format = AL_FORMAT_MONO16;
+		else if(m_channels  == 2 && m_bitsPerSample == 8)
+			m_format = AL_FORMAT_STEREO8;
+		else if(m_channels  == 2 && m_bitsPerSample == 16)
+			m_format = AL_FORMAT_STEREO16;
 
 		m_data = new char[m_data_size];
 	};
