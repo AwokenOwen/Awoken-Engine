@@ -122,6 +122,9 @@ int WindowManager::createWindow()
 
 	p_window = glfwCreateWindow(m_windowWidth, m_windowHeight, "Game Engine", nullptr, nullptr);
 
+	glfwSetInputMode(p_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+
 	if (p_window == nullptr)
 	{
 		cout << "Failed to create GLFW window\n";
