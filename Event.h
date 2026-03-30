@@ -65,7 +65,7 @@ template<typename ...R>
 template<typename T>
 void Event<R...>::add(T* object, void(T::* func)(R...))
 {
-	function<void()> lambda = [object, func](R... args)
+	function<void(R...)> lambda = [object, func](R... args)
 	{
 		(object->*func)(args...);
 	};
