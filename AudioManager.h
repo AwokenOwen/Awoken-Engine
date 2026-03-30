@@ -4,7 +4,13 @@
  */
 
 #pragma once
+
+#include <cstdint>
+#include <vector>
+
+#include "ResourceManager.h"
 #include "AL/alc.h"
+#include "AL/al.h"
 
 /**
  * @brief Singleton Macro
@@ -37,7 +43,7 @@ public:
      */
     static AudioManager& getInstance();
 
-    void update() const;
+    void update();
 
     /**
      * @brief Getter for the current device
@@ -52,8 +58,20 @@ public:
 private:
     AudioManager();
 
+    const int NUM_BUFFERS = 4;
+    const int BUFFER_SIZE = 65536;
+
     ALCdevice* p_device{};
     ALCcontext* p_context{};
 
     Object* p_listener{};
+
+    ALuint source{};
+
+    ALenum format;
+    SoundData* sound;
+
+    ALint state{};
+
+    void update_stream();
 };

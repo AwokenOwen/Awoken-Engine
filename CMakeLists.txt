@@ -43,23 +43,38 @@ set(GLFW_INSTALL OFF CACHE INTERNAL BOOL "")   # Disable the install target
 FetchContent_MakeAvailable(glfw)
 
 FetchContent_Declare(
-        AudioFile
-        GIT_REPOSITORY https://github.com/adamstark/AudioFile.git
-        GIT_TAG        master # or a specific release tag like v1.1.4
+        FreeType
+        GIT_REPOSITORY  https://github.com/freetype/freetype.git
+        GIT_TAG         master
 )
 
-FetchContent_MakeAvailable(AudioFile)
+FetchContent_MakeAvailable(FreeType)
 
 find_package(Freetype REQUIRED)
 
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY  https://github.com/g-truc/glm.git
+        GIT_TAG         master
+)
+
+FetchContent_MakeAvailable(glm)
+
+FetchContent_Declare(
+        json
+        GIT_REPOSITORY  https://github.com/nlohmann/json.git
+        GIT_TAG         master
+)
+
+FetchContent_MakeAvailable(json)
+
 include_directories(
-        Dependencies/freetype/include
-        Dependencies/glad/include
-        cmake-build-debug/_deps/glfw-src/include
-        Dependencies/glm/glm
-        Dependencies/json/include
-        cmake-build-debug/_deps/openal-src/include
-        cmake-build-debug/_deps/audiofile-src
+        glad/include
+        ${CMAKE_BINARY_DIR}/_deps/freetype-src/include
+        ${CMAKE_BINARY_DIR}/_deps/glfw-src/include
+        ${CMAKE_BINARY_DIR}/_deps/glm-src/glm
+        ${CMAKE_BINARY_DIR}/_deps/json-src/include
+        ${CMAKE_BINARY_DIR}/_deps/openal-src/include
 )
 
 add_library(Awoken_Engine STATIC
@@ -82,6 +97,8 @@ add_library(Awoken_Engine STATIC
         AudioSource.h
 )
 
+file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+
 add_executable(Awoken_Engine_Test
         main.cpp
         glad.c
@@ -94,5 +111,4 @@ target_link_libraries(Awoken_Engine_Test PRIVATE
         Freetype::Freetype
         glfw
         OpenAL::OpenAL
-        AudioFile
 )
