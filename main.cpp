@@ -24,7 +24,7 @@ int main(const int argc, char* argv[]) {
     Audio.setListener(b);
 
     b->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
-    b->setLocalPosition(vec3(0, 0, 100));
+    b->setLocalPosition(vec3(0, 0, 5));
 
     Game.run();
     Game.terminate();

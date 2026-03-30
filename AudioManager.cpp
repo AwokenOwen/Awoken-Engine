@@ -37,7 +37,8 @@ AudioManager & AudioManager::getInstance() {
 }
 
 void AudioManager::update() const {
-
+    vec3 position = p_listener->getLocalPosition();
+    alListener3f(AL_POSITION, position.x, position.y, position.z);
 }
 
 ALCdevice * AudioManager::getDevice() const {
@@ -49,7 +50,7 @@ void AudioManager::setListener(Object *listener) {
 }
 
 void AudioManager::PlaySoundTest() {
-    auto sound = Resource.loadSound("assets/defaultAssets/Sounds/sword-sound.wav");
+    auto sound = Resource.loadSound("assets/defaultAssets/Sounds/melee-sound-mono.wav");
 
     ALuint buffer;
     alGenBuffers(1, &buffer);
