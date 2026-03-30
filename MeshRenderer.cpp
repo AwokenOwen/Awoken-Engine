@@ -75,7 +75,7 @@ void MeshRenderer::loadCubeMap(const vector<const char*> &paths)
 {
     loadModel("assets/defaultAssets/Models/cube.fbx");
     m_materials[m_materials.size() - 1]->setSkyboxTexture(paths);
-    m_materials[m_materials.size() - 1]->setMaterialType(MaterialType::CUBE_MAP);
+    m_materials[m_materials.size() - 1]->setMaterialType(MaterialType::SKYBOX);
 }
 
 Mesh* MeshRenderer::processMesh(aiMesh* mesh, const aiScene* scene)

@@ -52,7 +52,7 @@ void Mesh::setUpShaderMatrices(const unsigned int shaderProgram) const {
     mat4 projectionMatrix = Window.getPerspectiveMatrix();
     mat4 viewMatrix = Game.getActiveScene()->getCamera()->getViewMatrix();
 
-    if (m_material->getMaterialType() == CUBE_MAP)
+    if (m_material->getMaterialType() == SKYBOX)
     {
         viewMatrix = mat4(mat3(viewMatrix));
     }
@@ -146,7 +146,8 @@ void Mesh::setUpDirectionalLight(const unsigned int shaderProgram)
     // Directional Light
     if (Game.getActiveScene()->getDirectionalLight() != nullptr)
     {
-        const vec3 direction = -Game.getActiveScene()->getDirectionalLight()->getDirection();
+        const vec3 direction = m_material->getMaterialType() == MaterialType::CUBE_MAP ?
+            Game.getActiveScene()->getDirectionalLight()->getDirection() : -Game.getActiveScene()->getDirectionalLight()->getDirection();
         const float power = Game.getActiveScene()->getDirectionalLight()->getPower();
         const vec3 color = Game.getActiveScene()->getDirectionalLight()->getColor();
 
@@ -191,7 +192,7 @@ void Mesh::draw()
     {
         glEnable(GL_CULL_FACE);
 
-        if (m_material->getMaterialType() == MaterialType::CUBE_MAP)
+        if (m_material->getMaterialType() == MaterialType::CUBE_MAP || m_material->getMaterialType() == MaterialType::SKYBOX)
         {
             glCullFace(GL_FRONT);
         }

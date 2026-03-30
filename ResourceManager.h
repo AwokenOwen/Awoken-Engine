@@ -102,6 +102,8 @@ public:
 	 */
 	static unsigned int loadCubeMap(const vector<const char*> &paths);
 
+	unsigned int loadHDR(const char* path);
+
 	/**
 	 * @brief Tries to get meshes from the Map of OpenGL mesh vectors using the path as a key. If found returns the vector if not return an empty vector.
 	 *

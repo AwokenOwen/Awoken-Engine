@@ -37,6 +37,7 @@ enum MaterialType
 	 * scale is based on [0, 1] to fit the screen
 	 */
 	GUI,
+	SKYBOX,
 };
 
 /**
