@@ -8,7 +8,7 @@ DirectionalLight::DirectionalLight(const vec3 color, const float power) : Object
 	this->m_power = power;
 	this->m_color = color;
 
-	setDirection(vec3(-1.0, -1.0, -1.0));
+	setDirection(vec3(0.5, -1.0, 0.5));
 
 	Game.getActiveScene()->setDirectionalLight(this);
 }
