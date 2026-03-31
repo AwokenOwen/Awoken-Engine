@@ -145,15 +145,7 @@ unsigned int ResourceManager::loadHDR(const char *path) {
 		std::cout << "Failed to load HDR image." << std::endl;
 		return -1;
 	}
-
-	unsigned int captureFBO, captureRBO;
-	glGenFramebuffers(1, &captureFBO);
-	glGenRenderbuffers(1, &captureRBO);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+	return hdrTexture;
 }
 
 vector<Mesh*> ResourceManager::getMeshFromMap(string path)
