@@ -38,14 +38,7 @@ void Scene::awake()
 }
 
 void Scene::start() const {
-	for (const auto i : m_inSceneOpaque)
-	{
-		if (i->getActiveState())
-		{
-			i->start();
-		}
-	}
-	for (const auto i : m_inSceneTransparent)
+	for (const auto i : m_inScene)
 	{
 		if (i->getActiveState())
 		{
