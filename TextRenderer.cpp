@@ -136,9 +136,9 @@ void TextRenderer::setText(const std::string& text) {
     }
 
     m_text.clear();
+    m_meshes.clear();
     for (int i = 0; i < text.size(); ++i) {
         Character character = m_characters.at(text[i]);
-
         float xpos = x + character.Bearing.x * 1;
         float ypos = y - (character.Size.y - character.Bearing.y) * 1;
 
@@ -167,4 +167,8 @@ void TextRenderer::setText(const std::string& text) {
 
 void TextRenderer::setColor(const glm::vec3 color) {
     m_color = color;
+}
+
+Material * TextRenderer::getMaterial() {
+    return m_material;
 }

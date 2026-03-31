@@ -17,6 +17,7 @@ using namespace std;
  */
 #define Window WindowManager::getInstance()
 
+class Object;
 /**
  * @brief Manager in charge of creating, destroying, and maintaining the window
  */
@@ -99,6 +100,14 @@ public:
 	 */
 	static void setAspectRatio(float aspect);
 
+	void activateFrameBuffer();
+	void deactivateFrameBuffer();
+	unsigned int getTextureColorbuffer() const;
+	void deleteFrameBuffer();
+	void createFrameBuffer();
+	void setFrameBufferObject(Object* object);
+	void sendFrameBufferTexture();
+
 private:
 	/**
 	 * @brief Private constructor for singleton functionality
@@ -111,8 +120,15 @@ private:
 	 * @return int
 	 */
 	int createWindow();
+
+	unsigned int framebuffer;
+	unsigned int textureColorbuffer;
+	unsigned int rbo;
+
 	/**
 	 * @brief Variable that holds the GLFW window
 	 */
 	GLFWwindow* p_window{};
+
+	Object* frameBufferObject{};
 };

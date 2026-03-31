@@ -76,6 +76,8 @@ public:
      * @param color The new color of the text
      */
     void setColor(glm::vec3 color);
+
+    Material* getMaterial();
 private:
     /**
      * @brief Map of chars to C++ struct characters used to print to the screen

@@ -2,6 +2,10 @@
 #include "InputManager.h"
 #include <ext/matrix_clip_space.hpp>
 
+#include "Material.h"
+#include "MeshRenderer.h"
+#include "Object.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 int m_windowWidth;
@@ -100,6 +104,30 @@ void WindowManager::setAspectRatio(float aspect)
 	aspectRatio = aspect;
 }
 
+void WindowManager::activateFrameBuffer() {
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
+	glEnable(GL_DEPTH_TEST);
+}
+
+void WindowManager::deactivateFrameBuffer() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+}
+
+unsigned int WindowManager::getTextureColorbuffer() const {
+	return textureColorbuffer;
+}
+
+void WindowManager::deleteFrameBuffer() {
+	glDeleteRenderbuffers(1, &rbo);
+	glDeleteFramebuffers(1, &framebuffer);
+	glDeleteTextures(1, &textureColorbuffer);
+}
+
 //Private constructor for singleton functionality
 WindowManager::WindowManager()
 = default;
@@ -119,11 +147,12 @@ int WindowManager::createWindow()
 
 	m_windowWidth = mode->width;
 	m_windowHeight = mode->height;
+	m_viewportWidth = m_windowWidth;
+	m_viewportHeight = m_windowHeight;
 
 	p_window = glfwCreateWindow(m_windowWidth, m_windowHeight, "Game Engine", nullptr, nullptr);
 
 	glfwSetInputMode(p_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 
 	if (p_window == nullptr)
 	{
@@ -143,13 +172,51 @@ int WindowManager::createWindow()
 	//NOTE: Set OpenGL Viewport
 	glViewport(0, 0, m_windowWidth, m_windowHeight);
 
+	createFrameBuffer();
+
 	glfwSetFramebufferSizeCallback(p_window, framebuffer_size_callback);
 
 	return 0;
 }
 
+void WindowManager::createFrameBuffer() {
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	// create a color attachment texture
+	glGenTextures(1, &textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_viewportWidth, m_viewportHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+	// create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_viewportWidth, m_viewportHeight); // use a single renderbuffer object for both a depth AND stencil buffer.
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+	// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+
+	auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer not complete: " << fboStatus << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	if (frameBufferObject != nullptr) {
+		sendFrameBufferTexture();
+	}
+}
+
+void WindowManager::setFrameBufferObject(Object *object) {
+	frameBufferObject = object;
+}
+
+void WindowManager::sendFrameBufferTexture() {
+	frameBufferObject->getComponent<MeshRenderer>()->getMaterials()[0]->setTexture(textureColorbuffer);
+}
+
 void framebuffer_size_callback(GLFWwindow* window, const int width, const int height)
 {
+	Window.deleteFrameBuffer();
 	m_windowWidth = width;
 	m_windowHeight = height;
 	if (fixedAspect)
@@ -176,4 +243,5 @@ void framebuffer_size_callback(GLFWwindow* window, const int width, const int he
 		m_viewportHeight = height;
 	}
 	glViewport(static_cast<int>((width - m_viewportWidth) / 2.0f), static_cast<int>((height - m_viewportHeight) / 2.0f), m_viewportWidth, m_viewportHeight);
+	Window.createFrameBuffer();
 }

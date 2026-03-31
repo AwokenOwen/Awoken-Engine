@@ -97,16 +97,13 @@ public:
 	 */
 	static void quit();
 
+	float getFps();
+
 private:
 	/**
 	 * @brief Private Constructor for singleton functionality
 	 */
 	GameManager();
-
-	/**
-	 * @brief The result of getTime at the end of the last frame is used to find the difference between that and the time of the current frame to calculate m_deltaTime
-	 */
-	float m_timeOnLastFrame = 0;
 	/**
 	 * @brief The difference between getTime() last frame and the current frame
 	 */
@@ -121,4 +118,6 @@ private:
 	 * @brief Name of the starting scene
 	 */
 	std::string m_nameOfBaseScene = "Main";
+
+	float m_fps{};
 };

@@ -190,4 +190,6 @@ private:
 	 * @brief The active skybox
 	 */
 	Object* m_skybox = nullptr;
+
+	Object* p_screenQuad{};
 };

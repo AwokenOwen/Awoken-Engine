@@ -46,10 +46,16 @@ void Material::addTexture(const unsigned int texture) {
 
 void Material::setTexture(const char* path, const int index)
 {
+    if (index >= m_textures.size()) {
+        Resource.loadImage(path);
+    }
     m_textures[index] = Resource.loadImage(path);
 }
 
 void Material::setTexture(const unsigned int texture, const int index) {
+    if (index >= m_textures.size()) {
+        addTexture(texture);
+    }
     m_textures[index] = texture;
 }
 

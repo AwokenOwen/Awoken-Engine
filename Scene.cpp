@@ -9,6 +9,8 @@
 #include "Material.h"
 #include <algorithm>
 
+#include "WindowManager.h"
+
 Scene::Scene()
 {
 	m_ambientColor = vec3(1.0f);
@@ -18,6 +20,16 @@ Scene::Scene()
 
 void Scene::awake()
 {
+	p_screenQuad = new Object();
+	p_screenQuad->setActive(false);
+	auto m = p_screenQuad->addComponent<MeshRenderer>();
+	m->loadModel("assets/defaultAssets/Models/image.fbx");
+	m->getMaterials()[0]->setShaderProgram(
+		"assets/defaultAssets/Shaders/defaultPostProcess.vert",
+		"assets/defaultAssets/Shaders/defaultPostProcess.frag");
+	Window.setFrameBufferObject(p_screenQuad);
+	Window.sendFrameBufferTexture();
+
     if (m_camera == nullptr)
     {
         m_camera = new Camera();
@@ -43,6 +55,7 @@ void Scene::start() const {
 }
 
 void Scene::update() const {
+	Window.activateFrameBuffer();
 	for (const auto i : m_inSceneOpaque)
 	{
 		if (i->getActiveState())
@@ -61,6 +74,8 @@ void Scene::update() const {
 
 void Scene::lateUpdate()
 {
+	Window.deactivateFrameBuffer();
+	p_screenQuad->update();
 	if (m_toBeAdded.size() > 0) {
 		for (auto i : m_toBeAdded)
 		{

@@ -39,19 +39,27 @@ void GameManager::run()
 {
 	cout << "Starting Game...\n\n";
 
+	int frame = 0;
+	float time = getTime();
+
 	while (!glfwWindowShouldClose(Window.getWindow()))
 	{
-		m_deltaTime = getTime() - m_timeOnLastFrame;
+		if (frame > 100) {
+			m_deltaTime = getTime() - time;
+			m_fps = frame / (getTime() - time);
+			frame = 0;
+			time = getTime();
+		}
+
 		Window.clear();
 
 		glfwPollEvents();
 
 		p_activeScene->update();
 		p_activeScene->lateUpdate();
-		//Audio.update();
 
 		Window.swap();
-		m_timeOnLastFrame = getTime();
+		frame++;
 	}
 }
 
@@ -116,4 +124,8 @@ GameManager::GameManager() = default;
 void GameManager::quit()
 {
 	glfwSetWindowShouldClose(Window.getWindow(), GLFW_TRUE);
+}
+
+float GameManager::getFps() {
+	return m_fps;
 }
