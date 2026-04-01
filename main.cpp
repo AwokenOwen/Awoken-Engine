@@ -22,7 +22,7 @@ int main(const int argc, char* argv[]) {
     sphere->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/sphere.fbx");
     sphere->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
         "assets/Shaders/smooth_sphere.vert",
-        "assets/Shaders/default_IBL.frag"
+        "assets/defaultAssets/Shaders/default.frag"
     );
     sphere->setLocalPosition(vec3(0,0,5));
 

@@ -427,8 +427,8 @@ unsigned int ResourceManager::makeIrradianceMap(unsigned int cubeMap) {
 	irradiance->setActive(false);
 	irradiance->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	irradiance->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-		"assets/Shaders/irradiance.vert",
-		"assets/Shaders/irradiance.frag"
+		"assets/defaultAssets/Shaders/irradiance.vert",
+		"assets/defaultAssets/Shaders/irradiance.frag"
 	);
 	irradiance->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
@@ -484,8 +484,8 @@ unsigned int ResourceManager::makePrefilterMap(unsigned int cubeMap) {
 	prefilter->setActive(false);
 	prefilter->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	prefilter->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-		"assets/Shaders/irradiance.vert",
-		"assets/Shaders/prefilteredMap.frag"
+		"assets/defaultAssets/Shaders/irradiance.vert",
+		"assets/defaultAssets/Shaders/prefilteredMap.frag"
 	);
 	prefilter->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
@@ -565,7 +565,7 @@ unsigned int ResourceManager::makeBRDFMap() {
 	brdf->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/image.fbx");
 	brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
 		"assets/defaultAssets/Shaders/defaultUI.vert",
-		"assets/Shaders/brdf.frag"
+		"assets/defaultAssets/Shaders/brdf.frag"
 	);
 	//brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
