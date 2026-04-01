@@ -11,22 +11,6 @@ int main(const int argc, char* argv[]) {
     Game.initialize();
     Game.getActiveScene()->loadDefaultSkybox();
 
-    new DirectionalLight;
-
-    Game.getActiveScene()->getCamera()->addComponent<MovementComponent>();
-
-    new FPSDisplay;
-
-    // IBL Testing
-    const auto sphere = new Object;
-    sphere->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/sphere.fbx");
-    sphere->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-        "assets/Shaders/smooth_sphere.vert",
-        "assets/defaultAssets/Shaders/default.frag"
-    );
-    sphere->setLocalPosition(vec3(0,0,5));
-
-
     Game.run();
     Game.terminate();
 }
