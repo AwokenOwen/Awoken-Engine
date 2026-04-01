@@ -123,7 +123,13 @@ void Material::loadTextures()
         glBindTexture(GL_TEXTURE_2D, m_textures[i]);
     }
 
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxTexture);
+    glActiveTexture(GL_TEXTURE0 + m_textures.size());
+    setUniform<int>("skybox", + m_textures.size());
+    glBindTexture(GL_TEXTURE_CUBE_MAP, Game.getActiveScene()->getSkyboxTexture());
+
+    glActiveTexture(GL_TEXTURE0 + m_textures.size() + 1);
+    setUniform<int>("irradianceMap", + m_textures.size() + 1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, Game.getActiveScene()->getIrradianceMapTexture());
 }
 
 void Material::setShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath)

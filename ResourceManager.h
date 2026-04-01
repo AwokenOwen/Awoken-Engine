@@ -142,6 +142,10 @@ public:
 	 */
 	SoundData* loadSound(string path);
 
+	unsigned int makeIrradianceMap(unsigned int cubeMap);
+
+	unsigned int makePrefilterMap(unsigned int cubeMap);
+
 private:
 	/**
 	 * @brief Private constructor
@@ -165,4 +169,6 @@ private:
 	 * @brief Map for already loaded sounds to save time on file loading
 	 */
 	map<string, SoundData*> m_soundMap;
+
+	unsigned int captureFBO, captureRBO;
 };

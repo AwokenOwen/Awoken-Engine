@@ -26,6 +26,7 @@ int WindowManager::initialize()
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	if (Input.initialize(p_window))
 	{
@@ -99,7 +100,7 @@ void WindowManager::setMaximized(const bool maximized) const {
 
 mat4 WindowManager::getPerspectiveMatrix()
 {
-	return glm::perspective(glm::radians(90.0f), static_cast<float>(Window.getViewportWidth()) / static_cast<float>(Window.getViewportHeight()), 0.1f, 100.0f);;
+	return glm::perspective(glm::radians(60.0f), static_cast<float>(Window.getViewportWidth()) / static_cast<float>(Window.getViewportHeight()), 0.1f, 100.0f);;
 }
 
 void WindowManager::setFixedAspect(bool fixed)

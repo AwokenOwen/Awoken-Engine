@@ -128,6 +128,9 @@ Camera* Scene::getCamera() const {
 void Scene::setSkybox(unsigned int cubeMapTexture) {
 	MeshRenderer* m;
 	m_skyboxTexture = cubeMapTexture;
+	m_irradianceMapTexture = Resource.makeIrradianceMap(cubeMapTexture);
+	m_prefilterTexture = Resource.makePrefilterMap(cubeMapTexture);
+	//m_skyboxTexture = m_prefilterTexture;
 	if (m_skybox == nullptr)
 	{
 		m_skybox = new Object;
@@ -138,7 +141,6 @@ void Scene::setSkybox(unsigned int cubeMapTexture) {
 		m = m_skybox->getComponent<MeshRenderer>();
 	}
 	m->loadModel("assets/defaultAssets/Models/cube.fbx");
-	m->getMaterials()[0]->setSkyboxTexture(cubeMapTexture);
 	m->getMaterials()[0]->setMaterialType(SKYBOX);
 	m->setShaderProgram("assets/defaultAssets/Shaders/skybox.vert", "assets/defaultAssets/Shaders/skybox.frag");
 }
@@ -163,4 +165,12 @@ void Scene::refreshTransparency() {
 		const float distance_b = glm::length(m_camera->getWorldPosition() - b->getWorldPosition());
 		return distance_a > distance_b;
 	});
+}
+
+unsigned int Scene::getSkyboxTexture() {
+	return m_skyboxTexture;
+}
+
+unsigned int Scene::getIrradianceMapTexture() {
+	return m_irradianceMapTexture;
 }

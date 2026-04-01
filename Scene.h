@@ -131,6 +131,9 @@ public:
 	 */
 	void refreshTransparency();
 
+	unsigned int getSkyboxTexture();
+	unsigned int getIrradianceMapTexture();
+
 private:
 	/**
 	 * @brief Vector of all objects in the scene
@@ -192,6 +195,8 @@ private:
 	Object* m_skybox = nullptr;
 
 	unsigned int m_skyboxTexture = 0;
+	unsigned int m_irradianceMapTexture = 0;
+	unsigned int m_prefilterTexture = 0;
 
 	Object* p_screenQuad{};
 };

@@ -218,10 +218,9 @@ void Mesh::draw()
 
     glUseProgram(shaderProgram);
 
-    // Load Textures
-    m_material->loadTextures();
-
     if (m_material->getMaterialType() != CUSTOM) {
+        // Load Textures
+        m_material->loadTextures();
         setUpShaderMatrices(shaderProgram);
         setUpShaderVariables(shaderProgram);
         setUpDirectionalLight(shaderProgram);
