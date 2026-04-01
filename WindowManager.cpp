@@ -66,6 +66,14 @@ int WindowManager::getWindowHeight()
 	return m_windowHeight;
 }
 
+int WindowManager::getViewportWidth() {
+	return m_viewportWidth;
+}
+
+int WindowManager::getViewportHeight() {
+	return m_viewportHeight;
+}
+
 //Clear the color and depth buffers
 void WindowManager::clear()
 {
@@ -91,7 +99,7 @@ void WindowManager::setMaximized(const bool maximized) const {
 
 mat4 WindowManager::getPerspectiveMatrix()
 {
-	return glm::perspective(glm::radians(80.0f), static_cast<float>(Window.getWindowWidth()) / static_cast<float>(Window.getWindowHeight()), 0.1f, 100.0f);;
+	return glm::perspective(glm::radians(90.0f), static_cast<float>(Window.getViewportWidth()) / static_cast<float>(Window.getViewportHeight()), 0.1f, 100.0f);;
 }
 
 void WindowManager::setFixedAspect(bool fixed)

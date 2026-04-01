@@ -64,6 +64,10 @@ void Material::setSkyboxTexture(const vector<const char*> &paths)
     m_skyboxTexture = Resource.loadCubeMap(paths);
 }
 
+void Material::setSkyboxTexture(unsigned int cubeMap) {
+    m_skyboxTexture = cubeMap;
+}
+
 void Material::setMaterialType(const MaterialType materialType)
 {
     m_type = materialType;

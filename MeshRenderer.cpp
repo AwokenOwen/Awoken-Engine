@@ -34,7 +34,7 @@ void MeshRenderer::loadModel(const string &path)
     }
 
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |  aiProcess_JoinIdenticalVertices | aiProcess_GenSmoothNormals) ;
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -75,7 +75,7 @@ void MeshRenderer::loadCubeMap(const vector<const char*> &paths)
 {
     loadModel("assets/defaultAssets/Models/cube.fbx");
     m_materials[m_materials.size() - 1]->setSkyboxTexture(paths);
-    m_materials[m_materials.size() - 1]->setMaterialType(MaterialType::SKYBOX);
+    m_materials[m_materials.size() - 1]->setMaterialType(MaterialType::CUBE_MAP);
 }
 
 Mesh* MeshRenderer::processMesh(aiMesh* mesh, const aiScene* scene)

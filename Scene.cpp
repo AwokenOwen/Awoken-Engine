@@ -9,6 +9,7 @@
 #include "Material.h"
 #include <algorithm>
 
+#include "ResourceManager.h"
 #include "WindowManager.h"
 
 Scene::Scene()
@@ -124,9 +125,9 @@ Camera* Scene::getCamera() const {
     return m_camera;
 }
 
-void Scene::setSkybox(const vector<const char*> &paths)
-{
+void Scene::setSkybox(unsigned int cubeMapTexture) {
 	MeshRenderer* m;
+	m_skyboxTexture = cubeMapTexture;
 	if (m_skybox == nullptr)
 	{
 		m_skybox = new Object;
@@ -136,22 +137,15 @@ void Scene::setSkybox(const vector<const char*> &paths)
 	{
 		m = m_skybox->getComponent<MeshRenderer>();
 	}
-	m->loadCubeMap(paths);
+	m->loadModel("assets/defaultAssets/Models/cube.fbx");
+	m->getMaterials()[0]->setSkyboxTexture(cubeMapTexture);
+	m->getMaterials()[0]->setMaterialType(SKYBOX);
 	m->setShaderProgram("assets/defaultAssets/Shaders/skybox.vert", "assets/defaultAssets/Shaders/skybox.frag");
 }
 
 void Scene::loadDefaultSkybox()
 {
-	const vector<const char*> paths = {
-	"assets/defaultAssets/Skybox/right.jpg",
-	"assets/defaultAssets/Skybox/left.jpg",
-	"assets/defaultAssets/Skybox/top.jpg",
-	"assets/defaultAssets/Skybox/bottom.jpg",
-	"assets/defaultAssets/Skybox/front.jpg",
-	"assets/defaultAssets/Skybox/back.jpg"
-	};
-
-	setSkybox(paths);
+	setSkybox(Resource.loadHDR("assets/defaultAssets/Skybox/skybox.hdr"));
 }
 
 void Scene::refreshTransparency() {

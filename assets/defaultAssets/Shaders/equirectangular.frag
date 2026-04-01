@@ -17,6 +17,7 @@ void main()
 {
     vec2 uv = SampleSphericalMap(normalize(localPos)); // make sure to normalize localPos
     vec3 color = texture2D(texture[0], uv).rgb;
+    //vec3 color = vec3(1.0);
 
     FragColor = vec4(color, 1.0);
 }

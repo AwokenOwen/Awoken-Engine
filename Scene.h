@@ -120,7 +120,7 @@ public:
 	 *
 	 * @param paths Vector of paths to each image file of the cube map skybox
 	 */
-	void setSkybox(const vector<const char*> &paths);
+	void setSkybox(unsigned int cubeMapTexture);
 	/**
 	 * @brief Grabs the default skybox images and makes a skybox of it
 	 */
@@ -190,6 +190,8 @@ private:
 	 * @brief The active skybox
 	 */
 	Object* m_skybox = nullptr;
+
+	unsigned int m_skyboxTexture = 0;
 
 	Object* p_screenQuad{};
 };

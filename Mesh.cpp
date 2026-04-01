@@ -188,21 +188,24 @@ void Mesh::setUpPointLights(const unsigned int shaderProgram)
 void Mesh::draw()
 {
     // draw mesh
-    if (!m_material->getTwoSided())
-    {
-        glEnable(GL_CULL_FACE);
-
-        if (m_material->getMaterialType() == MaterialType::CUBE_MAP || m_material->getMaterialType() == MaterialType::SKYBOX)
+    glCullFace(GL_FRONT);
+    if (m_material->getMaterialType() != CUSTOM) {
+        if (!m_material->getTwoSided())
         {
-            glCullFace(GL_FRONT);
+            glEnable(GL_CULL_FACE);
+
+            if (m_material->getMaterialType() == MaterialType::CUBE_MAP || m_material->getMaterialType() == MaterialType::SKYBOX)
+            {
+                glCullFace(GL_FRONT);
+            }
+            else {
+                glCullFace(GL_BACK);
+            }
         }
-        else {
-            glCullFace(GL_BACK);
+        else
+        {
+            glDisable(GL_CULL_FACE);
         }
-    }
-    else
-    {
-        glDisable(GL_CULL_FACE);
     }
 
     if (m_material->getTransparent()) {
@@ -217,13 +220,13 @@ void Mesh::draw()
 
     // Load Textures
     m_material->loadTextures();
-    m_material->setUniform<vec3>("objectPos", m_parent->getParent()->getLocalPosition());
-    m_material->setUniform<float>("time", Game.getTime());
 
-    setUpShaderMatrices(shaderProgram);
-    setUpShaderVariables(shaderProgram);
-    setUpDirectionalLight(shaderProgram);
-    setUpPointLights(shaderProgram);
+    if (m_material->getMaterialType() != CUSTOM) {
+        setUpShaderMatrices(shaderProgram);
+        setUpShaderVariables(shaderProgram);
+        setUpDirectionalLight(shaderProgram);
+        setUpPointLights(shaderProgram);
+    }
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, nullptr);

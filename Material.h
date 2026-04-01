@@ -38,6 +38,7 @@ enum MaterialType
 	 */
 	GUI,
 	SKYBOX,
+	CUSTOM,
 };
 
 /**
@@ -134,6 +135,13 @@ public:
 	 * @param paths Path to the folder of cube map textures
 	 */
 	void setSkyboxTexture(const vector<const char*> &paths);
+
+	/**
+	 * @brief sets the skybox texture used in the shader to a new cube map
+	 *
+	 * @param paths Path to the folder of cube map textures
+	 */
+	void setSkyboxTexture(unsigned int cubeMap);
 
 	/**
 	 * @brief Used to set uniforms in the shader

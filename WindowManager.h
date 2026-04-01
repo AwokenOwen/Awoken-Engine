@@ -64,6 +64,19 @@ public:
 	static int getWindowHeight();
 
 	/**
+ * @brief Getter for the width in pixels of the current window
+ *
+ * @return int
+ */
+	static int getViewportWidth();
+	/**
+	 * @brief Getter for the height in pixels of the current window
+	 *
+	 * @return int
+	 */
+	static int getViewportHeight();
+
+	/**
 	 * @brief Clear the color and depth buffers
 	 */
 	static void clear();
