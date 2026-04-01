@@ -130,7 +130,7 @@ void Scene::setSkybox(unsigned int cubeMapTexture) {
 	m_skyboxTexture = cubeMapTexture;
 	m_irradianceMapTexture = Resource.makeIrradianceMap(cubeMapTexture);
 	m_prefilterTexture = Resource.makePrefilterMap(cubeMapTexture);
-	//m_skyboxTexture = m_prefilterTexture;
+	m_brdfTexture = Resource.makeBRDFMap();
 	if (m_skybox == nullptr)
 	{
 		m_skybox = new Object;
@@ -173,4 +173,12 @@ unsigned int Scene::getSkyboxTexture() {
 
 unsigned int Scene::getIrradianceMapTexture() {
 	return m_irradianceMapTexture;
+}
+
+unsigned int Scene::getPrefilterTexture() {
+	return m_prefilterTexture;
+}
+
+unsigned int Scene::getBrdfTexture() {
+	return m_brdfTexture;
 }

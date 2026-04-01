@@ -130,6 +130,14 @@ void Material::loadTextures()
     glActiveTexture(GL_TEXTURE0 + m_textures.size() + 1);
     setUniform<int>("irradianceMap", + m_textures.size() + 1);
     glBindTexture(GL_TEXTURE_CUBE_MAP, Game.getActiveScene()->getIrradianceMapTexture());
+
+    glActiveTexture(GL_TEXTURE0 + m_textures.size() + 2);
+    setUniform<int>("prefilteredMap", + m_textures.size() + 2);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, Game.getActiveScene()->getPrefilterTexture());
+
+    glActiveTexture(GL_TEXTURE0 + m_textures.size() + 3);
+    setUniform<int>("BRDFMap", + m_textures.size() + 3);
+    glBindTexture(GL_TEXTURE_2D, Game.getActiveScene()->getBrdfTexture());
 }
 
 void Material::setShaderProgram(const char* vertexShaderPath, const char* fragmentShaderPath)

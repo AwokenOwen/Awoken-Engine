@@ -533,6 +533,52 @@ unsigned int ResourceManager::makePrefilterMap(unsigned int cubeMap) {
 	return prefilterMap;
 }
 
+unsigned int ResourceManager::makeBRDFMap() {
+	unsigned int brdfLUTTexture;
+	glGenTextures(1, &brdfLUTTexture);
+
+	// pre-allocate enough memory for the LUT texture.
+	glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+	// be sure to set wrapping mode to GL_CLAMP_TO_EDGE
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+	glDeleteFramebuffers(1, &captureFBO);
+	glGenFramebuffers(1, &captureFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTexture, 0);
+
+	auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer not complete: " << fboStatus << std::endl;
+
+	glViewport(0, 0, 512, 512);
+
+	auto brdf = new Object;
+	brdf->setActive(false);
+	brdf->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/image.fbx");
+	brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
+		"assets/defaultAssets/Shaders/defaultUI.vert",
+		"assets/Shaders/brdf.frag"
+	);
+	//brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	brdf->update();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	return brdfLUTTexture;
+}
+
 ResourceManager::ResourceManager()
 {
 }

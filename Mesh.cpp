@@ -188,7 +188,7 @@ void Mesh::setUpPointLights(const unsigned int shaderProgram)
 void Mesh::draw()
 {
     // draw mesh
-    glCullFace(GL_FRONT);
+    glDisable(GL_CULL_FACE);
     if (m_material->getMaterialType() != CUSTOM) {
         if (!m_material->getTwoSided())
         {
@@ -201,10 +201,6 @@ void Mesh::draw()
             else {
                 glCullFace(GL_BACK);
             }
-        }
-        else
-        {
-            glDisable(GL_CULL_FACE);
         }
     }
 

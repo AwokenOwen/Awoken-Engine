@@ -133,6 +133,8 @@ public:
 
 	unsigned int getSkyboxTexture();
 	unsigned int getIrradianceMapTexture();
+	unsigned int getPrefilterTexture();
+	unsigned int getBrdfTexture();
 
 private:
 	/**
@@ -197,6 +199,7 @@ private:
 	unsigned int m_skyboxTexture = 0;
 	unsigned int m_irradianceMapTexture = 0;
 	unsigned int m_prefilterTexture = 0;
+	unsigned int m_brdfTexture = 0;
 
 	Object* p_screenQuad{};
 };

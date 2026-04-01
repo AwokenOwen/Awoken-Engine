@@ -146,6 +146,8 @@ public:
 
 	unsigned int makePrefilterMap(unsigned int cubeMap);
 
+	unsigned int makeBRDFMap();
+
 private:
 	/**
 	 * @brief Private constructor
