@@ -163,6 +163,11 @@ int WindowManager::createWindow()
 
 	glfwSetInputMode(p_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	glfwMakeContextCurrent(p_window);
+	// Disable VSync to uncap framerate
+	glfwSwapInterval(0);
+
+
 	if (p_window == nullptr)
 	{
 		cout << "Failed to create GLFW window\n";
