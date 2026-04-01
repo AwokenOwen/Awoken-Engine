@@ -43,8 +43,8 @@ void main() {
     // Default Values can be removed
     vec3 albedo     = pow(vec3(1.0), vec3(2.2));
     vec3 normal     = normalize(Normal);
-    float metallic  = 1.0;
-    float roughness = 0.0;
+    float metallic  = 0.0;
+    float roughness = 1.0;
     float ao        = 1.0;
     //Coming Soon
     vec3 emission = vec3(0.0);
