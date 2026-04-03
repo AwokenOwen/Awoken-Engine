@@ -29,7 +29,7 @@ int main(const int argc, char* argv[]) {
     a->getComponent<MeshRenderer>()->setMaterial(goldMaterial);
 
     const auto barkMaterial = new Material();
-    barkMaterial->setShaderProgram("assets/defaultAssets/Shaders/default.vert", "assets/Shaders/Textured_Albeto_Normal_Metalic_Roughness.frag");
+    barkMaterial->setShaderProgram("assets/Shaders/smooth_sphere.vert", "assets/Shaders/Textured_Albeto_Normal_Metalic_Roughness.frag");
     barkMaterial->addTexture("assets/Textures/WoodBark/sphere_DefaultMaterial_BaseColor.png");
     barkMaterial->addTexture("assets/Textures/WoodBark/sphere_DefaultMaterial_Normal.png");
     barkMaterial->addTexture("assets/Textures/WoodBark/sphere_DefaultMaterial_Metallic.png");
