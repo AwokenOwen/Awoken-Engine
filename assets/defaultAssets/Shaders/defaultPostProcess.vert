@@ -1,4 +1,5 @@
 #version 330 core
+#extension GL_NV_shadow_samplers_cube : enable
 layout (location = 0) in vec2 aPos;
 
 out vec2 TexCoords;

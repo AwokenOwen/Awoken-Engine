@@ -4,12 +4,12 @@
 #include "DirectionalLight.h"
 #include "Material.h"
 #include "MeshRenderer.h"
-#include "test_classes/MovementComponent.h"
-#include "test_classes/FPSDisplay.h"
 
 int main(const int argc, char* argv[]) {
     Game.initialize();
     Game.getActiveScene()->loadDefaultSkybox();
+
+    const auto a = new Object;
 
     Game.run();
     Game.terminate();
