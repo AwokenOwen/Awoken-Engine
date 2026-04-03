@@ -11,7 +11,7 @@ out vec3 Normal;
 // change to number of textures needed for object
 // Make sure it's changed in fragment as well
 #define NUM_TEXTURES 1
-uniform sampler2D texture[NUM_TEXTURES];
+uniform sampler2D textures[NUM_TEXTURES];
 
 uniform mat4 model;
 uniform mat4 view;

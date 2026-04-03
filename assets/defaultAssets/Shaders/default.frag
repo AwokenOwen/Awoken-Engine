@@ -8,7 +8,7 @@ in vec3 Normal;
 // change to number of textures needed for object
 // Make sure it's changed in vertex as well
 #define NUM_TEXTURES 1
-uniform sampler2D texture[NUM_TEXTURES];
+uniform sampler2D textures[NUM_TEXTURES];
 
 //Skybox
 uniform samplerCube skybox;
@@ -42,7 +42,7 @@ vec3 CalcOtherLight(vec3 albedo, float metallic, float roughness, vec3 N, vec3 V
 
 void main() {
     // Default Values can be removed
-    vec3 albedo     = pow(vec3(1.0), vec3(2.2));
+    vec3 albedo     = vec3(1.0);
     vec3 normal     = normalize(Normal);
     float metallic  = 0.0;
     float roughness = 1.0;
@@ -56,6 +56,7 @@ void main() {
 
 
     // Running Normal Lighting Calculations
+    albedo = pow(albedo, vec3(2.2));
     vec3 color = CreateMaterial(albedo, normal, metallic, roughness, ao, emission);
 
     // Setting Color

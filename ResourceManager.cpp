@@ -65,7 +65,7 @@ unsigned int ResourceManager::loadImage(const char* path)
 	{
 		switch (nrChannels) {
 		case 1:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_R8,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED,
 				GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			break;

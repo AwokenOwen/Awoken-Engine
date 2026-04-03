@@ -5,7 +5,7 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 #define NUM_TEXTURES 1
-uniform sampler2D texture[NUM_TEXTURES];
+uniform sampler2D textures[NUM_TEXTURES];
 
 void main()
 {    

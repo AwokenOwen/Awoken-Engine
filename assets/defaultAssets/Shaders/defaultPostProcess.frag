@@ -4,7 +4,7 @@ out vec4 FragColor;
 
 in vec2 TexCoords;
 
-uniform sampler2D texture[1];
+uniform sampler2D textures[1];
 
 void main()
 {

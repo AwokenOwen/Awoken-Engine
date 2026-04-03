@@ -3,7 +3,7 @@
 out vec4 FragColor;
 in vec3 localPos;
 
-uniform sampler2D texture[1];
+uniform sampler2D textures[1];
 
 const vec2 invAtan = vec2(0.1591, 0.3183);
 vec2 SampleSphericalMap(vec3 v)
