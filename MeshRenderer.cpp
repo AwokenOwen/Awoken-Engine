@@ -53,6 +53,10 @@ vector<Material *> MeshRenderer::getMaterials() const {
     return m_materials;
 }
 
+void MeshRenderer::setMaterial(Material *material, const int index) {
+    m_materials[index] = material;
+}
+
 void MeshRenderer::processNode(const aiNode* node, const aiScene* scene, const string &path)
 {
     // process all the node's meshes (if any)

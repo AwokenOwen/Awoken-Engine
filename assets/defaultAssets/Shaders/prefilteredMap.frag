@@ -6,6 +6,9 @@ in vec3 localPos;
 uniform samplerCube environmentMap;
 uniform float roughness;
 
+#define NUM_TEXTURES 12
+uniform sampler2D textures[NUM_TEXTURES];
+
 const float PI = 3.14159265359;
 
 vec2 Hammersley(uint i, uint N);

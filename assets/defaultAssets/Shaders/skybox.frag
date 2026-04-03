@@ -6,6 +6,9 @@ in vec3 TexCoords;
 
 uniform samplerCube skybox;
 
+#define NUM_TEXTURES 12
+uniform sampler2D textures[NUM_TEXTURES];
+
 void main()
 {    
 	FragColor = textureCube(skybox, normalize(TexCoords));

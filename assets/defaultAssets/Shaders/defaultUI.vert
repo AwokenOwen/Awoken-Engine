@@ -6,6 +6,9 @@ layout (location = 2) in vec2 aTexCoords;
 
 out vec2 TexCoords;
 
+#define NUM_TEXTURES 12
+uniform sampler2D textures[NUM_TEXTURES];
+
 uniform mat4 model;
 
 void main()

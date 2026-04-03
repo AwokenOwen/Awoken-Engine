@@ -3,6 +3,9 @@
 out vec4 FragColor;
 in vec3 localPos;
 
+#define NUM_TEXTURES 12
+uniform sampler2D textures[NUM_TEXTURES];
+
 uniform samplerCube environmentMap;
 
 const float PI = 3.14159265359;

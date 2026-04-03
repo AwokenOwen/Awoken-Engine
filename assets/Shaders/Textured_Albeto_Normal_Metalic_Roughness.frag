@@ -1,12 +1,9 @@
 #version 330 core
-#extension GL_NV_shadow_samplers_cube : enable
 out vec4 FragColor;
 in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
 
-// change to number of textures needed for object
-// Make sure it's changed in vertex as well
 #define NUM_TEXTURES 12
 uniform sampler2D textures[NUM_TEXTURES];
 
@@ -43,20 +40,21 @@ vec3 CalcOtherLight(vec3 albedo, float metallic, float roughness, vec3 N, vec3 V
 void main() {
     // Default Values can be removed
     vec3 albedo     = vec3(1.0);
-    vec3 normal     = normalize(Normal);
-    float metallic  = 0.0;
+    vec3 normal     = Normal;
+    float metallic  = 1.0;
     float roughness = 1.0;
     float ao        = 1.0;
     //Coming Soon
     vec3 emission = vec3(0.0);
     // Do calculations here to customize input values
-
-
-
+    albedo = texture2D(textures[0], TexCoords).xyz;
+    normal = getNormalFromMap(textures[1]);
+    metallic = texture2D(textures[2], TexCoords).r;
+    roughness = texture2D(textures[3], TexCoords).r;
 
 
     // Running Normal Lighting Calculations
-    albedo = pow(albedo, vec3(2.2));
+    normal = normalize(normal);
     vec3 color = CreateMaterial(albedo, normal, metallic, roughness, ao, emission);
 
     // Setting Color
@@ -106,9 +104,6 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
     vec3 ambient = (kD * diffuse + specular) * ao;
 
     vec3 color = Lo + ambient;
-
-    color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0/2.2));
 
     return color;
 }

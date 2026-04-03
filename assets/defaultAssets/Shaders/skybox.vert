@@ -7,6 +7,9 @@ out vec3 TexCoords;
 uniform mat4 projection;
 uniform mat4 view;
 
+#define NUM_TEXTURES 12
+uniform sampler2D textures[NUM_TEXTURES];
+
 void main()
 {
     TexCoords = aPos;
