@@ -47,7 +47,6 @@ void main() {
     float metallic  = 0.0;
     float roughness = 1.0;
     float ao        = 1.0;
-    //Coming Soon
     vec3 emission = vec3(0.0);
     // Do calculations here to customize input values
 
@@ -61,6 +60,7 @@ void main() {
 
     // Setting Color
     FragColor = vec4(color, 1.0);
+    //FragColor = vec4(lightPositions[0], 1.0);
 }
 
 vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughness, float _ao, vec3 _emission){
@@ -105,7 +105,7 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
 
     vec3 ambient = (kD * diffuse + specular) * ao;
 
-    vec3 color = Lo + ambient;
+    vec3 color = Lo + ambient + emission;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));

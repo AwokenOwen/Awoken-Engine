@@ -44,9 +44,9 @@ void main() {
     float metallic  = 1.0;
     float roughness = 1.0;
     float ao        = 1.0;
-    //Coming Soon
     vec3 emission = vec3(0.0);
     // Do calculations here to customize input values
+
     albedo = texture2D(textures[0], TexCoords).xyz;
     normal = getNormalFromMap(textures[1]);
     metallic = texture2D(textures[2], TexCoords).r;
@@ -103,7 +103,7 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
 
     vec3 ambient = (kD * diffuse + specular) * ao;
 
-    vec3 color = Lo + ambient;
+    vec3 color = Lo + ambient + emission;
 
     return color;
 }

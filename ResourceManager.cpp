@@ -195,8 +195,8 @@ unsigned int ResourceManager::loadHDR(const char *path) {
 	a->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	a->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 	a->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-		"assets/defaultAssets/Shaders/equirectangular.vert",
-		"assets/defaultAssets/Shaders/equirectangular.frag"
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/equirectangular.vert",
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/equirectangular.frag"
 	);
 
 	a->getComponent<MeshRenderer>()->getMaterials()[0]->setUniform<mat4>("projection", captureProjection);
@@ -429,8 +429,8 @@ unsigned int ResourceManager::makeIrradianceMap(unsigned int cubeMap) {
 	irradiance->setActive(false);
 	irradiance->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	irradiance->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-		"assets/defaultAssets/Shaders/irradiance.vert",
-		"assets/defaultAssets/Shaders/irradiance.frag"
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.vert",
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.frag"
 	);
 	irradiance->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
@@ -488,8 +488,8 @@ unsigned int ResourceManager::makePrefilterMap(unsigned int cubeMap) {
 	prefilter->setActive(false);
 	prefilter->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	prefilter->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-		"assets/defaultAssets/Shaders/irradiance.vert",
-		"assets/defaultAssets/Shaders/prefilteredMap.frag"
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.vert",
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/prefilteredMap.frag"
 	);
 	prefilter->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
@@ -572,7 +572,7 @@ unsigned int ResourceManager::makeBRDFMap() {
 	brdf->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/image.fbx");
 	brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
 		"assets/defaultAssets/Shaders/defaultUI.vert",
-		"assets/defaultAssets/Shaders/brdf.frag"
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/brdf.frag"
 	);
 	//brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
