@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "GameManager.h"
 #include "Scene.h"
 #include "Camera.h"
@@ -5,58 +7,65 @@
 #include "Material.h"
 #include "MeshRenderer.h"
 #include "PointLight.h"
-#include "test_classes/FPSDisplay.h"
+#include "ResourceManager.h"
 #include "test_classes/MovementComponent.h"
 
 int main(const int argc, char* argv[]) {
-    // || Game Manager Init || //
-        // Sets up all other managers and prepared the engine to run //
     Game.initialize();
 
-    // || Camera Movement || //
-        // Adding a custom movement component onto the camera to move around the scene //
     Game.getActiveScene()->getCamera()->addComponent<MovementComponent>();
+    Game.getActiveScene()->getCamera()->setLocalPosition(vec3(0.0,2.0,0.0));
 
-    // || Lights || //
-        // Skybox/IBL ambient lighting //
     //Game.getActiveScene()->loadDefaultSkybox();
-        // Directional Light //
+    Resource.setProceduralSkyShader("assets/Shaders/shaderSkybox.frag");
     //new DirectionalLight;
-        // Single Point light //
-            // Point Light init with color and power as inputs //
-    const auto light = new PointLight(vec3(1,1,1), 1000);
-            // Setting point light position
-    light->setLocalPosition(vec3(0,15,0));
 
-    // || FPS DISPLAY || //
-    new FPSDisplay();
-
-    // || Ground Material Creation || //
-        // Material init //
     const auto terracottaMaterial = new Material();
-        // Shader loader custom non default shader using the default shaders as a base //
     terracottaMaterial->setShaderProgram("assets/Shaders/tiledGround.vert", "assets/Shaders/TexturedAlbedoMetallicRoughness.frag");
-        // Shader texture loading the relevant textures for the material //
     terracottaMaterial->addTexture("assets/Textures/Terracotta/sphere_DefaultMaterial_BaseColor.png");
     terracottaMaterial->addTexture("assets/Textures/Terracotta/sphere_DefaultMaterial_Metallic.png");
     terracottaMaterial->addTexture("assets/Textures/Terracotta/sphere_DefaultMaterial_Roughness.png");
-        // Setting the "custom" tile multiplier //
     terracottaMaterial->setUniform<float>("tile", 10.0f);
 
-    // || Object Creation || //
-        // Object init //
-    const auto a = new Object;
-        // Setting position of object //
-    a->setLocalPosition(vec3(0.0,-1.0,0.0));
-        // Adding the MeshRenderer component and loading the default plane model //
-    a->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/plane.fbx");
-        // Setting the material (of material position 0) to the material made above //
-    a->getComponent<MeshRenderer>()->setMaterial(terracottaMaterial);
+    const auto goldMaterial = new Material();
+    goldMaterial->setShaderProgram("assets/Shaders/smooth_sphere.vert", "assets/Shaders/TexturedAlbedoMetallicRoughness.frag");
+    goldMaterial->addTexture("assets/Textures/Gold/sphere_DefaultMaterial_BaseColor.png");
+    goldMaterial->addTexture("assets/Textures/Gold/sphere_DefaultMaterial_Metallic.png");
+    goldMaterial->addTexture("assets/Textures/Gold/sphere_DefaultMaterial_Roughness.png");
 
-    // || Game Manager Run || //
-        // Begins the game loop and continues until called to quit //
+    const auto a = new Object;
+    a->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/plane.fbx");
+    a->getComponent<MeshRenderer>()->setMaterial(terracottaMaterial);
+    a->setLocalPosition(vec3(0,0,60));
+
+    const auto sphere = new Object;
+    sphere->setLocalPosition(vec3(0,1,5));
+    sphere->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/sphere.fbx");
+    sphere->getComponent<MeshRenderer>()->setMaterial(goldMaterial);
+
+
+
+    for (auto i = 0; i < 7; ++i) {
+        auto light = new PointLight(vec3(1,1,1), 20);
+        light->setLocalPosition(vec3(1.43,4.19,0));
+
+        auto b = new Object;
+        b->setLocalPosition(vec3(-5.0,0.0,i * 15.0));
+        b->addComponent<MeshRenderer>()->loadModel("assets/Models/LightPost.fbx");
+        b->addChild(light);
+        b->getComponent<MeshRenderer>()->getMaterials()[1]->setShaderProgram("assets/Shaders/smooth_sphere.vert", "assets/Shaders/EmissiveOnly.frag");
+
+        auto light2 = new PointLight(vec3(1,1,1), 20);
+        light2->setLocalPosition(vec3(1.43,4.19,0));
+
+        auto b2 = new Object;
+        b2->setLocalPosition(vec3(5.0,0.0,i * 15.0));
+        b2->setLocalRotation(vec3(0.0,glm::radians(180.0),0.0));
+        b2->addComponent<MeshRenderer>()->loadModel("assets/Models/LightPost.fbx");
+        b2->addChild(light2);
+        b2->getComponent<MeshRenderer>()->getMaterials()[1]->setShaderProgram("assets/Shaders/smooth_sphere.vert", "assets/Shaders/EmissiveOnly.frag");
+    }
+
     Game.run();
-    // || Game Manager Terminate || //
-        // Call terminate on all Managers freeing all data needed to be freed then closes game//
     Game.terminate();
 }

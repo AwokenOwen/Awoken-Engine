@@ -112,8 +112,8 @@ Camera* Scene::getCamera() const {
 void Scene::setSkybox(unsigned int cubeMapTexture) {
 	MeshRenderer* m;
 	m_skyboxTexture = cubeMapTexture;
-	m_irradianceMapTexture = Resource.makeIrradianceMap(cubeMapTexture);
-	m_prefilterTexture = Resource.makePrefilterMap(cubeMapTexture);
+	m_irradianceMapTexture = Resource.makeIrradianceMap(m_skyboxTexture);
+	m_prefilterTexture = Resource.makePrefilterMap(m_skyboxTexture);
 	m_brdfTexture = Resource.makeBRDFMap();
 	if (m_skybox == nullptr)
 	{

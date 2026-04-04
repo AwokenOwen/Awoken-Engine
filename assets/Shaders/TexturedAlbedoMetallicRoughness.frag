@@ -18,7 +18,7 @@ uniform vec3 dirLightDir;
 uniform vec3 dirLightColor;
 uniform float dirLightPow;
 
-#define NUM_LIGHTS 4
+#define NUM_LIGHTS 20
 uniform vec3 lightPositions[NUM_LIGHTS];
 uniform vec3 lightColors[NUM_LIGHTS];
 uniform float lightPowers[NUM_LIGHTS];
@@ -80,7 +80,7 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
     Lo += CalcDirectionalLight(albedo, metallic, roughness, N, V, dirLightDir, F0);
 
     //All other lights
-    for(int i = 0; i < 4; ++i)
+    for(int i = 0; i < NUM_LIGHTS; ++i)
     {
         Lo += CalcOtherLight(albedo, metallic, roughness, N, V, lightPositions[i], F0, lightColors[i], lightPowers[i]);
     }

@@ -40,25 +40,21 @@ vec3 CalcOtherLight(vec3 albedo, float metallic, float roughness, vec3 N, vec3 V
 void main() {
     // Default Values can be removed
     vec3 albedo     = vec3(1.0);
-    vec3 normal     = Normal;
+    vec3 normal     = normalize(Normal);
     float metallic  = 1.0;
     float roughness = 1.0;
     float ao        = 1.0;
     vec3 emission = vec3(0.0);
-    // Do calculations here to customize input values
 
-    albedo = texture2D(textures[0], TexCoords).xyz;
-    normal = getNormalFromMap(textures[1]);
-    metallic = texture2D(textures[2], TexCoords).r;
-    roughness = texture2D(textures[3], TexCoords).r;
+    // Do calculations here to customize input values
+    emission = vec3(1.0);
 
 
     // Running Normal Lighting Calculations
-    normal = normalize(normal);
     vec3 color = CreateMaterial(albedo, normal, metallic, roughness, ao, emission);
 
     // Setting Color
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(emission, 1.0);
 }
 
 vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughness, float _ao, vec3 _emission){

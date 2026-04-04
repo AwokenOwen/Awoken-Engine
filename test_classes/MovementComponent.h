@@ -17,5 +17,8 @@ public:
     float theta{};
     float phi{};
 
+    float movementSpeed{5.0f};
+    float currentSpeed{5.0f};
+
     void update() override;
 };

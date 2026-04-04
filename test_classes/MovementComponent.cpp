@@ -52,6 +52,14 @@ void MovementComponent::handleKeyboard(KeyboardContext context) {
             movementInput.x += 1.0f;
         }
     }
+
+    if (context.getKey() == GLFW_KEY_LEFT_SHIFT) {
+        if (context.getAction() == GLFW_PRESS) {
+            movementSpeed = 15.0f;
+        }else {
+            movementSpeed = 5.0f;
+        }
+    }
 }
 
 void MovementComponent::handleMouse(glm::vec2 pos, glm::vec2 delta) {
@@ -76,12 +84,17 @@ void MovementComponent::update() {
     vec3 right = getParent()->getRight();
 
     vec3 moveDirection = forward * movementInput.y + right * movementInput.x;
-
+    moveDirection.y = 0;
     if (length(moveDirection) > 0.0f) {
         moveDirection = normalize(moveDirection);
+        currentSpeed = lerp(currentSpeed, movementSpeed, Game.getDeltaTime());
+    }else {
+        currentSpeed = 5.0f;
     }
 
-    moveDirection *= 15.0f * Game.getDeltaTime();
+
+
+    moveDirection *= currentSpeed * Game.getDeltaTime();
 
     getParent()->setLocalPosition(getParent()->getLocalPosition() + moveDirection);
 
