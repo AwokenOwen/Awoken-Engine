@@ -26,8 +26,10 @@ public:
 
 	/**
 	 * @brief Default constructor adds itself to the world list
+	 *
+	 * @param inWorld whether the object gets loaded into the scene
 	 */
-	Object();
+	explicit Object(bool inWorld = true);
 
 	/**
 	 * @brief Called once at the start of the frame it is enabled on

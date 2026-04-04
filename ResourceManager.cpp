@@ -190,7 +190,7 @@ unsigned int ResourceManager::loadHDR(const char *path) {
 		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 	 };
 
-	auto a = new Object();
+	auto a = new Object(false);
 	a->setActive(false);
 	a->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	a->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
@@ -218,6 +218,8 @@ unsigned int ResourceManager::loadHDR(const char *path) {
 		a->update(); // renders a 1x1 cube
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	delete a;
 
 	return envCubemap;
 }
@@ -423,7 +425,7 @@ unsigned int ResourceManager::makeIrradianceMap(unsigned int cubeMap) {
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
-	const auto irradiance = new Object;
+	const auto irradiance = new Object(false);
 	irradiance->setActive(false);
 	irradiance->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	irradiance->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
@@ -461,6 +463,8 @@ unsigned int ResourceManager::makeIrradianceMap(unsigned int cubeMap) {
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	delete irradiance;
+
 	return irradianceMap;
 }
 
@@ -480,7 +484,7 @@ unsigned int ResourceManager::makePrefilterMap(unsigned int cubeMap) {
 
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-	const auto prefilter = new Object;
+	const auto prefilter = new Object(false);
 	prefilter->setActive(false);
 	prefilter->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	prefilter->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
@@ -530,6 +534,9 @@ unsigned int ResourceManager::makePrefilterMap(unsigned int cubeMap) {
 			prefilter->update();
 		}
 	}
+
+	delete prefilter;
+
 	return prefilterMap;
 }
 
@@ -560,7 +567,7 @@ unsigned int ResourceManager::makeBRDFMap() {
 
 	glViewport(0, 0, 512, 512);
 
-	auto brdf = new Object;
+	auto brdf = new Object(false);
 	brdf->setActive(false);
 	brdf->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/image.fbx");
 	brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
@@ -575,6 +582,8 @@ unsigned int ResourceManager::makeBRDFMap() {
 	brdf->update();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	delete brdf;
 
 	return brdfLUTTexture;
 }

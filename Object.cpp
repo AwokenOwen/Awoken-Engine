@@ -6,7 +6,7 @@
 
 #include "GameManager.h"
 
-Object::Object()
+Object::Object(const bool inWorld)
 {
 	//set default variables and instantiate
 	m_localPosition = vec3(0, 0, 0);
@@ -17,9 +17,10 @@ Object::Object()
 	m_worldRotation = quat(vec3(0, 0, 0));
 	m_worldScale = vec3(1, 1, 1);
 
-	Game.instantiate(this);
-
 	setActive(true);
+
+	if (inWorld)
+		Game.instantiate(this);
 }
 
 //called once at the start of the frame it is enabled on
