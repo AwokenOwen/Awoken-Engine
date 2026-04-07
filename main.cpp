@@ -17,7 +17,6 @@ int main(const int argc, char* argv[]) {
     Game.getActiveScene()->getCamera()->setLocalPosition(vec3(0.0,2.0,0.0));
 
     //Game.getActiveScene()->loadDefaultSkybox();
-    Resource.setProceduralSkyShader("assets/Shaders/shaderSkybox.frag");
     //new DirectionalLight;
 
     const auto terracottaMaterial = new Material();
