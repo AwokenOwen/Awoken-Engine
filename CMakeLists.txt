@@ -95,17 +95,13 @@ add_library(Awoken_Engine STATIC
         AudioManager.cpp
         AudioSource.cpp
         AudioSource.h
+        glad.c
 )
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 
 add_executable(Awoken_Engine_Test
         main.cpp
-        glad.c
-        test_classes/MovementComponent.cpp
-        test_classes/MovementComponent.h
-        test_classes/FPSDisplay.cpp
-        test_classes/FPSDisplay.h
 )
 
 
