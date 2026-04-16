@@ -5,6 +5,8 @@
 #include "AudioManager.h"
 #include "Scene.h"
 #include "iostream"
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -39,18 +41,11 @@ void GameManager::run()
 {
 	cout << "Starting Game...\n\n";
 
-	int frame = 0;
-	float time = getTime();
+	double lastTime = getTime();
+	double targetFrameTime = 1.0 / 60.0;
 
 	while (!glfwWindowShouldClose(Window.getWindow()))
 	{
-		if (frame > 100) {
-			m_deltaTime = getTime() - time;
-			m_fps = frame / (getTime() - time);
-			frame = 0;
-			time = getTime();
-		}
-
 		Window.clear();
 
 		glfwPollEvents();
@@ -59,10 +54,14 @@ void GameManager::run()
 		p_activeScene->lateUpdate();
 
 		Window.swap();
-		frame++;
+		double currentFrameTime = getTime();
+		double deltaTime = currentFrameTime - lastTime;
+		m_deltaTime = glm::max(deltaTime, targetFrameTime);
+		m_fps = 1 / m_deltaTime;
+		lastTime = currentFrameTime;
+		std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(glm::max(0.0, targetFrameTime - deltaTime) * 1000)));
 	}
 }
-
 void GameManager::terminate()
 {
 	cout << "Stopping Engine...\n\n";
@@ -114,7 +113,7 @@ float GameManager::getTime()
 	return static_cast<float>(glfwGetTime());
 }
 
-float GameManager::getDeltaTime() const
+double GameManager::getDeltaTime() const
 {
 	return m_deltaTime;
 }

@@ -100,7 +100,7 @@ void WindowManager::setMaximized(const bool maximized) const {
 
 mat4 WindowManager::getPerspectiveMatrix()
 {
-	return glm::perspective(glm::radians(60.0f), static_cast<float>(Window.getViewportWidth()) / static_cast<float>(Window.getViewportHeight()), 0.1f, 100.0f);;
+	return glm::perspective(glm::radians(60.0f), static_cast<float>(Window.getViewportWidth()) / static_cast<float>(Window.getViewportHeight()), 0.1f, 1000.0f);;
 }
 
 void WindowManager::setFixedAspect(bool fixed)

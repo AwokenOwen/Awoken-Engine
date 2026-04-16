@@ -37,7 +37,7 @@ public:
 	/**
 	 * @brief Default constructor
 	 */
-	Scene();
+	Scene() = default;
 
 	/**
 	 * @brief Called once at the start of a scene
@@ -140,66 +140,53 @@ private:
 	/**
 	 * @brief Vector of all objects in the scene
 	 */
-	vector<Object*> m_inScene;
+	vector<Object*> m_inScene{};
 	/**
 	 * @brief Vector of objects in the scene
 	 */
-	vector<Object*> m_inSceneOpaque;
+	vector<Object*> m_inSceneOpaque{};
 	/**
 	 * @brief Vector of objects in the scene
 	 */
-	vector<Object*> m_inSceneTransparent;
+	vector<Object*> m_inSceneTransparent{};
 	/**
 	 * @brief Vector of objects that need to be added
 	 */
-	vector<Object*> m_toBeAdded;
+	vector<Object*> m_toBeAdded{};
 	/**
 	 * @brief Vector of objects that need to be deleted
 	 */
-	vector<Object*> m_toBeDeleted;
+	vector<Object*> m_toBeDeleted{};
 
 	/**
 	 * @brief The name of the scene
 	 */
-	string m_name;
-
-	/**
-	 * @brief The ambient color of the scene
-	 *
-	 * || NEED TO CHANGE ON IMPLEMENTING IBL ||
-	 */
-	vec3 m_ambientColor{};
-	/**
-	 * @brief The ambient power of the scene
-	 *
-	 * || NEED TO CHANGE ON IMPLEMENTING IBL ||
-	 */
-	float m_ambientPower;
+	string m_name{};
 
 	/**
 	 * @brief The current directional light in the scene
 	 *
 	 * || Eventually add ability for multiple ||
 	 */
-	DirectionalLight* m_directionalLight = nullptr;
+	DirectionalLight* m_directionalLight{};
 	/**
 	 * @brief The current point lights in the scene
 	 */
-	vector<PointLight*> m_pointLights;
+	vector<PointLight*> m_pointLights{};
 
 	/**
 	 * @brief The active camera
 	 */
-	Camera* m_camera = nullptr;
+	Camera* m_camera{};
 	/**
 	 * @brief The active skybox
 	 */
-	Object* m_skybox = nullptr;
+	Object* m_skybox{};
 
-	unsigned int m_skyboxTexture = 0;
-	unsigned int m_irradianceMapTexture = 0;
-	unsigned int m_prefilterTexture = 0;
-	unsigned int m_brdfTexture = 0;
+	unsigned int m_skyboxTexture{};
+	unsigned int m_irradianceMapTexture{};
+	unsigned int m_prefilterTexture{};
+	unsigned int m_brdfTexture{};
 
-	Object* p_screenQuad{};
+	Object* p_screen{};
 };

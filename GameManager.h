@@ -90,7 +90,7 @@ public:
 	 *
 	 * @return float
 	 */
-	[[nodiscard]] float getDeltaTime() const;
+	[[nodiscard]] double getDeltaTime() const;
 
 	/**
 	 * @brief Sets the while loop in run() to finish
@@ -107,7 +107,7 @@ private:
 	/**
 	 * @brief The difference between getTime() last frame and the current frame
 	 */
-	float m_deltaTime = 0;
+	double m_deltaTime = 0;
 
 	/**
 	 * @brief Scene variable for the current active scene

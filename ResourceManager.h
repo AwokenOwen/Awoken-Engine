@@ -8,6 +8,8 @@
 #include <string>
 #include <map>
 #include <vector>
+
+#include "vec3.hpp"
 #include "AL/al.h"
 
 using namespace std;
@@ -147,6 +149,8 @@ public:
 	unsigned int makePrefilterMap(unsigned int cubeMap);
 
 	unsigned int makeBRDFMap();
+
+	void setProceduralSkyShader(string path);
 
 private:
 	/**

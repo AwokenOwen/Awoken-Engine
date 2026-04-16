@@ -117,7 +117,7 @@ void Material::loadTextures()
 {
     for (int i = 0; i < m_textures.size(); i++)
     {
-        setUniform<int>(string("texture[" + to_string(i) + "]"), i);
+        setUniform<int>(string("textures[" + to_string(i) + "]"), i);
 
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, m_textures[i]);

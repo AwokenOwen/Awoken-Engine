@@ -153,7 +153,7 @@ private:
 	 *
 	 * @param shaderProgram The shader program to push the directional light variables to
 	 */
-	void setUpDirectionalLight(unsigned int shaderProgram);
+	void setUpDirectionalLight(unsigned int shaderProgram) const;
 	/**
 	 * @brief Helper function to push all the point lights to
 	 *

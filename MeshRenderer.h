@@ -67,6 +67,8 @@ public:
 	 */
 	[[nodiscard]] vector<Material*> getMaterials() const;
 
+	void setMaterial(Material* material, int index = 0);
+
 private:
 	/**
 	 * @brief Vector of 3D models to draw

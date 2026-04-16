@@ -9,6 +9,7 @@
 #include "Mesh.h"
 #include <iostream>
 
+#include "GameManager.h"
 #include "Material.h"
 #include "MeshRenderer.h"
 #include "Object.h"
@@ -65,7 +66,7 @@ unsigned int ResourceManager::loadImage(const char* path)
 	{
 		switch (nrChannels) {
 		case 1:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_R8,
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED,
 				GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			break;
@@ -190,13 +191,13 @@ unsigned int ResourceManager::loadHDR(const char *path) {
 		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 	 };
 
-	auto a = new Object();
+	auto a = new Object(false);
 	a->setActive(false);
 	a->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	a->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 	a->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-		"assets/defaultAssets/Shaders/equirectangular.vert",
-		"assets/defaultAssets/Shaders/equirectangular.frag"
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/equirectangular.vert",
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/equirectangular.frag"
 	);
 
 	a->getComponent<MeshRenderer>()->getMaterials()[0]->setUniform<mat4>("projection", captureProjection);
@@ -218,6 +219,8 @@ unsigned int ResourceManager::loadHDR(const char *path) {
 		a->update(); // renders a 1x1 cube
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	delete a;
 
 	return envCubemap;
 }
@@ -423,12 +426,12 @@ unsigned int ResourceManager::makeIrradianceMap(unsigned int cubeMap) {
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
-	const auto irradiance = new Object;
+	const auto irradiance = new Object(false);
 	irradiance->setActive(false);
 	irradiance->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	irradiance->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-		"assets/defaultAssets/Shaders/irradiance.vert",
-		"assets/defaultAssets/Shaders/irradiance.frag"
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.vert",
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.frag"
 	);
 	irradiance->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
@@ -461,6 +464,8 @@ unsigned int ResourceManager::makeIrradianceMap(unsigned int cubeMap) {
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	delete irradiance;
+
 	return irradianceMap;
 }
 
@@ -480,12 +485,12 @@ unsigned int ResourceManager::makePrefilterMap(unsigned int cubeMap) {
 
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-	const auto prefilter = new Object;
+	const auto prefilter = new Object(false);
 	prefilter->setActive(false);
 	prefilter->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
 	prefilter->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
-		"assets/defaultAssets/Shaders/irradiance.vert",
-		"assets/defaultAssets/Shaders/prefilteredMap.frag"
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.vert",
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/prefilteredMap.frag"
 	);
 	prefilter->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
@@ -530,6 +535,9 @@ unsigned int ResourceManager::makePrefilterMap(unsigned int cubeMap) {
 			prefilter->update();
 		}
 	}
+
+	delete prefilter;
+
 	return prefilterMap;
 }
 
@@ -560,12 +568,12 @@ unsigned int ResourceManager::makeBRDFMap() {
 
 	glViewport(0, 0, 512, 512);
 
-	auto brdf = new Object;
+	auto brdf = new Object(false);
 	brdf->setActive(false);
 	brdf->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/image.fbx");
 	brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
 		"assets/defaultAssets/Shaders/defaultUI.vert",
-		"assets/defaultAssets/Shaders/brdf.frag"
+		"assets/defaultAssets/Shaders/UnseenRenderingShaders/brdf.frag"
 	);
 	//brdf->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
 
@@ -576,7 +584,77 @@ unsigned int ResourceManager::makeBRDFMap() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	delete brdf;
+
 	return brdfLUTTexture;
+}
+
+void ResourceManager::setProceduralSkyShader(string path) {
+	glGenFramebuffers(1, &captureFBO);
+	glGenRenderbuffers(1, &captureRBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
+	unsigned int envCubemap;
+	glGenTextures(1, &envCubemap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		// note that we store each face with 16 bit floating point values
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
+					 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+	glm::mat4 captureViews[] =
+	{
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+	 };
+
+	auto a = new Object(false);
+	a->setActive(false);
+	a->addComponent<MeshRenderer>()->loadModel("assets/defaultAssets/Models/cube.fbx");
+	a->getComponent<MeshRenderer>()->getMaterials()[0]->setMaterialType(CUSTOM);
+	a->getComponent<MeshRenderer>()->getMaterials()[0]->setShaderProgram(
+		"assets/defaultAssets/Shaders/skybox.vert",
+		"assets/Shaders/shaderSkybox.frag"
+	);
+
+	a->getComponent<MeshRenderer>()->getMaterials()[0]->setUniform<mat4>("projection", captureProjection);
+
+	glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		a->getComponent<MeshRenderer>()->getMaterials()[0]->setUniform<mat4>("view", captureViews[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+							   GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, envCubemap, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		a->update(); // renders a 1x1 cube
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	delete a;
+
+	Game.getActiveScene()->setSkybox(envCubemap);
 }
 
 ResourceManager::ResourceManager()

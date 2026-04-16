@@ -12,23 +12,15 @@
 #include "ResourceManager.h"
 #include "WindowManager.h"
 
-Scene::Scene()
-{
-	m_ambientColor = vec3(1.0f);
-	m_ambientPower = 0.1f;
-	m_directionalLight = nullptr;
-}
-
 void Scene::awake()
 {
-	p_screenQuad = new Object();
-	p_screenQuad->setActive(false);
-	auto m = p_screenQuad->addComponent<MeshRenderer>();
+	p_screen = new Object(false);
+	auto m = p_screen->addComponent<MeshRenderer>();
 	m->loadModel("assets/defaultAssets/Models/image.fbx");
 	m->getMaterials()[0]->setShaderProgram(
 		"assets/defaultAssets/Shaders/defaultPostProcess.vert",
 		"assets/defaultAssets/Shaders/defaultPostProcess.frag");
-	Window.setFrameBufferObject(p_screenQuad);
+	Window.setFrameBufferObject(p_screen);
 	Window.sendFrameBufferTexture();
 
     if (m_camera == nullptr)
@@ -69,7 +61,7 @@ void Scene::update() const {
 void Scene::lateUpdate()
 {
 	Window.deactivateFrameBuffer();
-	p_screenQuad->update();
+	p_screen->update();
 	if (m_toBeAdded.size() > 0) {
 		for (auto i : m_toBeAdded)
 		{
@@ -97,14 +89,6 @@ void Scene::instantiate(Object* obj)
 	m_toBeAdded.push_back(obj);
 }
 
-vec3 Scene::getAmbientColor() const {
-	return m_ambientColor;
-}
-
-float Scene::getAmbientPower() const {
-	return m_ambientPower;
-}
-
 void Scene::setDirectionalLight(DirectionalLight *directionalLight) {
 	m_directionalLight = directionalLight;
 }
@@ -128,8 +112,8 @@ Camera* Scene::getCamera() const {
 void Scene::setSkybox(unsigned int cubeMapTexture) {
 	MeshRenderer* m;
 	m_skyboxTexture = cubeMapTexture;
-	m_irradianceMapTexture = Resource.makeIrradianceMap(cubeMapTexture);
-	m_prefilterTexture = Resource.makePrefilterMap(cubeMapTexture);
+	m_irradianceMapTexture = Resource.makeIrradianceMap(m_skyboxTexture);
+	m_prefilterTexture = Resource.makePrefilterMap(m_skyboxTexture);
 	m_brdfTexture = Resource.makeBRDFMap();
 	if (m_skybox == nullptr)
 	{

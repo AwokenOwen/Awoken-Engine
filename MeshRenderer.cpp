@@ -34,7 +34,7 @@ void MeshRenderer::loadModel(const string &path)
     }
 
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |  aiProcess_JoinIdenticalVertices | aiProcess_GenSmoothNormals) ;
+    const aiScene* scene = import.ReadFile(path, aiProcess_PreTransformVertices | aiProcess_Triangulate | aiProcess_FlipUVs) ;
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -43,6 +43,7 @@ void MeshRenderer::loadModel(const string &path)
     }
 
     processNode(scene->mRootNode, scene, path);
+    Resource.addMeshToMap(path, m_meshes);
 }
 
 void MeshRenderer::setShaderProgram(const char *vertexShaderPath, const char *fragmentShaderPath, const int index) const {
@@ -51,6 +52,10 @@ void MeshRenderer::setShaderProgram(const char *vertexShaderPath, const char *fr
 
 vector<Material *> MeshRenderer::getMaterials() const {
     return m_materials;
+}
+
+void MeshRenderer::setMaterial(Material *material, const int index) {
+    m_materials[index] = material;
 }
 
 void MeshRenderer::processNode(const aiNode* node, const aiScene* scene, const string &path)
@@ -67,8 +72,6 @@ void MeshRenderer::processNode(const aiNode* node, const aiScene* scene, const s
     {
         processNode(node->mChildren[i], scene, path);
     }
-
-    Resource.addMeshToMap(path, m_meshes);
 }
 
 void MeshRenderer::loadCubeMap(const vector<const char*> &paths)

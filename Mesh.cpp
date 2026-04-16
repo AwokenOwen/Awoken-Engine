@@ -124,25 +124,13 @@ void Mesh::setUpShaderMatrices(const unsigned int shaderProgram) const {
 
 void Mesh::setUpShaderVariables(const unsigned int shaderProgram)
 {
-    // Ambient Light
-    const vec3 ambientColor = Game.getActiveScene()->getAmbientColor();
-
-    const int ambientColorLoc = glGetUniformLocation(shaderProgram, "ambientColor");
-    glUniform3f(ambientColorLoc, ambientColor.x, ambientColor.y, ambientColor.z);
-
-    float ambientPower = Game.getActiveScene()->getAmbientPower();
-
-    const int ambienPowerLoc = glGetUniformLocation(shaderProgram, "ambientPower");
-    glUniform1f(ambienPowerLoc, ambientPower);
-
     const vec3 cameraPosition = Game.getActiveScene()->getCamera()->getWorldPosition();
 
     const int cameraLoc = glGetUniformLocation(shaderProgram, "camPos");
     glUniform3f(cameraLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 }
 
-void Mesh::setUpDirectionalLight(const unsigned int shaderProgram)
-{
+void Mesh::setUpDirectionalLight(const unsigned int shaderProgram) const {
     // Directional Light
     if (Game.getActiveScene()->getDirectionalLight() != nullptr)
     {
