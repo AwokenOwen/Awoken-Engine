@@ -53,14 +53,6 @@ FetchContent_MakeAvailable(FreeType)
 find_package(Freetype REQUIRED)
 
 FetchContent_Declare(
-        glm
-        GIT_REPOSITORY  https://github.com/g-truc/glm.git
-        GIT_TAG         master
-)
-
-FetchContent_MakeAvailable(glm)
-
-FetchContent_Declare(
         json
         GIT_REPOSITORY  https://github.com/nlohmann/json.git
         GIT_TAG         master
@@ -69,45 +61,46 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 
 include_directories(
-        glad/include
+        Source/glad/include
+)
+
+include_directories(
+        Source/glad/include
+        Source/Managers
+        Source/Util
+        Source/Components/
+        Source/Objects
         ${CMAKE_BINARY_DIR}/_deps/freetype-src/include
         ${CMAKE_BINARY_DIR}/_deps/glfw-src/include
-        ${CMAKE_BINARY_DIR}/_deps/glm-src/glm
         ${CMAKE_BINARY_DIR}/_deps/json-src/include
         ${CMAKE_BINARY_DIR}/_deps/openal-src/include
 )
 
-add_library(Awoken_Engine STATIC
-        Camera.cpp
-        Component.cpp
-        DirectionalLight.cpp
-        GameManager.cpp
-        InputManager.cpp
-        Material.cpp
-        Mesh.cpp
-        MeshRenderer.cpp
-        Object.cpp
-        PointLight.cpp
-        ResourceManager.cpp
-        Scene.cpp
-        WindowManager.cpp
-        TextRenderer.cpp
-        AudioManager.cpp
-        AudioSource.cpp
-        AudioSource.h
-)
-
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 
-add_executable(Awoken_Engine_Test
-        main.cpp
-        glad.c
-        test_classes/MovementComponent.cpp
-        test_classes/MovementComponent.h
-        test_classes/FPSDisplay.cpp
-        test_classes/FPSDisplay.h
+add_library(Awoken_Engine STATIC
+        Source/Managers/GameManager.cpp
+        Source/Managers/GameManager.h
+        Source/Managers/LogManager.cpp
+        Source/Managers/LogManager.h
+        Source/Managers/Manager.h
+        Source/Managers/WindowManager.cpp
+        Source/Managers/WindowManager.h
+        Source/Managers/WorldManager.cpp
+        Source/Managers/WorldManager.h
+        Source/Objects/Object.cpp
+        Source/Objects/Object.h
+        Source/Util/Event.h
+        Source/Util/glad.c
+        Source/Util/Math.h
+        Source/Components/Renderer.h
+        Source/Components/Component.cpp
+        Source/Components/Component.h
 )
 
+add_executable(Awoken_Engine_Test
+        Source/main.cpp
+)
 
 target_link_libraries(Awoken_Engine_Test PRIVATE
         Awoken_Engine
