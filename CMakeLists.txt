@@ -1,81 +1,35 @@
-cmake_minimum_required(VERSION 4.1.2)
+cmake_minimum_required(VERSION 3.16)
 project(Awoken_Engine)
-
 set(CMAKE_CXX_STANDARD 20)
-
 include(FetchContent)
 
-# Declare and make Assimp available
-FetchContent_Declare(
-        assimp
+FetchContent_Declare(assimp
         GIT_REPOSITORY https://github.com/assimp/assimp.git
-        GIT_TAG v5.3.1 # Recommended to use a specific version tag
-)
-
-# Optional: Disable unnecessary Assimp features for faster builds
+        GIT_TAG v5.3.1)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(assimp)
-
-# Declare the OpenAL Soft dependency from its GitHub repository
-FetchContent_Declare(
-        OpenAL
+FetchContent_Declare(OpenAL
         GIT_REPOSITORY https://github.com/kcat/openal-soft.git
-        GIT_TAG        master # You can specify a specific release tag or commit hash here
-)
+        GIT_TAG master)
 
-# Make the content available and add its CMake targets to the project
-FetchContent_MakeAvailable(OpenAL)
-
-FetchContent_Declare(
-        glfw
+FetchContent_Declare(glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG        "3.4" # Use the desired version tag, e.g., "3.4"
-        GIT_SHALLOW    ON    # Use shallow clone to save time and space
-)
+        GIT_TAG 3.4
+        GIT_SHALLOW ON)
+set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "")
+set(GLFW_BUILD_TESTS OFF CACHE INTERNAL "")
+set(GLFW_INSTALL OFF CACHE INTERNAL "")
 
-set(GLFW_BUILD_DOCS OFF CACHE INTERNAL BOOL "") # Disable building documentation
-set(GLFW_BUILD_TESTS OFF CACHE INTERNAL BOOL "") # Disable building tests
-set(GLFW_INSTALL OFF CACHE INTERNAL BOOL "")   # Disable the install target
+FetchContent_Declare(FreeType
+        GIT_REPOSITORY https://github.com/freetype/freetype.git
+        GIT_TAG master)
 
-FetchContent_MakeAvailable(glfw)
+FetchContent_Declare(json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG master)
 
-FetchContent_Declare(
-        FreeType
-        GIT_REPOSITORY  https://github.com/freetype/freetype.git
-        GIT_TAG         master
-)
-
-FetchContent_MakeAvailable(FreeType)
-
-find_package(Freetype REQUIRED)
-
-FetchContent_Declare(
-        json
-        GIT_REPOSITORY  https://github.com/nlohmann/json.git
-        GIT_TAG         master
-)
-
-FetchContent_MakeAvailable(json)
-
-include_directories(
-        Source/glad/include
-)
-
-include_directories(
-        Source/glad/include
-        Source/Managers
-        Source/Util
-        Source/Components/
-        Source/Objects
-        ${CMAKE_BINARY_DIR}/_deps/freetype-src/include
-        ${CMAKE_BINARY_DIR}/_deps/glfw-src/include
-        ${CMAKE_BINARY_DIR}/_deps/json-src/include
-        ${CMAKE_BINARY_DIR}/_deps/openal-src/include
-)
-
-file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+FetchContent_MakeAvailable(assimp OpenAL glfw FreeType json)
 
 add_library(Awoken_Engine STATIC
         Source/Managers/GameManager.cpp
@@ -97,9 +51,22 @@ add_library(Awoken_Engine STATIC
         Source/Components/Component.h
 )
 
-target_link_libraries(Awoken_Engine PRIVATE
+target_include_directories(Awoken_Engine PUBLIC
+        Source/glad/include
+        Source/Managers
+        Source/Util
+        Source/Components/
+        Source/Objects
+        ${freetype_SOURCE_DIR}/include
+        ${glfw_SOURCE_DIR}/include
+        ${json_SOURCE_DIR}/include
+        ${openal_SOURCE_DIR}/include
+)
+
+target_link_libraries(Awoken_Engine PUBLIC
         assimp::assimp
-        Freetype::Freetype
+        freetype
         glfw
         OpenAL::OpenAL
+        nlohmann_json::nlohmann_json
 )
