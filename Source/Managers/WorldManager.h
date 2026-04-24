@@ -81,6 +81,7 @@ public:
     void loadScene(const char* path);
     void setActiveScene(const char* path, bool isFile = false);
     void setBaseScene(const char* name);
+    void setObjectActiveState(Object* object, bool active);
 private:
     /**
      * @brief Starts all other managers preparing to start the game
@@ -122,7 +123,6 @@ private:
 struct Scene {
     std::string name;
 
-    Event<> m_startEvent{&World};
     Event<> m_updateEvent{&World};
     Event<> m_enableEvent{&World};
     Event<> m_disableEvent{&World};

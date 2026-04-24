@@ -3,12 +3,7 @@
 //
 
 #include "Object.h"
-
-#include <iostream>
-
 #include "WorldManager.h"
-
-Object::Object() = default;
 
 Vector3 Object::getLocalPosition() const {
     return m_localPosition;
@@ -96,13 +91,15 @@ bool Object::getActiveState() const {
     return m_activeState;
 }
 
-void Object::setActiveState(bool activeState) {
-    // We're doing fun things here
-    m_activeState = activeState;
+void Object::setActiveState(const bool active) {
+    if (m_activeState == active)
+        return;
+    m_activeState = active;
+    World.setObjectActiveState(this, active);
 }
 
 void Object::addChild(Object *child) {
-    Object* currentParent = p_parent;
+    const Object* currentParent = p_parent;
 
     while (currentParent != nullptr) {
         if (currentParent == child) {
@@ -116,13 +113,20 @@ void Object::addChild(Object *child) {
     child->p_parent = this;
 }
 
-void Object::start() {
-    m_startEvent.callEvent(this);
-
-    std::cout << "start" << std::endl;
+void Object::setComponentActiveState(Component *component, const bool active) {
+    if (active) {
+        m_enableEvent.add(component, &Component::enable);
+        m_updateEvent.add(component, &Component::update);
+    }else {
+        m_disableEvent.add(component, &Component::disable);
+        m_updateEvent.remove(component, &Component::update);
+    }
 }
 
 void Object::update() {
+    m_startEvent.callEvent(this);
+    m_startEvent.clearEvent(this);
+
     m_updateEvent.callEvent(this);
 }
 
@@ -138,12 +142,10 @@ void Object::destroy() {
     m_destroyEvent.callEvent(this);
 }
 
-void Object::end() const {
+void Object::end() {
     for (const auto child : m_children) {
         child->end();
     }
-    for (const auto component : m_components) {
-        // call component.end()
-    }
+    m_destroyEvent.callEvent(this);
     delete this;
 }

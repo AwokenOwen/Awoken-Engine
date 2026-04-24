@@ -4,7 +4,7 @@
 
 #include "WorldManager.h"
 #include "Renderer.h"
-#include "Object.h"
+#include "../Util/Object.h"
 #include <iostream>
 #include <nlohmann/json_fwd.hpp>
 
@@ -66,7 +66,7 @@ void WorldManager::loadScene(const char *path) {
     m_loadedScenes.insert({s->name, s});
 
     // Log that scene is loaded
-    Log.log("Loaded %s", s->name.c_str());
+    Log.log("Loaded %s into memory", s->name.c_str());
 }
 
 void WorldManager::setActiveScene(const char* path, const bool isFile) {
@@ -102,6 +102,16 @@ void WorldManager::setBaseScene(const char *name) {
     m_baseScene = name;
 }
 
+void WorldManager::setObjectActiveState(Object *object, const bool active) {
+    if (active) {
+        m_activeScene->m_enableEvent.add(object, &Object::enable);
+        m_activeScene->m_updateEvent.add(object, &Object::update);
+    }else {
+        m_activeScene->m_disableEvent.add(object, &Object::disable);
+        m_activeScene->m_updateEvent.remove(object, &Object::update);
+    }
+}
+
 Scene* WorldManager::createSceneFromFile(const char *path) {
     std::ifstream ifs(path);
     if (!ifs) {
@@ -117,10 +127,8 @@ Scene* WorldManager::createSceneFromFile(const char *path) {
     for (std::vector<nlohmann::json> rootObjects = j["Root Objects"]; const auto object: rootObjects) {
         auto root = Object::fromJson(object);
         a->m_rootObjects.push_back(root);
-        a->m_startEvent.add(root, &Object::start);
         a->m_updateEvent.add(root, &Object::update);
         for (const auto child: root->m_children) {
-            a->m_startEvent.add(child, &Object::start);
             a->m_updateEvent.add(child, &Object::update);
         }
     }
@@ -141,11 +149,10 @@ int WorldManager::initialize() {
 }
 
 void WorldManager::terminate() {
-    for (const auto [key, value]: m_loadedScenes) {
-        m_loadedScenes.erase(key);
+    for (const auto value: m_loadedScenes | std::views::values) {
         value->end();
     }
-
+    m_loadedScenes.clear();
     // log terminated
     Log.log("WorldManager terminated");
 }
@@ -158,18 +165,11 @@ void WorldManager::awake() {
 void WorldManager::update() {
     // Add all to be objects into the scene
     for (const auto object: m_tobeAdded) {
-        // Add object to start event
-        m_activeScene->m_startEvent.add(object, &Object::start);
         // Add object to update event
         m_activeScene->m_updateEvent.add(object, &Object::update);
     }
     // clear to be added so no repeats
     m_tobeAdded.clear();
-
-    // Call all the new objects start function
-    m_activeScene->m_startEvent.callEvent(this);
-    // Clear event so no repeats
-    m_activeScene->m_startEvent.clearEvent(this);
 
     // Call all objects update functions
     m_activeScene->m_updateEvent.callEvent(this);

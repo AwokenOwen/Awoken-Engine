@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 4.3.2)
 project(Awoken_Engine)
+project(Awoken_Engine_Test)
 set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 
@@ -36,8 +37,13 @@ FetchContent_Declare(json
 FetchContent_MakeAvailable(assimp OpenAL glfw FreeType json)
 
 add_library(Awoken_Engine STATIC
+        Source/Components/Renderer.h
+        Source/Components/Component.cpp
+        Source/Components/Component.h
         Source/Managers/GameManager.cpp
         Source/Managers/GameManager.h
+        Source/Managers/InputManager.cpp
+        Source/Managers/InputManager.h
         Source/Managers/LogManager.cpp
         Source/Managers/LogManager.h
         Source/Managers/Manager.h
@@ -45,14 +51,11 @@ add_library(Awoken_Engine STATIC
         Source/Managers/WindowManager.h
         Source/Managers/WorldManager.cpp
         Source/Managers/WorldManager.h
-        Source/Objects/Object.cpp
-        Source/Objects/Object.h
         Source/Util/Event.h
         Source/Util/glad.c
         Source/Util/Math.h
-        Source/Components/Renderer.h
-        Source/Components/Component.cpp
-        Source/Components/Component.h
+        Source/Util/Object.cpp
+        Source/Util/Object.h
 )
 
 target_include_directories(Awoken_Engine PUBLIC

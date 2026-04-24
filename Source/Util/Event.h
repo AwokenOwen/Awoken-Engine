@@ -94,7 +94,7 @@ Event<R...>::Event() {
 template<typename ... R>
 template<typename T>
 Event<R...>::Event(T *owner) {
-    m_ownerHash = *static_cast<int*>(reinterpret_cast<void*>(owner));
+    m_ownerHash = *reinterpret_cast<int*>(owner);
 }
 
 template<typename ... R>
@@ -105,8 +105,8 @@ void Event<R...>::add(T *object, void(T::*func)(R...)) {
         (object->*func)(args...);
     };
 
-    int hash = *static_cast<int*>(reinterpret_cast<void*>(object));
-	hash *= *static_cast<int*>(reinterpret_cast<void*>(&func));
+	int hash = *reinterpret_cast<int*>(object);
+	hash *= *reinterpret_cast<int*>(&func);
 
     Listener<R...> listener{hash, lambda};
 
@@ -116,8 +116,8 @@ void Event<R...>::add(T *object, void(T::*func)(R...)) {
 template<typename ... R>
 template<typename T>
 void Event<R...>::remove(T *object, void(T::*func)(R...)) {
-	int hash = *static_cast<int*>(reinterpret_cast<void*>(object));
-	hash *= *static_cast<int*>(reinterpret_cast<void*>(&func));
+	int hash = *reinterpret_cast<int*>(object);
+	hash *= *reinterpret_cast<int*>(&func);
 
     std::erase_if(m_functions, [hash](const Listener<R...>& listener) {
         return listener.m_hash == hash;
@@ -134,9 +134,7 @@ void Event<R...>::clearEvent() {
 template<typename ... R>
 template<typename T>
 void Event<R...>::clearEvent(T *caller) {
-	int hash = *static_cast<int*>(reinterpret_cast<void*>(caller));
-
-    if (hash == m_ownerHash) {
+	if (const int hash = *reinterpret_cast<int*>(caller); hash == m_ownerHash) {
         m_functions.clear();
     }
 }
@@ -153,9 +151,7 @@ void Event<R...>::callEvent(R... args) {
 template<typename ... R>
 template<typename T>
 void Event<R...>::callEvent(R... args, T *caller) {
-	int hash = *static_cast<int*>(reinterpret_cast<void*>(caller));
-
-	if (hash == m_ownerHash) {
+	if (const int hash = *reinterpret_cast<int*>(caller); hash == m_ownerHash) {
 		for (auto f : m_functions) {
 			f.m_function(args...);
 		}

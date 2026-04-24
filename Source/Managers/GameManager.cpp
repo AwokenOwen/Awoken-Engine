@@ -7,13 +7,14 @@
 #include <chrono>
 #include <thread>
 
+#include "InputManager.h"
 #include "LogManager.h"
 #include "WindowManager.h"
 #include "WorldManager.h"
 
 int GameManager::initialize() {
     // Other Manager Initializations
-    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 /* || other manager inits == 1 */) {
+    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 /* || other manager inits == 1 */) {
         exit(-1);
     }
 
@@ -27,6 +28,8 @@ int GameManager::initialize() {
 void GameManager::terminate() {
     // Terminating all Managers
     Window.terminate();
+    World.terminate();
+    Input.terminate();
     // other manager terminate
 
     // Log Done

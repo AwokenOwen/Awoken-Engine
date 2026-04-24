@@ -8,6 +8,7 @@
 #include "Event.h"
 #include <vector>
 
+#include "Component.h"
 #include "nlohmann/json.hpp"
 
 class Component;
@@ -15,7 +16,7 @@ class Object {
     friend class WorldManager;
     friend struct Scene;
 public:
-    Object();
+    Object() = default;
     virtual ~Object() = default;
 
     /**
@@ -121,20 +122,42 @@ public:
     /**
      * @brief Sets the active state and adds it to the correct event with the world manager
      *
-     * @param activeState the new active state
+     * @param active the new active state
      */
-    void setActiveState(bool activeState = true);
+    void setActiveState(bool active = true);
 
+    /**
+     * @brief Function to add a child object to this object
+     *
+     * @param child the object to be added to hierarchy
+     */
     void addChild(Object* child);
 
-private:
-    void start();
-    void update();
-    void enable();
-    void disable();
-    void destroy();
-    void end() const;
+    void setComponentActiveState(Component* component, bool active);
 
+protected:
+    /**
+     * @brief Called every frame
+     */
+    void update();
+    /**
+     * @brief Called when the object's active state is set to true
+     */
+    void enable();
+    /**
+     * @brief Called when the object's active state is set to false
+     */
+    void disable();
+    /**
+     * @brief Called when the object is destroyed
+     */
+    void destroy();
+    /**
+     * @brief Called during the termination of the engine to free everything
+     */
+    void end();
+
+private:
     std::string name;
 
     Vector3 m_localPosition{};
@@ -191,7 +214,7 @@ private:
     }
 
     static Object* fromJson(const nlohmann::json& j) {
-        auto a = new Object();
+        const auto a = new Object();
 
         a->m_activeState = j["ActiveState"];
 
@@ -201,9 +224,7 @@ private:
         a->m_localRotation = Quaternion(j["Rotation"]["x"].get<double>(), j["Rotation"]["y"].get<double>(), j["Rotation"]["z"].get<double>(), j["Rotation"]["w"].get<double>());
         a->m_localScale = Vector3(j["Scale"]["x"].get<double>(), j["Scale"]["y"].get<double>(), j["Scale"]["z"].get<double>());
 
-        std::vector<nlohmann::json> children = j["Children"];
-
-        for (auto c : children) {
+        for (const std::vector<nlohmann::json> children = j["Children"]; auto c : children) {
             a->addChild(fromJson(c));
         }
 
@@ -221,7 +242,12 @@ template<typename T> T* Object::addComponent() {
             return dynamic_cast<T*>(c);
         }
     }
-    return new T();
+    auto newComponent = new T();
+    m_startEvent.add(newComponent, &T::start);
+    m_updateEvent.add(newComponent, &T::update);
+    m_destroyEvent.add(newComponent, &T::destroy);
+
+    return newComponent;
 }
 
 template<typename T> T* Object::getComponent() {
