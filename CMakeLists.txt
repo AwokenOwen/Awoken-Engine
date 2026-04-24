@@ -11,7 +11,7 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(OpenAL
         GIT_REPOSITORY https://github.com/kcat/openal-soft.git
-        GIT_TAG 1.24.0
+        GIT_TAG 1.25.0
         GIT_SHALLOW ON
 )
 set(ALSOFT_BUILD_ROUTER OFF CACHE BOOL "" FORCE)
