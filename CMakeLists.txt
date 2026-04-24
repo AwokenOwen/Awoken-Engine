@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 4.3.2)
 project(Awoken_Engine)
-project(Awoken_Engine_Test)
 set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 
