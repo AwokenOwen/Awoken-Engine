@@ -71,7 +71,7 @@ public:
      *
      * @return The current active Scene
      */
-    Scene* getActiveScene();
+    Scene* getActiveScene() const;
 
     /**
      * @brief Function that grabs a scene json file and loads it into memory
@@ -80,6 +80,7 @@ public:
      */
     void loadScene(const char* path);
     void setActiveScene(const char* path, bool isFile = false);
+    void setBaseScene(const char* name);
 private:
     /**
      * @brief Starts all other managers preparing to start the game
@@ -108,11 +109,12 @@ private:
     */
     ~WorldManager() override = default;
 
-    Scene* createSceneFromFile(const char* path);
+    static Scene* createSceneFromFile(const char* path);
 
     std::vector<Object*> m_tobeAdded{};
     std::vector<Object*> m_tobeDestroyed{};
 
+    std::string m_baseScene{"default"};
     Scene* m_activeScene{};
     std::map<std::string, Scene*> m_loadedScenes{};
 };
@@ -132,4 +134,6 @@ struct Scene {
     std::vector<Object*> m_rootObjects{};
 
     nlohmann::json toJson() const;
+
+    void end() const;
 };

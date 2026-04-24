@@ -133,6 +133,7 @@ private:
     void enable();
     void disable();
     void destroy();
+    void end() const;
 
     std::string name;
 

@@ -42,10 +42,6 @@ GameManager & GameManager::getInstance() {
     return singleton;
 }
 
-double GameManager::getTime() {
-
-}
-
 void GameManager::run() {
     // Log start
     Log.log("Starting Game Loop");

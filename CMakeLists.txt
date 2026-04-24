@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 4.1.2)
 project(Awoken_Engine)
-project(Awoken_Engine_Test)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -98,12 +97,7 @@ add_library(Awoken_Engine STATIC
         Source/Components/Component.h
 )
 
-add_executable(Awoken_Engine_Test
-        Source/main.cpp
-)
-
-target_link_libraries(Awoken_Engine_Test PRIVATE
-        Awoken_Engine
+target_link_libraries(Awoken_Engine PRIVATE
         assimp::assimp
         Freetype::Freetype
         glfw

@@ -137,3 +137,13 @@ void Object::disable() {
 void Object::destroy() {
     m_destroyEvent.callEvent(this);
 }
+
+void Object::end() const {
+    for (const auto child : m_children) {
+        child->end();
+    }
+    for (const auto component : m_components) {
+        // call component.end()
+    }
+    delete this;
+}
