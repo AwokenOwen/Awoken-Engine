@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.3.2)
 project(Awoken_Engine)
 set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
@@ -11,7 +11,11 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(OpenAL
         GIT_REPOSITORY https://github.com/kcat/openal-soft.git
-        GIT_TAG master)
+        GIT_TAG 1.24.0
+        GIT_SHALLOW ON
+)
+set(ALSOFT_BUILD_ROUTER OFF CACHE BOOL "" FORCE)
+set(AL_USE_MODULES OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
