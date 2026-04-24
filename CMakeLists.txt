@@ -74,5 +74,3 @@ target_link_libraries(Awoken_Engine PUBLIC
         OpenAL::OpenAL
         nlohmann_json::nlohmann_json
 )
-
-file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
