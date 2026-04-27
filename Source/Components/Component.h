@@ -1,5 +1,5 @@
 //
-// Created by awokenowen on 4/23/26.
+// Created by AwokenOwen on 4/23/26.
 //
 
 #pragma once
@@ -35,13 +35,7 @@ public:
      *
      * @param active
      */
-    void setActiveState(bool active);
-
-protected:
-    /**
-     * @brief Called when the parent objected is destroyed
-     */
-    void destroy();
+    virtual void setActiveState(bool active);
 
 private:
     /**
@@ -60,6 +54,12 @@ private:
      * @brief Called on the last frame after being set to disabled
      */
     virtual void disable() = 0;
+    /**
+     * @brief Called when the parent objected is destroyed
+     */
+    virtual void destroy() {
+        delete this;
+    }
 
     /**
      * @brief Converts all necessary properties into JSON for storing

@@ -1,10 +1,9 @@
 //
-// Created by awokenowen on 4/23/26.
+// Created by AwokenOwen on 4/23/26.
 //
 
 #include "Component.h"
-
-#include "../Util/Object.h"
+#include "Object.h"
 
 Component::Component(Object *parent) {
     p_parent = parent;
@@ -23,8 +22,4 @@ void Component::setActiveState(const bool active) {
         return;
     m_activeState = active;
     getParent()->setComponentActiveState(this, active);
-}
-
-void Component::destroy() {
-    delete this;
 }

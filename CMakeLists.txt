@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 4.3.2)
 project(Awoken_Engine)
+project(Awoken_Engine_Test)
 set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 
@@ -55,6 +56,14 @@ add_library(Awoken_Engine STATIC
         Source/Util/Math.h
         Source/Util/Object.cpp
         Source/Util/Object.h
+        Source/Components/MeshRendererComponent.cpp
+        Source/Components/MeshRendererComponent.h
+        Source/Util/Mesh.cpp
+        Source/Util/Mesh.h
+        Source/Util/Material.cpp
+        Source/Util/Material.h
+        Source/Components/CameraComponent.cpp
+        Source/Components/CameraComponent.h
 )
 
 target_include_directories(Awoken_Engine PUBLIC
@@ -78,3 +87,25 @@ target_link_libraries(Awoken_Engine PUBLIC
 )
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+
+#REMOVE WHEN PUSHING
+
+include_directories(
+        Source/glad/include
+        Source/Managers
+        Source/Util
+        Source/Components/
+        Source/Objects
+        ${freetype_SOURCE_DIR}/include
+        ${glfw_SOURCE_DIR}/include
+        ${json_SOURCE_DIR}/include
+        ${openal_SOURCE_DIR}/include
+)
+
+add_executable(Awoken_Engine_Test
+    main.cpp
+)
+
+target_link_libraries(Awoken_Engine_Test PUBLIC
+    Awoken_Engine
+)

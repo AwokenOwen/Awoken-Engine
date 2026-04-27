@@ -5,7 +5,17 @@
 #include <cmath>
 #include <numbers>
 
+#include "glad/glad.h"
+
 #define PI std::numbers::pi
+
+inline float toRadians(const float degrees) {
+    return degrees * PI / 180;
+};
+
+inline float cot(const float a) {
+    return 1.0f / std::tan(a);
+};
 
 class Matrix4;
 class Matrix3;
@@ -147,6 +157,18 @@ public:
 
     void Inverse();
     [[nodiscard]] Matrix2 inverse() const;
+
+    float* toFloatArray() {
+        floatArray[0] = a1;
+        floatArray[1] = a2;
+        floatArray[2] = b1;
+        floatArray[3] = b2;
+
+        return floatArray;
+    };
+
+private:
+    float floatArray[4] {};
 };
 
 class Matrix3 {
@@ -174,6 +196,23 @@ public:
 
     void Inverse();
     [[nodiscard]] Matrix3 inverse() const;
+
+    float* toFloatArray() {
+        floatArray[0] = a1;
+        floatArray[1] = a2;
+        floatArray[2] = a3;
+        floatArray[3] = b1;
+        floatArray[4] = b2;
+        floatArray[5] = b3;
+        floatArray[6] = c1;
+        floatArray[7] = c2;
+        floatArray[8] = c3;
+
+        return floatArray;
+    };
+
+private:
+    float floatArray[9] {};
 };
 
 class Matrix4 {
@@ -211,6 +250,30 @@ public:
     [[nodiscard]] Matrix4 inverse() const;
 
     [[nodiscard]] static Matrix4 makeModelMatrix(const Vector3 &position, const Quaternion &rotation, const Vector3 &scale);
+
+    const float *toFloatArray() {
+        floatArray[0] = a1;
+        floatArray[1] = a2;
+        floatArray[2] = a3;
+        floatArray[3] = a4;
+        floatArray[4] = b1;
+        floatArray[5] = b2;
+        floatArray[6] = b3;
+        floatArray[7] = b4;
+        floatArray[8] = c1;
+        floatArray[9] = c2;
+        floatArray[10] = c3;
+        floatArray[11] = c4;
+        floatArray[12] = d1;
+        floatArray[13] = d2;
+        floatArray[14] = d3;
+        floatArray[15] = d4;
+
+        return floatArray;
+    };
+
+private:
+    float floatArray[16] {};
 };
 
 inline double det2(const Matrix2 &a) {

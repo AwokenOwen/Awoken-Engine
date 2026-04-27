@@ -40,6 +40,13 @@ void WindowManager::setWindowTitle(const std::string &title) {
     m_windowTitle = title;
 }
 
+float WindowManager::getAspectRatio() const {
+    if (m_fixedAspectRatio) {
+        return m_aspectRatio;
+    }
+    return static_cast<float>(m_viewportWidth) / static_cast<float>(m_viewportHeight);
+}
+
 void WindowManager::clear() {
     // Clear the screen
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

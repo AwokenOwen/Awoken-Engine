@@ -58,20 +58,21 @@ public:
      * @param renderer the renderer that is getting changed
      */
     void updateTransparency(Renderer* renderer);
+    void setActiveRenderer(Renderer* renderer, bool active);
 
     /**
      * @brief Getter for the current active camera in the current active scene
      *
      * @return The Camera Component of the current active camera
      */
-    CameraComponent* getActiveCamera();
+    [[nodiscard]] CameraComponent* getActiveCamera();
 
     /**
      * @brief The getter for the current active scene
      *
      * @return The current active Scene
      */
-    Scene* getActiveScene() const;
+    [[nodiscard]] Scene* getActiveScene() const;
 
     /**
      * @brief Function that grabs a scene json file and loads it into memory

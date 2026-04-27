@@ -34,6 +34,8 @@ public:
      * @param title
      */
     void setWindowTitle(const std::string &title);
+
+    [[nodiscard]] float getAspectRatio() const;
 private:
     /**
      * @brief Starts the Window Manager and creates the window for the game

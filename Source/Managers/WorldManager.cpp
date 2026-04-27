@@ -42,6 +42,14 @@ void WorldManager::updateTransparency(Renderer *renderer) {
     renderer->getTransparency() ? m_activeScene->m_transparentDrawEvent.add(renderer, &Renderer::draw) : m_activeScene->m_opaqueDrawEvent.add(renderer, &Renderer::draw);
 }
 
+void WorldManager::setActiveRenderer(Renderer *renderer, const bool active) {
+    if (active) {
+        registerRenderer(renderer);
+    }else {
+       renderer->getTransparency() ? m_activeScene->m_transparentDrawEvent.remove(renderer, &Renderer::draw) :  m_activeScene->m_opaqueDrawEvent.remove(renderer, &Renderer::draw);
+    }
+}
+
 CameraComponent * WorldManager::getActiveCamera() {
     // Camera not a thing yet, will be added later
     return nullptr;
