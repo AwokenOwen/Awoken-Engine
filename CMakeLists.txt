@@ -37,41 +37,39 @@ FetchContent_Declare(json
 FetchContent_MakeAvailable(assimp OpenAL glfw FreeType json)
 
 add_library(Awoken_Engine STATIC
-        Source/Components/Renderer.h
-        Source/Components/Component.cpp
-        Source/Components/Component.h
-        Source/Managers/GameManager.cpp
-        Source/Managers/GameManager.h
-        Source/Managers/InputManager.cpp
-        Source/Managers/InputManager.h
-        Source/Managers/LogManager.cpp
-        Source/Managers/LogManager.h
-        Source/Managers/Manager.h
-        Source/Managers/WindowManager.cpp
-        Source/Managers/WindowManager.h
-        Source/Managers/WorldManager.cpp
-        Source/Managers/WorldManager.h
-        Source/Util/Event.h
-        Source/Util/glad.c
-        Source/Util/Math.h
-        Source/Util/Object.cpp
-        Source/Util/Object.h
-        Source/Components/MeshRendererComponent.cpp
-        Source/Components/MeshRendererComponent.h
-        Source/Util/Mesh.cpp
-        Source/Util/Mesh.h
-        Source/Util/Material.cpp
-        Source/Util/Material.h
+        include/Renderer.h
+        include/Component.h
+        include/GameManager.h
+        include/InputManager.h
+        include/LogManager.h
+        include/Manager.h
+        include/WindowManager.h
+        include/WorldManager.h
+        include/Event.h
+        include/Math.h
+        include/Object.h
+        include/MeshRendererComponent.h
+        include/Mesh.h
+        include/Material.h
+        include/CameraComponent.h
         Source/Components/CameraComponent.cpp
-        Source/Components/CameraComponent.h
+        Source/Components/Component.cpp
+        Source/Components/MeshRendererComponent.cpp
+        Source/Managers/GameManager.cpp
+        Source/Managers/InputManager.cpp
+        Source/Managers/LogManager.cpp
+        Source/Managers/WindowManager.cpp
+        Source/Managers/WorldManager.cpp
+        Source/Util/glad.c
+        Source/Util/Object.cpp
+        Source/Util/Mesh.cpp
+        Source/Util/Material.cpp
+        main.cpp
 )
 
 target_include_directories(Awoken_Engine PUBLIC
-        Source/glad/include
-        Source/Managers
-        Source/Util
-        Source/Components/
-        Source/Objects
+        glad/include
+        include
         ${freetype_SOURCE_DIR}/include
         ${glfw_SOURCE_DIR}/include
         ${json_SOURCE_DIR}/include
@@ -91,11 +89,8 @@ file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 #REMOVE WHEN PUSHING
 
 include_directories(
-        Source/glad/include
-        Source/Managers
-        Source/Util
-        Source/Components/
-        Source/Objects
+        glad/include
+        include
         ${freetype_SOURCE_DIR}/include
         ${glfw_SOURCE_DIR}/include
         ${json_SOURCE_DIR}/include

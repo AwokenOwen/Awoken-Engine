@@ -4,7 +4,7 @@
 
 #include "WorldManager.h"
 #include "Renderer.h"
-#include "../Util/Object.h"
+#include "Object.h"
 #include <iostream>
 #include <nlohmann/json_fwd.hpp>
 

@@ -111,5 +111,5 @@ private:
     /**
      * @brief The title of the window on window bar
      */
-    std::string m_windowTitle{"Game Engine"};
+    std::string m_windowTitle{"Awoken Engine"};
 };
