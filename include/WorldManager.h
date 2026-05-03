@@ -75,7 +75,7 @@ public:
     [[nodiscard]] Scene* getActiveScene() const;
 
     /**
-     * @brief Function that grabs a scene json file and loads it into memory
+     * @brief Function that grabs a scene JSON file and loads it into memory
      *
      * @param path
      */
@@ -134,7 +134,7 @@ struct Scene {
 
     std::vector<Object*> m_rootObjects{};
 
-    nlohmann::json toJson() const;
+    [[nodiscard]] nlohmann::json toJson() const;
 
     void end() const;
 };
