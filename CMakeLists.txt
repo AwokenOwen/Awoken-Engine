@@ -56,6 +56,7 @@ add_library(Awoken_Engine STATIC
         Source/Managers/WorldManager.cpp
         Source/Util/glad.c
         Source/Util/Object.cpp
+        include/stb_image.h
 )
 
 target_include_directories(Awoken_Engine PUBLIC

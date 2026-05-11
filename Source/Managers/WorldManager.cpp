@@ -7,6 +7,7 @@
 #include "Object.h"
 #include <iostream>
 #include <nlohmann/json_fwd.hpp>
+#include "ResourceManager.h"
 
 WorldManager & WorldManager::getInstance() {
     // Make singleton
@@ -57,60 +58,22 @@ CameraComponent * WorldManager::getActiveCamera() {
 
 Scene * WorldManager::getActiveScene() const {
     // getter for the active scene
-    return m_activeScene;
+    return Resource.getScene(m_activeSceneName);
 }
 
-void WorldManager::loadScene(const char *path) {
-    // Log the loading scene
-    Log.log("Loading %s", path);
-    // Call helper for parsing JSON
-    auto s = createSceneFromFile(path);
-    if (s == nullptr) {
-        Log.logError("Failed to load %s as into scene map", path);
-        return;
-    }
+void WorldManager::setActiveScene(const std::string &name) {
+    // do resource stuff
+    m_activeSceneName = name;
+    m_activeScene = Resource.getScene(m_activeSceneName);
 
-    // insert into the loaded map to be called on later
-    m_loadedScenes.insert({s->name, s});
-
-    // Log that scene is loaded
-    Log.log("Loaded %s into memory", s->name.c_str());
+    Log.log("Setting active scene: %s", m_activeSceneName.c_str());
 }
 
-void WorldManager::setActiveScene(const char* path, const bool isFile) {
-    // if the scene is being loaded from a file
-    if (isFile) {
-        // Helper to parse JSON file
-        const auto s = createSceneFromFile(path);
-        if (s == nullptr) {
-            Log.logError("Failed to set %s as Active Scene", path);
-            return;
-        }
-        // insert into the loaded map
-        m_loadedScenes.insert({s->name, s});
-        // set as active scene
-        m_activeScene = s;
-        // log that it's loaded
-        Log.log("Loaded %s", s->name.c_str());
-    }else {
-        // Look for scene name in map
-        if (const auto s = m_loadedScenes.find(path); s != m_loadedScenes.end()) {
-            // set as active scene
-            m_activeScene = s->second;
-            // Log that the scene is loaded
-            Log.log("Loaded %s", m_activeScene->name.c_str());
-            return;
-        }
-        // log error if the scene querier is not in the map
-        Log.logError("Scene %s not found", path);
-    }
-}
-
-void WorldManager::setBaseScene(const char *name) {
+void WorldManager::setBaseScene(const std::string& name) {
     m_baseScene = name;
 }
 
-void WorldManager::setObjectActiveState(Object *object, const bool active) {
+void WorldManager::setObjectActiveState(Object *object, const bool active) const {
     if (active) {
         m_activeScene->m_enableEvent.add(object, &Object::enable);
         m_activeScene->m_updateEvent.add(object, &Object::update);
@@ -120,36 +83,7 @@ void WorldManager::setObjectActiveState(Object *object, const bool active) {
     }
 }
 
-Scene* WorldManager::createSceneFromFile(const char *path) {
-    std::ifstream ifs(path);
-    if (!ifs) {
-        Log.logError("%s, could not be opened", path);
-        return nullptr;
-    }
-    nlohmann::json j = nlohmann::json::parse(ifs);
-
-    auto a = new Scene();
-
-    a->name = j["Name"];
-
-    for (std::vector<nlohmann::json> rootObjects = j["Root Objects"]; const auto object: rootObjects) {
-        auto root = Object::fromJson(object);
-        a->m_rootObjects.push_back(root);
-        a->m_updateEvent.add(root, &Object::update);
-        for (const auto child: root->m_children) {
-            a->m_updateEvent.add(child, &Object::update);
-        }
-    }
-
-    ifs.close();
-
-    return a;
-}
-
 int WorldManager::initialize() {
-    // load default scene into memory
-    loadScene("assets/Scenes/default.scene");
-
     // log initialized
     Log.log("WorldManager initialized");
 
@@ -157,17 +91,18 @@ int WorldManager::initialize() {
 }
 
 void WorldManager::terminate() {
-    for (const auto value: m_loadedScenes | std::views::values) {
-        value->end();
-    }
-    m_loadedScenes.clear();
     // log terminated
     Log.log("WorldManager terminated");
 }
 
 void WorldManager::awake() {
     // do important set up
-    setActiveScene(m_baseScene.c_str());
+    Log.log("Loading base scene...");
+
+    Resource.loadScene(m_baseScene);
+    setActiveScene(m_baseScene);
+
+    Log.log("Finished loading base scene: %s", m_activeSceneName.c_str());
 }
 
 void WorldManager::update() {
@@ -180,16 +115,16 @@ void WorldManager::update() {
     m_tobeAdded.clear();
 
     // Call all objects update functions
-    m_activeScene->m_updateEvent.callEvent(this);
+    m_activeScene->m_updateEvent.callEvent();
 
     // Draw all drawers to the screen/framebuffer, transparent first then opaque
-    m_activeScene->m_transparentDrawEvent.callEvent(this);
-    m_activeScene->m_opaqueDrawEvent.callEvent(this);
+    m_activeScene->m_transparentDrawEvent.callEvent();
+    m_activeScene->m_opaqueDrawEvent.callEvent();
 
     // Call the destroy event
-    m_activeScene->m_destroyEvent.callEvent(this);
+    m_activeScene->m_destroyEvent.callEvent();
     // Clear the destroy event so no repeats
-    m_activeScene->m_destroyEvent.clearEvent(this);
+    m_activeScene->m_destroyEvent.clearEvent();
 
     // Remove all to be objects from the scene
     for (const auto object: m_tobeDestroyed) {
@@ -198,30 +133,4 @@ void WorldManager::update() {
     }
     // clear to be destroyed so no repeats
     m_tobeDestroyed.clear();
-}
-
-nlohmann::json Scene::toJson() const {
-    nlohmann::json j;
-
-    j["Name"] = name;
-
-    int untitledNumber = 0;
-    std::vector<nlohmann::json> rootObjects;
-    for (auto& object : m_rootObjects) {
-        if (object->name == "") {
-            object->name = "Untitled_" + std::to_string(untitledNumber++);
-        }
-        rootObjects.push_back(object->toJson());
-    }
-
-    j["Root Objects"] = rootObjects;
-
-    return j;
-}
-
-void Scene::end() const {
-    for (const auto object: m_rootObjects) {
-        object->end();
-    }
-    delete this;
 }

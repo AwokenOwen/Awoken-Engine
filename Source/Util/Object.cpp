@@ -124,28 +124,28 @@ void Object::setComponentActiveState(Component *component, const bool active) {
 }
 
 void Object::update() {
-    m_startEvent.callEvent(this);
-    m_startEvent.clearEvent(this);
+    m_startEvent.callEvent();
+    m_startEvent.clearEvent();
 
-    m_updateEvent.callEvent(this);
+    m_updateEvent.callEvent();
 }
 
 void Object::enable() {
-    m_enableEvent.callEvent(this);
+    m_enableEvent.callEvent();
 }
 
 void Object::disable() {
-    m_disableEvent.callEvent(this);
+    m_disableEvent.callEvent();
 }
 
 void Object::destroy() {
-    m_destroyEvent.callEvent(this);
+    m_destroyEvent.callEvent();
 }
 
 void Object::end() {
     for (const auto child : m_children) {
         child->end();
     }
-    m_destroyEvent.callEvent(this);
+    m_destroyEvent.callEvent();
     delete this;
 }

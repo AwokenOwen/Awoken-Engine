@@ -1,33 +1,47 @@
 //
-// Created by awokenowen on 5/3/26.
+// Created by AwokenOwen on 5/3/26.
 //
 
 #pragma once
-#include <map>
-
 #include "glad/glad.h"
 #include <vector>
 #include <string>
+#include <map>
+#include <nlohmann/json.hpp>
+
 #include "Math.h"
-#include "Manager.h"
+#include "Event.h"
+#include "WorldManager.h"
+
+struct ShaderPaths {
+    std::string vertexPath{};
+    std::string fragmentPath{};
+};
+
+struct Shader {
+    std::string name{};
+    unsigned int shaderProgram{};
+};
 
 struct Material {
     Material(std::string name, unsigned int shader);
 
-    template<typename T>
-    void setUniform(const std::string& location, T value);
-
 private:
     std::string m_name{};
 
-    unsigned int m_shader{};
+    Shader m_shader{};
     std::vector<unsigned int> m_textures{};
 };
 
 struct Vertex {
-    Vector3 Position;
-    Vector3 Normal;
-    Vector2 TexCoords;
+    Vector3 m_position{};
+    Vector3 m_normal{};
+    Vector2 m_texCoords{};
+
+    Vertex() = default;
+    explicit Vertex(Vector3 position, Vector3 normal, Vector2 texCoords);
+    explicit Vertex(Vector3 position, Vector2 texCoords);
+    explicit Vertex(Vector3 position);
 };
 
 struct Mesh {
@@ -48,6 +62,32 @@ private:
     Material* p_material{};
 };
 
+class Object;
+struct Scene {
+    friend class WorldManager;
+    friend class ResourceManager;
+
+    [[nodiscard]] std::string getName() const;
+
+private:
+    std::string m_name{};
+
+    Event<> m_updateEvent{};
+    Event<> m_enableEvent{};
+    Event<> m_disableEvent{};
+    Event<> m_destroyEvent{};
+
+    Event<> m_transparentDrawEvent{};
+    Event<> m_opaqueDrawEvent{};
+
+    std::vector<Object*> m_rootObjects{};
+
+    static Scene* fromJson(const nlohmann::json& j);
+    [[nodiscard]] nlohmann::json toJson() const;
+
+    void end() const;
+};
+
 /**
  * @brief Singleton Macro
  */
@@ -63,36 +103,32 @@ public:
     static ResourceManager& getInstance();
 
     /**
-     * @brief Function used to load meshes into the scene
+     * @brief Function used to load a scene from the JSON file path and into the scene map
      *
-     * @param name The name of the mesh to be added
-     * @param path The path the mesh is located at
-     * @return A copy of the mesh at the path or NULL if name is already in the map
+     * @param path the path to the JSON file containing all the information
+     * @return the name of the scene if added or empty string if name of scene is already in map
      */
-    Mesh makeMesh(std::string name, std::string path);
+    std::string addScene(const std::string& path);
     /**
-     * @brief A function to get a loaded mesh from the mesh map
+     * @brief load scene from sceneMap into the loaded Scene map
      *
-     * @param name The name of the Mesh in the map
-     * @return The mesh in the map or NULL if not in the map
+     * @param name name of scene in scene map
+     * @return Scene pointer to the newly loaded scene or nullptr if name not in scene map
      */
-    Mesh getMesh(std::string name);
-
+    Scene* loadScene(const std::string& name);
     /**
+     * @brief Function that gets a scene in the loaded scene map and returns it. If the scene is not in the loaded scene map it tries to load it from scene map
      *
-     * @param name The name of the material to be added to the map
-     * @param vertexPath The path to the vertex shader
-     * @param fragmentPath The path to the fragment shader
-     * @return A copy of the material create with those two shaders or NULL if name is already in the map
+     * @param name name of the scene in the loaded scene map
+     * @return The scene from the loaded scene map nullptr if it's not in either the scene map or loaded scene map
      */
-    Material makeMaterial(std::string name, std::string vertexPath, std::string fragmentPath);
+    Scene* getScene(const std::string& name);
     /**
-     * @brief A function to get the material needed from the map
+     * @brief clears the loaded Scene map to free ram usage
      *
-     * @param name The name of the material in the map
-     * @return The material in the map or NULL if the name is not in the map
+     * @param keepLoaded List of scenes that will not be removed from map
      */
-    Material getMaterial(std::string name);
+    void flushLoadedScenes(const std::vector<std::string>& keepLoaded = {});
 
 private:
     /**
@@ -114,5 +150,6 @@ private:
      */
     ~ResourceManager() override = default;
 
-    std::map<std::string, Mesh> m_meshes;
+    std::map<std::string, std::string> m_sceneMap;
+    std::map<std::string, Scene*> m_loadedScenes;
 };

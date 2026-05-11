@@ -271,19 +271,19 @@ private:
 	/**
 	 * @brief Event called when based on mouse position and delta
 	 */
-	Event<Vector2, Vector2> m_mouseMoveEvent{this};
+	Event<Vector2, Vector2> m_mouseMoveEvent{};
 	/**
 	 * @brief Event gives KeyboardContext based on key
 	 */
-	Event<KeyboardContext> m_keyboardEvent{this};
+	Event<KeyboardContext> m_keyboardEvent{};
 	/**
 	 * @brief Event gives MouseButtonContext on the mouse button
 	 */
-	Event<MouseButtonContext> m_mouseButtonEvent{this};
+	Event<MouseButtonContext> m_mouseButtonEvent{};
 	/**
 	 * @brief Event give a vec2 of scroll delta
 	 */
-	Event<Vector2> m_scrollEvent{this};
+	Event<Vector2> m_scrollEvent{};
 
 	//mouse movement variables
 	/**

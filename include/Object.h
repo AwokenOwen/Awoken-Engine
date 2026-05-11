@@ -170,11 +170,11 @@ private:
 
     bool m_activeState{true};
 
-    Event<> m_startEvent{this};
-    Event<> m_updateEvent{this};
-    Event<> m_enableEvent{this};
-    Event<> m_disableEvent{this};
-    Event<> m_destroyEvent{this};
+    Event<> m_startEvent{};
+    Event<> m_updateEvent{};
+    Event<> m_enableEvent{};
+    Event<> m_disableEvent{};
+    Event<> m_destroyEvent{};
 
     nlohmann::json toJson() {
         nlohmann::json j;
@@ -203,7 +203,7 @@ private:
         int untitledNumber = 0;
         std::vector<nlohmann::json> temp;
         for (auto& object : m_children) {
-            if (object->name == "") {
+            if (object->name.empty()) {
                 object->name = "Untitled_" + std::to_string(untitledNumber++);
             }
             temp.push_back(object->toJson());

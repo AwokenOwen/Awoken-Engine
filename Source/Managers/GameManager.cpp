@@ -9,12 +9,13 @@
 
 #include "InputManager.h"
 #include "LogManager.h"
+#include "ResourceManager.h"
 #include "WindowManager.h"
 #include "WorldManager.h"
 
 int GameManager::initialize() {
     // Other Manager Initializations
-    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 /* || other manager inits == 1 */) {
+    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 || Resource.initialize() == 1/* || other manager inits == 1 */) {
         exit(-1);
     }
 
@@ -30,6 +31,7 @@ void GameManager::terminate() {
     Window.terminate();
     World.terminate();
     Input.terminate();
+    Resource.terminate();
     // other manager terminate
 
     // Log Done

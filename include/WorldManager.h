@@ -24,6 +24,7 @@ class CameraComponent;
  */
 class WorldManager : public Manager{
     friend class GameManager;
+    friend class ResourceManager;
 public:
     /**
      * @brief Getter for the singleton instance
@@ -75,14 +76,26 @@ public:
     [[nodiscard]] Scene* getActiveScene() const;
 
     /**
-     * @brief Function that grabs a scene JSON file and loads it into memory
+     * @brief Function used to set a new active scene and load all the necessary resources
      *
-     * @param path
+     * @param name Name of the scene in the resource manager scene map to set as the active scene
      */
-    void loadScene(const char* path);
-    void setActiveScene(const char* path, bool isFile = false);
-    void setBaseScene(const char* name);
-    void setObjectActiveState(Object* object, bool active);
+    void setActiveScene(const std::string& name);
+
+    /**
+     * @brief sets the name of the base scene needed to start the engine
+     *
+     * @param name Name of the scene in the resource manager scene map
+     */
+    void setBaseScene(const std::string& name);
+
+    /**
+     * @brief Function used for setting the active state of an object and added them to the correct enabled/disabled events
+     *
+     * @param object Object that the active state is changing on
+     * @param active the new active state
+     */
+    void setObjectActiveState(Object* object, bool active) const;
 private:
     /**
      * @brief Starts all other managers preparing to start the game
@@ -111,30 +124,11 @@ private:
     */
     ~WorldManager() override = default;
 
-    static Scene* createSceneFromFile(const char* path);
-
     std::vector<Object*> m_tobeAdded{};
     std::vector<Object*> m_tobeDestroyed{};
 
     std::string m_baseScene{"default"};
-    Scene* m_activeScene{};
-    std::map<std::string, Scene*> m_loadedScenes{};
-};
+    std::string m_activeSceneName{};
 
-struct Scene {
-    std::string name;
-
-    Event<> m_updateEvent{&World};
-    Event<> m_enableEvent{&World};
-    Event<> m_disableEvent{&World};
-    Event<> m_destroyEvent{&World};
-
-    Event<> m_transparentDrawEvent{&World};
-    Event<> m_opaqueDrawEvent{&World};
-
-    std::vector<Object*> m_rootObjects{};
-
-    [[nodiscard]] nlohmann::json toJson() const;
-
-    void end() const;
+    Scene* m_activeScene{nullptr};
 };
