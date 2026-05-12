@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.3.2)
+cmake_minimum_required(VERSION 4.2.2)
 project(Awoken_Engine)
 project(Awoken_Engine_Test)
 set(CMAKE_CXX_STANDARD 20)
@@ -15,6 +15,9 @@ FetchContent_Declare(glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
         GIT_TAG 3.4
         GIT_SHALLOW ON)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(FreeType
         GIT_REPOSITORY https://github.com/freetype/freetype.git
@@ -77,8 +80,7 @@ target_link_libraries(Awoken_Engine PUBLIC
 )
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
-
-#REMOVE WHEN PUSHING
+file(COPY sceneList.scene DESTINATION ${CMAKE_BINARY_DIR})
 
 include_directories(
         glad/include
@@ -90,7 +92,8 @@ include_directories(
 )
 
 add_executable(Awoken_Engine_Test
-    main.cpp
+        main.cpp
+
 )
 
 target_link_libraries(Awoken_Engine_Test PUBLIC

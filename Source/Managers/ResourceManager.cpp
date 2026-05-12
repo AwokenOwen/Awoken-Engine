@@ -3,6 +3,9 @@
 //
 
 #include "ResourceManager.h"
+
+#include <iostream>
+
 #include "Object.h"
 #include "LogManager.h"
 
