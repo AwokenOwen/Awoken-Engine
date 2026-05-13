@@ -108,13 +108,6 @@ public:
      */
     void setActiveState(bool active = true);
 
-    /**
-     * @brief Function to add a child object to this object
-     *
-     * @param child the object to be added to hierarchy
-     */
-    void addChild(Object* child);
-
     void setComponentActiveState(Component* component, bool active);
 
     /**

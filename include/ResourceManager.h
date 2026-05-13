@@ -76,9 +76,10 @@ struct Scene {
 
     [[nodiscard]] std::string getName() const;
 
-    [[nodiscard]] nlohmann::json toJson() const;
-
-    std::vector<Object*> m_rootObjects{};
+    EVENT_ACCESSORS(m_updateEvent);
+    EVENT_ACCESSORS(m_enableEvent);
+    EVENT_ACCESSORS(m_disableEvent);
+    EVENT_ACCESSORS(m_destroyEvent);
 
 private:
     std::string m_name{};
@@ -91,9 +92,11 @@ private:
     Event<> m_transparentDrawEvent{};
     Event<> m_opaqueDrawEvent{};
 
+    std::vector<Object*> m_rootObjects{};
 
     CameraComponent* m_mainCamera{};
 
+    [[nodiscard]] nlohmann::json toJson() const;
     static Scene* fromJson(const nlohmann::json& j);
 
     void end() const;

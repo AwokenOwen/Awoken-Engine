@@ -33,12 +33,13 @@ public:
     static WorldManager& getInstance();
 
     /**
-     * @brief Function used to put a new object into the update loop
+     * @brief Function to add an object into the game during runtime
      *
-     * @param object The new Object needed to be added
-     * @param parent The Object the new object will be parented to, nullptr if root object
+     * @param parent The parent of the new Object
+     * @return Pointer to the newly created Object
      */
-    void registerObject(Object* object, const Object* parent = nullptr);
+    Object* instantiateObject(Object* parent = nullptr);
+
     /**
      * @brief Function used to prepare an object to be destroyed and the data freed
      *

@@ -16,9 +16,26 @@ WorldManager & WorldManager::getInstance() {
     return instance;
 }
 
-void WorldManager::registerObject(Object *object, const Object* parent) {
-    // Add to the to be added list
-    m_tobeAdded.push_back(object);
+Object* WorldManager::instantiateObject(Object* parent)
+{
+    const auto a = new Object();
+
+    m_tobeAdded.push_back(a);
+
+    if (parent != nullptr)
+    {
+        a->m_name = "Child_" + std::to_string(parent->m_children.size());
+        parent->m_children.push_back(a);
+        a->p_parent = parent;
+
+        Log.log("Instantiating Object %s", a->m_name.c_str());
+        return a;
+    }
+    a->m_name = "Root_" + std::to_string(m_activeScene->m_rootObjects.size());
+    m_activeScene->m_rootObjects.push_back(a);
+
+    Log.log("Instantiating Object %s", a->m_name.c_str());
+    return a;
 }
 
 void WorldManager::destroyObject(Object *object) {
@@ -120,6 +137,9 @@ void WorldManager::update() {
     // Remove all to be objects from the scene
     for (const auto object: m_tobeDestroyed) {
         m_activeScene->m_updateEvent.remove(object, &Object::update);
+
+        Log.log("Destroying object %s", object->m_name.c_str());
+
         delete(object);
     }
     // clear to be destroyed so no repeats

@@ -100,21 +100,6 @@ void Object::setActiveState(const bool active) {
     World.setObjectActiveState(this, active);
 }
 
-void Object::addChild(Object *child) {
-    const Object* currentParent = p_parent;
-
-    while (currentParent != nullptr) {
-        if (currentParent == child) {
-            Log.logError("Cyclical Hierarchy detected, addChild failed");
-            return;
-        }
-        currentParent = currentParent->p_parent;
-    }
-
-    m_children.push_back(child);
-    child->p_parent = this;
-}
-
 void Object::setComponentActiveState(Component *component, const bool active) {
     if (active) {
         m_enableEvent.add(component, &Component::enable);
@@ -211,10 +196,13 @@ Object* Object::fromJson(const nlohmann::json& j)
     }
 
     for (const std::vector<nlohmann::json> children = j["Children"]; const auto& c : children) {
-        a->addChild(fromJson(c));
+        auto child = fromJson(c);
+        child->p_parent = a;
+        a->m_children.push_back(child);
     }
 
-    World.registerObject(a);
+    World.getActiveScene()->addTo_m_updateEvent(a, &Object::update);
+    World.getActiveScene()->addTo_m_destroyEvent(a, &Object::destroy);
 
     return a;
 }
