@@ -19,9 +19,6 @@ WorldManager & WorldManager::getInstance() {
 void WorldManager::registerObject(Object *object, const Object* parent) {
     // Add to the to be added list
     m_tobeAdded.push_back(object);
-    if (parent == nullptr) {
-        m_activeScene->m_rootObjects.push_back(object);
-    }
 }
 
 void WorldManager::destroyObject(Object *object) {
@@ -51,14 +48,8 @@ void WorldManager::setActiveRenderer(Renderer *renderer, const bool active) {
     }
 }
 
-CameraComponent * WorldManager::getActiveCamera() {
-    // Camera not a thing yet, will be added later
-    return nullptr;
-}
-
 Scene * WorldManager::getActiveScene() const {
-    // getter for the active scene
-    return Resource.getScene(m_activeSceneName);
+    return m_activeScene;
 }
 
 void WorldManager::setActiveScene(const std::string &name) {

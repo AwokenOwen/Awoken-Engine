@@ -1,5 +1,5 @@
 //
-// Created by awokenowen on 4/13/26.
+// Created by AwokenOwen on 4/13/26.
 //
 
 #pragma once
@@ -17,7 +17,6 @@
 struct Scene;
 class Renderer;
 class Object;
-class CameraComponent;
 
 /**
  * @brief Singleton class that handles all Frame-buffers and the World events
@@ -60,13 +59,6 @@ public:
      */
     void updateTransparency(Renderer* renderer);
     void setActiveRenderer(Renderer* renderer, bool active);
-
-    /**
-     * @brief Getter for the current active camera in the current active scene
-     *
-     * @return The Camera Component of the current active camera
-     */
-    [[nodiscard]] CameraComponent* getActiveCamera();
 
     /**
      * @brief The getter for the current active scene

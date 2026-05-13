@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <nlohmann/json.hpp>
+#include <functional>
 
 #include "Math.h"
 #include "Event.h"
@@ -63,11 +64,21 @@ private:
 };
 
 class Object;
+class CameraComponent;
 struct Scene {
     friend class WorldManager;
     friend class ResourceManager;
 
+    Scene(const std::string& name)
+    {
+        m_name = name;
+    };
+
     [[nodiscard]] std::string getName() const;
+
+    [[nodiscard]] nlohmann::json toJson() const;
+
+    std::vector<Object*> m_rootObjects{};
 
 private:
     std::string m_name{};
@@ -80,10 +91,10 @@ private:
     Event<> m_transparentDrawEvent{};
     Event<> m_opaqueDrawEvent{};
 
-    std::vector<Object*> m_rootObjects{};
+
+    CameraComponent* m_mainCamera{};
 
     static Scene* fromJson(const nlohmann::json& j);
-    [[nodiscard]] nlohmann::json toJson() const;
 
     void end() const;
 };
@@ -130,6 +141,17 @@ public:
      */
     void flushLoadedScenes(const std::vector<std::string>& keepLoaded = {});
 
+    /**
+     * @brief takes in an Object and component JSON and loads that component onto the object from the JSON file
+     *
+     * @param obj The object that the component will be added to
+     * @param component The JSON file that will be converted into a component
+     */
+    void loadComponent(Object* obj, nlohmann::json component) const;
+
+    template<typename T>
+    void registerComponent(const std::string& type);
+
 private:
     /**
      * @brief Starts the Resource Manager
@@ -150,6 +172,8 @@ private:
      */
     ~ResourceManager() override = default;
 
-    std::map<std::string, std::string> m_sceneMap;
-    std::map<std::string, Scene*> m_loadedScenes;
+    std::map<std::string, std::string> m_sceneMap{};
+    std::map<std::string, Scene*> m_loadedScenes{};
+
+    std::map<std::string, std::function<void(Object* obj, nlohmann::json j)>> m_componentMap{};
 };

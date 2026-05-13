@@ -13,11 +13,11 @@
  */
 #define EVENT_ACCESSORS(EventName, ...)                                          \
 	template<typename T>                                                         \
-	void add##EventName(T* object, void(T::* func)(__VA_ARGS__)) {              \
+	void addTo_##EventName(T* object, void(T::* func)(__VA_ARGS__)) {              \
 		EventName.add(object, func);                                             \
 	}                                                                            \
 	template<typename T>                                                         \
-	void remove##EventName(T* object, void(T::* func)(__VA_ARGS__)) {           \
+	void removeFrom_##EventName(T* object, void(T::* func)(__VA_ARGS__)) {           \
 		EventName.remove(object, func);                                          \
 	}
 

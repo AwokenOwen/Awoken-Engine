@@ -47,6 +47,16 @@ float WindowManager::getAspectRatio() const {
     return static_cast<float>(m_viewportWidth) / static_cast<float>(m_viewportHeight);
 }
 
+int WindowManager::getViewportWidth() const
+{
+    return m_viewportWidth;
+}
+
+int WindowManager::getViewportHeight() const
+{
+    return m_viewportHeight;
+}
+
 void WindowManager::clear() {
     // Clear the screen
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

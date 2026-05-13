@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 4.2.2)
+
+# Redirect all output to a 'bin' folder in the build directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
 project(Awoken_Engine)
 project(Awoken_Engine_Test)
 set(CMAKE_CXX_STANDARD 20)
@@ -35,7 +41,6 @@ FetchContent_MakeAvailable(assimp glfw FreeType json OpenAL)
 
 add_library(Awoken_Engine STATIC
         include/Renderer.h
-        include/Component.h
         include/GameManager.h
         include/InputManager.h
         include/LogManager.h
@@ -45,12 +50,8 @@ add_library(Awoken_Engine STATIC
         include/Event.h
         include/Math.h
         include/Object.h
-        include/MeshRendererComponent.h
-        include/CameraComponent.h
         include/ResourceManager.h
-        Source/Components/CameraComponent.cpp
-        Source/Components/Component.cpp
-        Source/Components/MeshRendererComponent.cpp
+        include/stb_image.h
         Source/Managers/GameManager.cpp
         Source/Managers/InputManager.cpp
         Source/Managers/LogManager.cpp
@@ -59,7 +60,9 @@ add_library(Awoken_Engine STATIC
         Source/Managers/WorldManager.cpp
         Source/Util/glad.c
         Source/Util/Object.cpp
-        include/stb_image.h
+        Source/Components/Component.cpp
+        Source/Components/CameraComponent.cpp
+        Source/Components/MeshRendererComponent.cpp
 )
 
 target_include_directories(Awoken_Engine PUBLIC
@@ -79,21 +82,20 @@ target_link_libraries(Awoken_Engine PUBLIC
         OpenAL::OpenAL
 )
 
-file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY sceneList.scene DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}/bin")
+file(COPY gameInit.json DESTINATION "${CMAKE_BINARY_DIR}/bin")
 
-include_directories(
+add_executable(Awoken_Engine_Test
+        main.cpp
+)
+
+target_include_directories(Awoken_Engine_Test PUBLIC
         glad/include
         include
         ${freetype_SOURCE_DIR}/include
         ${glfw_SOURCE_DIR}/include
         ${json_SOURCE_DIR}/include
         ${openal_SOURCE_DIR}/include
-)
-
-add_executable(Awoken_Engine_Test
-        main.cpp
-
 )
 
 target_link_libraries(Awoken_Engine_Test PUBLIC

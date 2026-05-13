@@ -21,3 +21,20 @@ void MeshRendererComponent::update() {
 
 void MeshRendererComponent::draw() {
 }
+
+void MeshRendererComponent::enable()
+{
+}
+
+void MeshRendererComponent::disable()
+{
+}
+
+nlohmann::json MeshRendererComponent::toJson()
+{
+    return {};
+}
+
+void MeshRendererComponent::fromJson(nlohmann::json j)
+{
+}

@@ -36,6 +36,9 @@ public:
     void setWindowTitle(const std::string &title);
 
     [[nodiscard]] float getAspectRatio() const;
+
+    [[nodiscard]] int getViewportWidth() const;
+    [[nodiscard]] int getViewportHeight() const;
 private:
     /**
      * @brief Starts the Window Manager and creates the window for the game

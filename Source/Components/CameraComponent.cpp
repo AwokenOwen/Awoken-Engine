@@ -34,3 +34,45 @@ Matrix4 CameraComponent::getProjectionMatrix() const {
 void CameraComponent::setProjectionType(const bool projectionType) {
     m_projectionType = projectionType;
 }
+
+void CameraComponent::start()
+{
+
+}
+
+void CameraComponent::update()
+{
+
+}
+
+void CameraComponent::enable()
+{
+
+}
+
+void CameraComponent::disable()
+{
+
+}
+
+nlohmann::json CameraComponent::toJson()
+{
+    nlohmann::json j;
+
+    j["Type"] = "Camera";
+
+    j["ProjectionType"] = m_projectionType;
+    j["FOV"] = m_fov;
+    j["Near"] = m_near;
+    j["Far"] = m_far;
+
+    return j;
+}
+
+void CameraComponent::fromJson(nlohmann::json j)
+{
+    m_projectionType = j["ProjectionType"].get<bool>();
+    m_fov = j["FOV"].get<float>();
+    m_near = j["Near"].get<float>();
+    m_far = j["Far"].get<float>();
+}

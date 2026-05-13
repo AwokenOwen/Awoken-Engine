@@ -10,11 +10,12 @@
 #define ORTHOGRAPHIC false
 
 class CameraComponent : public Component{
+    friend class ResourceManager;
 public:
     explicit CameraComponent(Object* parent);
 
-    Matrix4 getViewMatrix() const;
-    Matrix4 getProjectionMatrix() const;
+    [[nodiscard]] Matrix4 getViewMatrix() const;
+    [[nodiscard]] Matrix4 getProjectionMatrix() const;
 
     void setProjectionType(bool projectionType);
 
@@ -25,8 +26,11 @@ private:
     float m_near{0.001f};
     float m_far{100.0f};
 
-    float m_left{-1.0f};
-    float m_right{1.0f};
-    float m_top{1.0f};
-    float m_bottom{-1.0f};
+    nlohmann::json toJson() override;
+    void fromJson(nlohmann::json j) override;
+
+    void start() override;
+    void update() override;
+    void enable() override;
+    void disable() override;
 };

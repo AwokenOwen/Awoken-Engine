@@ -8,6 +8,7 @@
 class Object;
 class Component {
     friend class Object;
+    friend class ResourceManager;
 public:
     /**
      * @brief Constructor necessary for all components
@@ -67,6 +68,7 @@ private:
      * @return The JSON of the component
      */
     virtual nlohmann::json toJson() = 0;
+    virtual void fromJson(nlohmann::json j) = 0;
 
     Object* p_parent{};
 

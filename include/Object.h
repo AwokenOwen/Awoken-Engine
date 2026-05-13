@@ -1,20 +1,20 @@
 //
-// Created by awokenowen on 4/13/26.
+// Created by AwokenOwen on 4/13/26.
 //
 
 #pragma once
 #include "Math.h"
-#include "LogManager.h"
 #include "Event.h"
 #include <vector>
 
-#include "Component.h"
+#include "LogManager.h"
 #include "nlohmann/json.hpp"
 
 class Component;
 class Object {
     friend class WorldManager;
     friend struct Scene;
+    friend class ResourceManager;
 public:
     Object() = default;
     virtual ~Object() = default;
@@ -98,24 +98,6 @@ public:
     [[nodiscard]] Object* getParent() const;
 
     /**
-     * @brief Adds a new component type to an object, only one instance of a component is allowed on an object
-     *
-     * @tparam T The type of component
-     * @return The newly added component or an already added one of the same type
-     */
-    template<typename T>
-    T* addComponent();
-
-    /**
-     * @brief Gets an already added component from an object, if not already added return nullptr
-     *
-     * @tparam T The type of the component
-     * @return The component on the object or nullptr if it doesn't exist
-     */
-    template<typename T>
-    T* getComponent();
-
-    /**
      * @return The active state of the object
      */
     [[nodiscard]] bool getActiveState() const;
@@ -134,6 +116,31 @@ public:
     void addChild(Object* child);
 
     void setComponentActiveState(Component* component, bool active);
+
+    /**
+     * @brief Adds a new component type to an object, only one instance of a component is allowed on an object
+     *
+     * @tparam T The type of component
+     * @return The newly added component or an already added one of the same type
+     */
+    template<typename T>
+    T* addComponent();
+
+    /**
+     * @brief Gets an already added component from an object, if not already added return nullptr
+     *
+     * @tparam T The type of the component
+     * @return The component on the object or nullptr if it doesn't exist
+     */
+    template<typename T>
+    T* getComponent();
+
+    EVENT_ACCESSORS(m_startEvent)
+    EVENT_ACCESSORS(m_updateEvent)
+    EVENT_ACCESSORS(m_enableEvent)
+    EVENT_ACCESSORS(m_disableEvent)
+    EVENT_ACCESSORS(m_destroyEvent)
+
 
 protected:
     /**
@@ -158,7 +165,7 @@ protected:
     void end();
 
 private:
-    std::string name;
+    std::string m_name;
 
     Vector3 m_localPosition{};
     Quaternion m_localRotation{};
@@ -176,60 +183,8 @@ private:
     Event<> m_disableEvent{};
     Event<> m_destroyEvent{};
 
-    nlohmann::json toJson() {
-        nlohmann::json j;
-
-        j["Name"] = name;
-
-        j["ActiveState"] = m_activeState;
-
-        j["Position"]["x"] = m_localPosition.x;
-        j["Position"]["y"] = m_localPosition.y;
-        j["Position"]["z"] = m_localPosition.z;
-
-        j["Rotation"]["x"] = m_localRotation.x;
-        j["Rotation"]["y"] = m_localRotation.y;
-        j["Rotation"]["z"] = m_localRotation.z;
-        j["Rotation"]["w"] = m_localRotation.w;
-
-        j["Scale"]["x"] = m_localScale.x;
-        j["Scale"]["y"] = m_localScale.y;
-        j["Scale"]["z"] = m_localScale.z;
-
-        for (auto c : m_components) {
-            // do later
-        }
-
-        int untitledNumber = 0;
-        std::vector<nlohmann::json> temp;
-        for (auto& object : m_children) {
-            if (object->name.empty()) {
-                object->name = "Untitled_" + std::to_string(untitledNumber++);
-            }
-            temp.push_back(object->toJson());
-        }
-
-        j["Children"] = temp;
-        return j;
-    }
-
-    static Object* fromJson(const nlohmann::json& j) {
-        const auto a = new Object();
-
-        a->m_activeState = j["ActiveState"];
-
-        a->name = j["Name"];
-
-        a->m_localPosition = Vector3(j["Position"]["x"].get<double>(), j["Position"]["y"].get<double>(),j["Position"]["z"].get<double>());
-        a->m_localRotation = Quaternion(j["Rotation"]["x"].get<double>(), j["Rotation"]["y"].get<double>(), j["Rotation"]["z"].get<double>(), j["Rotation"]["w"].get<double>());
-        a->m_localScale = Vector3(j["Scale"]["x"].get<double>(), j["Scale"]["y"].get<double>(), j["Scale"]["z"].get<double>());
-
-        for (const std::vector<nlohmann::json> children = j["Children"]; auto c : children) {
-            a->addChild(fromJson(c));
-        }
-
-        return a;
-    }
+    nlohmann::json toJson();
+    static Object* fromJson(const nlohmann::json& j);
 };
 
 template<typename T> T* Object::addComponent() {
@@ -242,11 +197,8 @@ template<typename T> T* Object::addComponent() {
             return dynamic_cast<T*>(c);
         }
     }
-    auto newComponent = new T();
-    m_startEvent.add(newComponent, &T::start);
-    m_updateEvent.add(newComponent, &T::update);
-    m_destroyEvent.add(newComponent, &T::destroy);
-
+    auto newComponent = new T(this);
+    this->m_components.push_back(newComponent);
     return newComponent;
 }
 

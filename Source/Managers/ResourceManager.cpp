@@ -5,9 +5,13 @@
 #include "ResourceManager.h"
 
 #include <iostream>
+#include <utility>
 
 #include "Object.h"
 #include "LogManager.h"
+
+#include "CameraComponent.h"
+#include "MeshRendererComponent.h"
 
 nlohmann::json Scene::toJson() const {
     nlohmann::json j;
@@ -16,8 +20,8 @@ nlohmann::json Scene::toJson() const {
     std::vector<nlohmann::json> temp;
     int untitledNumber = 0;
     for (auto object : m_rootObjects) {
-        if (object->name.empty()) {
-            object->name = "Untitled_" + std::to_string(untitledNumber++);
+        if (object->m_name.empty()) {
+            object->m_name = "Untitled_" + std::to_string(untitledNumber++);
         }
         temp.push_back(object->toJson());
     }
@@ -32,10 +36,7 @@ std::string Scene::getName() const {
 }
 
 Scene * Scene::fromJson(const nlohmann::json &j) {
-    auto *scene = new Scene();
-
-    scene->m_name = j["Name"].get<std::string>();
-
+    auto *scene = new Scene(j["Name"].get<std::string>());
     for (const std::vector<nlohmann::json> objects = j["Root Objects"]; const auto& o : objects) {
         scene->m_rootObjects.emplace_back(Object::fromJson(o));
     }
@@ -115,8 +116,34 @@ void ResourceManager::flushLoadedScenes(const std::vector<std::string>& keepLoad
     });
 }
 
+void ResourceManager::loadComponent(Object* obj, nlohmann::json component) const
+{
+    auto type = component["Type"].get<std::string>();
+
+    if (!m_componentMap.contains(type))
+    {
+        Log.logError("Could not find registered component");
+        return;
+    }
+
+    m_componentMap.at(type)(obj, component);
+}
+
+template <typename T>
+void ResourceManager::registerComponent(const std::string& type)
+{
+    static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
+    std::function lambda = [](Object* obj, nlohmann::json j)
+    {
+        auto a = obj->addComponent<T>();
+        a->fromJson(std::move(j));
+    };
+    m_componentMap.insert({type, lambda});
+    Log.log("Registered component '%s'", type.c_str());
+}
+
 int ResourceManager::initialize() {
-    std::ifstream f("sceneList.scene");
+    std::ifstream f("gameInit.json");
     nlohmann::json j = nlohmann::json::parse(f);
 
     const std::string primaryPath = j["Primary"].get<std::string>();
@@ -125,6 +152,11 @@ int ResourceManager::initialize() {
     for (const std::vector<nlohmann::json> children = j["Scenes"]; const auto& c : children) {
         addScene(c.get<std::string>());
     }
+
+    // Register all components to be read and added from JSON files
+    registerComponent<CameraComponent>("Camera");
+    registerComponent<MeshRendererComponent>("MeshRenderer");
+
 
     Log.log("Resource Manager initialized");
     return 0;

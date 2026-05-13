@@ -3,6 +3,8 @@
 //
 
 #include "Object.h"
+#include "Component.h"
+#include "ResourceManager.h"
 #include "WorldManager.h"
 
 Vector3 Object::getLocalPosition() const {
@@ -148,4 +150,71 @@ void Object::end() {
     }
     m_destroyEvent.callEvent();
     delete this;
+}
+
+nlohmann::json Object::toJson()
+{
+    nlohmann::json j;
+
+    j["Name"] = m_name;
+
+    j["ActiveState"] = m_activeState;
+
+    j["Position"]["x"] = m_localPosition.x;
+    j["Position"]["y"] = m_localPosition.y;
+    j["Position"]["z"] = m_localPosition.z;
+
+    j["Rotation"]["x"] = m_localRotation.x;
+    j["Rotation"]["y"] = m_localRotation.y;
+    j["Rotation"]["z"] = m_localRotation.z;
+    j["Rotation"]["w"] = m_localRotation.w;
+
+    j["Scale"]["x"] = m_localScale.x;
+    j["Scale"]["y"] = m_localScale.y;
+    j["Scale"]["z"] = m_localScale.z;
+
+    std::vector<nlohmann::json> components{};
+    for (const auto& c : m_components)
+    {
+        components.push_back(c->toJson());
+    }
+
+    j["Components"] = components;
+
+    int untitledNumber = 0;
+    std::vector<nlohmann::json> children{};
+    for (auto& object : m_children) {
+        if (object->m_name.empty()) {
+            object->m_name = "Untitled_" + std::to_string(untitledNumber++);
+        }
+        children.push_back(object->toJson());
+    }
+
+    j["Children"] = children;
+    return j;
+}
+
+Object* Object::fromJson(const nlohmann::json& j)
+{
+    const auto a = new Object();
+
+    a->m_activeState = j["ActiveState"];
+
+    a->m_name = j["Name"];
+
+    a->m_localPosition = Vector3(j["Position"]["x"].get<double>(), j["Position"]["y"].get<double>(),j["Position"]["z"].get<double>());
+    a->m_localRotation = Quaternion(j["Rotation"]["x"].get<double>(), j["Rotation"]["y"].get<double>(), j["Rotation"]["z"].get<double>(), j["Rotation"]["w"].get<double>());
+    a->m_localScale = Vector3(j["Scale"]["x"].get<double>(), j["Scale"]["y"].get<double>(), j["Scale"]["z"].get<double>());
+
+    for (const std::vector<nlohmann::json> components = j["Components"]; const auto& c : components) {
+        Resource.loadComponent(a, c);
+    }
+
+    for (const std::vector<nlohmann::json> children = j["Children"]; const auto& c : children) {
+        a->addChild(fromJson(c));
+    }
+
+    World.registerObject(a);
+
+    return a;
 }

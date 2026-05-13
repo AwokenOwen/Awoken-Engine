@@ -7,6 +7,7 @@
 #include "Renderer.h"
 
 class MeshRendererComponent : public Component, public Renderer{
+    friend class ResourceManager;
 public:
     explicit MeshRendererComponent(Object* parent);
     ~MeshRendererComponent() override = default;
@@ -18,4 +19,8 @@ private:
     void update() override;
 
     void draw() override;
+    void enable() override;
+    void disable() override;
+    nlohmann::json toJson() override;
+    void fromJson(nlohmann::json j) override;
 };
