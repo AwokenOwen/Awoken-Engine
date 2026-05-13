@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.2.2)
+cmake_minimum_required(VERSION 4.3)
 
 # Redirect all output to a 'bin' folder in the build directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
@@ -6,7 +6,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 project(Awoken_Engine)
-project(Awoken_Engine_Test)
 set(CMAKE_CXX_STANDARD 20)
 
 add_definitions(-Wno-unused-but-set-variable)
@@ -88,19 +87,3 @@ target_link_libraries(Awoken_Engine PUBLIC
 file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}/bin")
 file(COPY gameInit.json DESTINATION "${CMAKE_BINARY_DIR}/bin")
 
-add_executable(Awoken_Engine_Test
-        main.cpp
-)
-
-target_include_directories(Awoken_Engine_Test PUBLIC
-        glad/include
-        include
-        ${freetype_SOURCE_DIR}/include
-        ${glfw_SOURCE_DIR}/include
-        ${json_SOURCE_DIR}/include
-        ${openal_SOURCE_DIR}/include
-)
-
-target_link_libraries(Awoken_Engine_Test PUBLIC
-    Awoken_Engine
-)
