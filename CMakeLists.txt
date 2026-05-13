@@ -52,6 +52,9 @@ add_library(Awoken_Engine STATIC
         include/Object.h
         include/ResourceManager.h
         include/stb_image.h
+        include/MeshRendererComponent.h
+        include/Component.h
+        include/CameraComponent.h
         Source/Managers/GameManager.cpp
         Source/Managers/InputManager.cpp
         Source/Managers/LogManager.cpp
