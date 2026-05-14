@@ -87,3 +87,22 @@ target_link_libraries(Awoken_Engine PUBLIC
 file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}/bin")
 file(COPY gameInit.json DESTINATION "${CMAKE_BINARY_DIR}/bin")
 
+# For testing purposes
+
+project(Awoken_Engine_Test)
+
+add_executable(Awoken_Engine_Test
+        main.cpp)
+
+target_link_libraries(Awoken_Engine_Test PUBLIC
+        Awoken_Engine
+)
+
+target_include_directories(Awoken_Engine_Test PUBLIC
+        glad/include
+        include
+        ${freetype_SOURCE_DIR}/include
+        ${glfw_SOURCE_DIR}/include
+        ${json_SOURCE_DIR}/include
+        ${openal_SOURCE_DIR}/include
+)
