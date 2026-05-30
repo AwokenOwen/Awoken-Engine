@@ -40,28 +40,29 @@ Object* WorldManager::instantiateObject(Object* parent)
 
 void WorldManager::destroyObject(Object *object) {
     // Register to the to be added event
-    m_activeScene->m_destroyEvent.add(object, &Object::destroy);
+    m_destroyEvent.add(object, &Object::destroy);
     // Add to the to be destroyed list
     m_tobeDestroyed.push_back(object);
 }
 
 void WorldManager::registerRenderer(Renderer *renderer) {
     // Based on transparency register renderer to event
-    renderer->getTransparency() ? m_activeScene->m_transparentDrawEvent.add(renderer, &Renderer::draw) : m_activeScene->m_opaqueDrawEvent.add(renderer, &Renderer::draw);
+    renderer->getTransparency() ? m_transparentDrawEvent.add(renderer, &Renderer::draw) : m_opaqueDrawEvent.add(renderer, &Renderer::draw);
+    m_loadEvent.add(renderer, &Renderer::load);
 }
 
 void WorldManager::updateTransparency(Renderer *renderer) {
     // Remove from old event
-    renderer->getTransparency() ? m_activeScene->m_opaqueDrawEvent.remove<>(renderer, &Renderer::draw) : m_activeScene->m_transparentDrawEvent.remove<>(renderer, &Renderer::draw);
+    renderer->getTransparency() ? m_opaqueDrawEvent.remove<>(renderer, &Renderer::draw) : m_transparentDrawEvent.remove<>(renderer, &Renderer::draw);
     // Register to new event
-    renderer->getTransparency() ? m_activeScene->m_transparentDrawEvent.add(renderer, &Renderer::draw) : m_activeScene->m_opaqueDrawEvent.add(renderer, &Renderer::draw);
+    renderer->getTransparency() ? m_transparentDrawEvent.add(renderer, &Renderer::draw) : m_opaqueDrawEvent.add(renderer, &Renderer::draw);
 }
 
 void WorldManager::setActiveRenderer(Renderer *renderer, const bool active) {
     if (active) {
         registerRenderer(renderer);
     }else {
-       renderer->getTransparency() ? m_activeScene->m_transparentDrawEvent.remove(renderer, &Renderer::draw) :  m_activeScene->m_opaqueDrawEvent.remove(renderer, &Renderer::draw);
+       renderer->getTransparency() ? m_transparentDrawEvent.remove(renderer, &Renderer::draw) :  m_opaqueDrawEvent.remove(renderer, &Renderer::draw);
     }
 }
 
@@ -81,13 +82,13 @@ void WorldManager::setBaseScene(const std::string& name) {
     m_baseScene = name;
 }
 
-void WorldManager::setObjectActiveState(Object *object, const bool active) const {
+void WorldManager::setObjectActiveState(Object *object, const bool active) {
     if (active) {
-        m_activeScene->m_enableEvent.add(object, &Object::enable);
-        m_activeScene->m_updateEvent.add(object, &Object::update);
+        m_enableEvent.add(object, &Object::enable);
+        m_updateEvent.add(object, &Object::update);
     }else {
-        m_activeScene->m_disableEvent.add(object, &Object::disable);
-        m_activeScene->m_updateEvent.remove(object, &Object::update);
+        m_disableEvent.add(object, &Object::disable);
+        m_updateEvent.remove(object, &Object::update);
     }
 }
 
@@ -117,26 +118,32 @@ void WorldManager::update() {
     // Add all to be objects into the scene
     for (const auto object: m_tobeAdded) {
         // Add object to update event
-        m_activeScene->m_updateEvent.add(object, &Object::update);
+        m_updateEvent.add(object, &Object::update);
     }
     // clear to be added so no repeats
     m_tobeAdded.clear();
 
+    m_loadEvent.callEvent();
+    m_loadEvent.clearEvent();
+
+    m_unloadEvent.callEvent();
+    m_unloadEvent.clearEvent();
+
     // Call all objects update functions
-    m_activeScene->m_updateEvent.callEvent();
+    m_updateEvent.callEvent();
 
     // Draw all drawers to the screen/framebuffer, transparent first then opaque
-    m_activeScene->m_transparentDrawEvent.callEvent();
-    m_activeScene->m_opaqueDrawEvent.callEvent();
+    m_transparentDrawEvent.callEvent();
+    m_opaqueDrawEvent.callEvent();
 
     // Call the destroy event
-    m_activeScene->m_destroyEvent.callEvent();
+    m_destroyEvent.callEvent();
     // Clear the destroy event so no repeats
-    m_activeScene->m_destroyEvent.clearEvent();
+    m_destroyEvent.clearEvent();
 
     // Remove all to be objects from the scene
     for (const auto object: m_tobeDestroyed) {
-        m_activeScene->m_updateEvent.remove(object, &Object::update);
+        m_updateEvent.remove(object, &Object::update);
 
         Log.log("Destroying object %s", object->m_name.c_str());
 

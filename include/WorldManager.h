@@ -88,7 +88,11 @@ public:
      * @param object Object that the active state is changing on
      * @param active the new active state
      */
-    void setObjectActiveState(Object* object, bool active) const;
+    void setObjectActiveState(Object* object, bool active);
+
+    EVENT_ACCESSORS(m_updateEvent)
+    EVENT_ACCESSORS(m_destroyEvent)
+
 private:
     /**
      * @brief Starts all other managers preparing to start the game
@@ -119,6 +123,17 @@ private:
 
     std::vector<Object*> m_tobeAdded{};
     std::vector<Object*> m_tobeDestroyed{};
+
+    Event<> m_updateEvent{};
+    Event<> m_enableEvent{};
+    Event<> m_disableEvent{};
+    Event<> m_destroyEvent{};
+
+    Event<> m_transparentDrawEvent{};
+    Event<> m_opaqueDrawEvent{};
+
+    Event<> m_loadEvent{};
+    Event<> m_unloadEvent{};
 
     std::string m_baseScene{"default"};
     std::string m_activeSceneName{};

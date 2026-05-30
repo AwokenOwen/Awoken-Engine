@@ -51,7 +51,7 @@ add_library(Awoken_Engine STATIC
         include/Object.h
         include/ResourceManager.h
         include/stb_image.h
-        include/MeshRendererComponent.h
+        include/ModelRendererComponent.h
         include/Component.h
         include/CameraComponent.h
         Source/Managers/GameManager.cpp
@@ -64,7 +64,7 @@ add_library(Awoken_Engine STATIC
         Source/Util/Object.cpp
         Source/Components/Component.cpp
         Source/Components/CameraComponent.cpp
-        Source/Components/MeshRendererComponent.cpp
+        Source/Components/ModelRendererComponent.cpp
 )
 
 target_include_directories(Awoken_Engine PUBLIC

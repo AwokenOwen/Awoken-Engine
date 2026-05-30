@@ -1,7 +1,8 @@
 //
 // Created by AwokenOwen on 5/3/26.
 //
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "ResourceManager.h"
 
 #include <iostream>
@@ -11,7 +12,9 @@
 #include "LogManager.h"
 
 #include "CameraComponent.h"
-#include "MeshRendererComponent.h"
+#include "ModelRendererComponent.h"
+
+#include "assimp/postprocess.h"
 
 nlohmann::json Scene::toJson() const {
     nlohmann::json j;
@@ -29,6 +32,15 @@ nlohmann::json Scene::toJson() const {
     j["Root Objects"] = temp;
 
     return j;
+}
+
+void Material::load() const
+{
+    glUseProgram(m_shaderProgram);
+    for (const auto& func : m_uniforms | std::views::values)
+    {
+        func();
+    }
 }
 
 std::string Scene::getName() const {
@@ -56,14 +68,11 @@ ResourceManager & ResourceManager::getInstance() {
     return single;
 }
 
-std::string ResourceManager::addScene(const std::string &path) {
+std::string ResourceManager::registerScene(const std::string &path) {
     std::ifstream f(path);
     nlohmann::json j = nlohmann::json::parse(f);
-    if (j == nlohmann::json::value_t::null) {
-        Log.logError("Could not load file at path %s", path.c_str());
-        return {};
-    }
-    std::string name = j["Name"].get<std::string>();
+
+    auto name = j["Name"].get<std::string>();
 
     if (m_sceneMap.contains(name)) {
         Log.logError("Could not add scene '%s' as it's already in the scene map", name.c_str());
@@ -116,17 +125,78 @@ void ResourceManager::flushLoadedScenes(const std::vector<std::string>& keepLoad
     });
 }
 
-void ResourceManager::loadComponent(Object* obj, nlohmann::json component) const
+template <typename T>
+void Material::setUniform(const std::string& name, T value)
 {
-    auto type = component["Type"].get<std::string>();
-
-    if (!m_componentMap.contains(type))
+    if (!m_uniforms.contains(name))
     {
-        Log.logError("Could not find registered component");
+        Log.logError("Cannot find uniform %s", name.c_str());
         return;
     }
-
-    m_componentMap.at(type)(obj, component);
+    if (std::is_same_v<T, int> || std::is_same_v<T, bool>)
+    {
+        m_uniforms[name] = [this, name, value]()
+        {
+            glUseProgram(m_shaderProgram);
+            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            glUniform1i(uniform, *reinterpret_cast<int*>(&value));
+        };
+        return;
+    }
+    if (std::is_same_v<T, float>)
+    {
+        m_uniforms[name] = [this, name, value]()
+        {
+            glUseProgram(m_shaderProgram);
+            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            glUniform1f(uniform, *reinterpret_cast<float*>(&value));
+        };
+        return;
+    }
+    if (std::is_same_v<T, Vector2>)
+    {
+        m_uniforms[name] = [this, name, value]()
+        {
+            glUseProgram(m_shaderProgram);
+            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            Vector2 _value = *reinterpret_cast<Vector2*>(&value);
+            glUniform2f(uniform, _value.x, _value.y);
+        };
+        return;
+    }
+    if (std::is_same_v<T, Vector3>)
+    {
+        m_uniforms[name] = [this, name, value]()
+        {
+            glUseProgram(m_shaderProgram);
+            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            Vector3 _value = *reinterpret_cast<Vector3*>(&value);
+            glUniform3f(uniform, _value.x, _value.y, _value.z);
+        };
+        return;
+    }
+    if (std::is_same_v<T, Vector4>)
+    {
+        m_uniforms[name] = [this, name, value]()
+        {
+            glUseProgram(m_shaderProgram);
+            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            Vector4 _value = *reinterpret_cast<Vector4*>(&value);
+            glUniform4f(uniform, _value.x, _value.y, _value.z, _value.w);
+        };
+        return;
+    }
+    if (std::is_same_v<T, Matrix4>)
+    {
+        m_uniforms[name] = [this, name, value]()
+        {
+            glUseProgram(m_shaderProgram);
+            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            Matrix4 _value = *reinterpret_cast<Matrix4*>(&value);
+            glUniformMatrix4fv(uniform, 1, GL_FALSE, _value.toFloatArray());
+        };
+        return;
+    }
 }
 
 template <typename T>
@@ -142,20 +212,296 @@ void ResourceManager::registerComponent(const std::string& type)
     Log.log("Registered component '%s'", type.c_str());
 }
 
+void ResourceManager::loadComponent(Object* obj, nlohmann::json component) const
+{
+    auto type = component["Type"].get<std::string>();
+
+    if (!m_componentMap.contains(type))
+    {
+        Log.logError("Could not find registered component");
+        return;
+    }
+
+    m_componentMap.at(type)(obj, component);
+}
+
+void ResourceManager::loadModel(const std::string& path)
+{
+    if (m_loadedModels.contains(path))
+    {
+        m_loadedModels.at(path).listeners++;
+        return;
+    }
+
+    Assimp::Importer import;
+    const aiScene* scene = import.ReadFile(path, aiProcess_PreTransformVertices | aiProcess_Triangulate | aiProcess_FlipUVs) ;
+
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    {
+        Log.logError("Could not load model, Assimp Error: '%s'", import.GetErrorString());
+        return;
+    }
+
+    m_loadedModels.insert({path, {}});
+    processNode(scene->mRootNode, scene, path);
+}
+
+Model ResourceManager::getModel(const std::string& path)
+{
+    if (!m_loadedModels.contains(path))
+    {
+        Log.logError("No model of path '%s' exists in the loaded map", path.c_str());
+        return{};
+    }
+
+    return m_loadedModels[path];
+}
+
+void ResourceManager::unloadModel(const std::string& path)
+{
+    if (!m_loadedModels.contains(path))
+    {
+        Log.logError("No model of path '%s' exists in the loaded map", path.c_str());
+        return;
+    }
+    m_loadedModels.at(path).listeners--;
+    if (m_loadedModels.at(path).listeners <= 0)
+    {
+        m_loadedModels.erase(path);
+    }
+}
+
+void ResourceManager::loadTexture(const std::string& path)
+{
+    if (m_loadedTextures.contains(path))
+    {
+        m_loadedTextures.at(path).listeners++;
+        return;
+    }
+
+    //Loading Texture
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // set the texture wrapping/filtering options (on currently bound texture)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load and generate the texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(path.c_str(), &width, &height,
+        &nrChannels, 0);
+    if (data)
+    {
+        switch (nrChannels) {
+        case 1:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED,
+                GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            break;
+        case 2:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, width, height, 0, GL_RG,
+                GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            break;
+        case 3:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            break;
+        default:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            break;
+        }
+    }
+    else
+    {
+        Log.logError("Could not load texture '%s'", path.c_str());
+    }
+    stbi_image_free(data);
+
+    auto mapTexture = Texture{};
+
+    mapTexture.m_textureID = texture;
+
+    m_loadedTextures.insert({path, mapTexture});
+}
+
+Texture ResourceManager::getTexture(const std::string& path) const
+{
+    if (!m_loadedTextures.contains(path))
+    {
+        Log.logError("No texture of path '%s' exists in the loaded map", path.c_str());
+        return {};
+    }
+
+    return m_loadedTextures.at(path);
+}
+
+void ResourceManager::unloadTexture(const std::string& path)
+{
+    if (!m_loadedTextures.contains(path))
+    {
+        Log.logError("No texture of path '%s' exists in the loaded map", path.c_str());
+        return;
+    }
+
+    m_loadedTextures.at(path).listeners--;
+    if (m_loadedTextures.at(path).listeners <= 0)
+    {
+        m_loadedTextures.erase(path);
+    }
+}
+
+void ResourceManager::loadMaterial(const std::string& path)
+{
+    if (m_loadedMaterials.contains(path))
+    {
+        m_loadedMaterials.at(path).listeners++;
+        return;
+    }
+
+    std::ifstream f(path);
+    nlohmann::json j = nlohmann::json::parse(f);
+
+    auto vertexShaderPath = j["VertexShader"].get<std::string>();
+    auto fragmentShaderPath = j["FragmentShader"].get<std::string>();
+
+    std::string vertexCode;
+    std::string fragmentCode;
+    std::ifstream vShaderFile;
+    std::ifstream fShaderFile;
+
+    // ensure ifstream objects can throw exceptions:
+    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try
+    {
+        // open files
+        vShaderFile.open(vertexShaderPath);
+        fShaderFile.open(fragmentShaderPath);
+        std::stringstream vShaderStream, fShaderStream;
+        // read file's buffer contents into streams
+        vShaderStream << vShaderFile.rdbuf();
+        fShaderStream << fShaderFile.rdbuf();
+        // close file handlers
+        vShaderFile.close();
+        fShaderFile.close();
+        // convert stream into string
+        vertexCode = vShaderStream.str();
+        fragmentCode = fShaderStream.str();
+    }
+    catch (std::ifstream::failure e)
+    {
+        Log.logError(e.what());
+    }
+    const char* vertexShaderSource = vertexCode.c_str();
+    const char* fragmentShaderSource = fragmentCode.c_str();
+
+    unsigned int vertexShader;
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glCompileShader(vertexShader);
+
+    int  success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+        Log.logError(infoLog);
+    }
+
+    unsigned int fragmentShader;
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+       Log.logError(infoLog);
+    }
+
+    unsigned int shaderProgram = glCreateProgram();
+
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
+        Log.logError(infoLog);
+    }
+
+    auto mapMaterial = Material{};
+    mapMaterial.m_shaderProgram = shaderProgram;
+
+    // Load Uniforms
+    for (const std::vector<nlohmann::json> uniforms = j["Uniforms"]; const auto& u : uniforms)
+    {
+        auto name = u["Name"].get<std::string>();
+        auto type = u["Type"].get<std::string>();
+        mapMaterial.m_uniforms.insert({name, [this, type, mapMaterial, u]()
+        {
+            m_uniformMap[type](mapMaterial.m_shaderProgram, u);
+        }});
+    }
+
+    m_loadedMaterials.insert({path, mapMaterial});
+}
+
+Material ResourceManager::getMaterial(const std::string& path)
+{
+    if (!m_loadedMaterials.contains(path))
+    {
+        Log.logError("Cannot find material %s", path.c_str());
+        return {};
+    }
+    return m_loadedMaterials.at(path);
+}
+
+void ResourceManager::unloadMaterial(const std::string& path)
+{
+    if (!m_loadedMaterials.contains(path))
+    {
+        Log.logError("Cannot find material %s", path.c_str());
+        return;
+    }
+    m_loadedMaterials.at(path).listeners--;
+    if (m_loadedMaterials.at(path).listeners <= 0)
+    {
+        m_loadedMaterials.erase(path);
+    }
+}
+
 int ResourceManager::initialize() {
     std::ifstream f("gameInit.json");
     nlohmann::json j = nlohmann::json::parse(f);
 
+    // Register all scenes
     const std::string primaryPath = j["Primary"].get<std::string>();
-    World.setBaseScene(addScene(primaryPath));
+    World.setBaseScene(registerScene(primaryPath));
 
     for (const std::vector<nlohmann::json> children = j["Scenes"]; const auto& c : children) {
-        addScene(c.get<std::string>());
+        registerScene(c.get<std::string>());
     }
 
     // Register all components to be read and added from JSON files
     registerComponent<CameraComponent>("Camera");
-    registerComponent<MeshRendererComponent>("MeshRenderer");
+    registerComponent<ModelRendererComponent>("ModelRenderer");
+
+    m_uniformMap.insert({"Int", [](unsigned int shaderProgram, nlohmann::json j)
+    {
+        int uniform = glGetUniformLocation(shaderProgram, j["Name"].get<std::string>().c_str());
+        int value = j["Value"].get<int>();
+
+    }});
 
 
     Log.log("Resource Manager initialized");
@@ -169,4 +515,96 @@ void ResourceManager::terminate() {
     m_loadedScenes.clear();
 
     Log.log("Resource Manager Terminated");
+}
+
+void ResourceManager::processNode(const aiNode* node, const aiScene* scene, const std::string& path)
+{
+    // process all the node's meshes (if any)
+    for (unsigned int i = 0; i < node->mNumMeshes; i++)
+    {
+        const aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        processMesh(mesh, path);
+    }
+    // then do the same for each of its children
+    for (unsigned int i = 0; i < node->mNumChildren; i++)
+    {
+        processNode(node->mChildren[i], scene, path);
+    }
+}
+
+void ResourceManager::processMesh(const aiMesh* mesh, const std::string &path)
+{
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+    {
+        Vertex vertex;
+
+        Vector3 vector;
+        vector.x = mesh->mVertices[i].x;
+        vector.y = mesh->mVertices[i].y;
+        vector.z = mesh->mVertices[i].z;
+        vertex.m_position = vector;
+
+        vector.x = mesh->mNormals[i].x;
+        vector.y = mesh->mNormals[i].y;
+        vector.z = mesh->mNormals[i].z;
+        vertex.m_normal = vector;
+
+        if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+        {
+            Vector2 vec;
+            vec.x = mesh->mTextureCoords[0][i].x;
+            vec.y = mesh->mTextureCoords[0][i].y;
+            vertex.m_uvs = vec;
+        }
+        else
+            vertex.m_uvs = Vector2(0.0f, 0.0f);
+
+        vertices.push_back(vertex);
+    }
+    // process indices
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+    {
+        aiFace face = mesh->mFaces[i];
+        for (unsigned int j = 0; j < face.mNumIndices; j++)
+            indices.push_back(face.mIndices[j]);
+    }
+
+    Mesh map_mesh;
+    unsigned int VAO{};
+    unsigned int VBO{};
+    unsigned int EBO{};
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+                 &indices[0], GL_STATIC_DRAW);
+
+    // vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<void*>(nullptr));
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_normal)));
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_uvs)));
+
+    glBindVertexArray(0);
+
+    map_mesh.m_VAO = VAO;
+    map_mesh.m_VBO = VBO;
+    map_mesh.m_EBO = EBO;
+    map_mesh.m_indices = indices;
+
+    m_loadedModels.at(path).m_meshes.push_back(map_mesh);
 }

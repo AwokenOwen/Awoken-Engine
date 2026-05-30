@@ -5,7 +5,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "glad/glad.h"
+#include "nlohmann/json.hpp"
 
 #define PI std::numbers::pi
 
@@ -40,6 +40,10 @@ public:
 
     static double dot(const Vector2 &a, const Vector2 &b);
     static Vector2 lerp(Vector2 a, Vector2 b, float t);
+
+    static Vector2 fromJson(nlohmann::json json);
+    nlohmann::json toJson();
+
 };
 
 class Vector3 {
@@ -72,6 +76,9 @@ public:
     [[nodiscard]] static Vector3 forward();
     [[nodiscard]] static Vector3 right();
     [[nodiscard]] static Vector3 up();
+
+    static Vector3 fromJson(nlohmann::json json);
+    nlohmann::json toJson();
 };
 
 class Vector4 {
@@ -109,6 +116,9 @@ public:
 
     static double dot(const Vector4 &a, const Vector4 &b);
     static Vector4 lerp(const Vector4 &a, const Vector4 &b, float t);
+
+    static Vector4 fromJson(nlohmann::json json);
+    nlohmann::json toJson();
 };
 
 class Quaternion {
@@ -135,6 +145,9 @@ public:
 
     static double dot(const Quaternion &a, const Quaternion &b);
     static Quaternion slerp(const Quaternion &a, const Quaternion &b, float t);
+
+    static Quaternion fromJson(nlohmann::json json);
+    nlohmann::json toJson();
 };
 
 class Matrix2 {
@@ -166,6 +179,9 @@ public:
 
         return floatArray;
     };
+
+    static Matrix2 fromJson(nlohmann::json json);
+    nlohmann::json toJson();
 
 private:
     float floatArray[4] {};
@@ -210,6 +226,9 @@ public:
 
         return floatArray;
     };
+
+    static Matrix3 fromJson(nlohmann::json json);
+    nlohmann::json toJson();
 
 private:
     float floatArray[9] {};
@@ -271,6 +290,9 @@ public:
 
         return floatArray;
     };
+
+    static Matrix4 fromJson(nlohmann::json json);
+    nlohmann::json toJson();
 
 private:
     float floatArray[16] {};
@@ -789,6 +811,20 @@ inline Vector2 Vector2::lerp(const Vector2 a, const Vector2 b, const float t) {
     return  a * (1 - t) + (t) * b;
 }
 
+inline Vector2 Vector2::fromJson(nlohmann::json json)
+{
+    return Vector2(json["x"].get<double>(), json["y"].get<double>());
+}
+
+inline nlohmann::json Vector2::toJson()
+{
+    nlohmann::json j;
+
+    j["x"] = this->x;
+    j["y"] = this->y;
+    return j;
+}
+
 inline Vector3::Vector3() {
     this->x = 0;
     this->y = 0;
@@ -904,6 +940,21 @@ inline Vector3 Vector3::right() {
 
 inline Vector3 Vector3::up() {
     return Vector3(0, 1, 0);
+}
+
+inline Vector3 Vector3::fromJson(nlohmann::json json)
+{
+    return Vector3(json["x"].get<double>(), json["y"].get<double>(), json["z"].get<double>());
+}
+
+inline nlohmann::json Vector3::toJson()
+{
+    nlohmann::json j;
+
+    j["x"] = this->x;
+    j["y"] = this->y;
+    j["z"] = this->z;
+    return j;
 }
 
 inline void Vector3::translate(const Vector3 &v) {
@@ -1077,6 +1128,22 @@ inline Vector4 Vector4::lerp(const Vector4 &a, const Vector4 &b, float t) {
     return (1-t)*a + t*b;
 }
 
+inline Vector4 Vector4::fromJson(nlohmann::json json)
+{
+    return Vector4(json["x"].get<double>(), json["y"].get<double>(), json["z"].get<double>(), json["w"].get<double>());
+}
+
+inline nlohmann::json Vector4::toJson()
+{
+    nlohmann::json j;
+
+    j["x"] = x;
+    j["y"] = y;
+    j["z"] = z;
+    j["w"] = w;
+    return j;
+}
+
 inline Quaternion::Quaternion() {
     x = 0.0;
     y = 0.0;
@@ -1213,6 +1280,22 @@ inline Quaternion Quaternion::slerp(const Quaternion &a, const Quaternion &b, co
     return ((a * sin_one_minus_t) + b * sin_t) / sin_angle;
 }
 
+inline Quaternion Quaternion::fromJson(nlohmann::json json)
+{
+    return Quaternion(json["x"].get<double>(), json["y"].get<double>(), json["z"].get<double>(), json["w"].get<double>());
+}
+
+inline nlohmann::json Quaternion::toJson()
+{
+    nlohmann::json j;
+
+    j["x"] = this->x;
+    j["y"] = this->y;
+    j["z"] = this->z;
+    j["w"] = this->w;
+    return j;
+}
+
 inline Matrix2::Matrix2() {
     a1 = 1.0; a2 = 0.0;
     b1 = 0.0; b2 = 1.0;
@@ -1266,6 +1349,23 @@ inline Matrix2 Matrix2::inverse() const {
         b2 / d, -a2 / d,
         -b1 / d, a1 / d,
     };
+}
+
+inline Matrix2 Matrix2::fromJson(nlohmann::json json)
+{
+    return {json["a1"].get<double>(), json["a2"].get<double>(),
+     json["b1"].get<double>(), json["b2"].get<double>()};
+}
+
+inline nlohmann::json Matrix2::toJson()
+{
+    nlohmann::json j;
+
+    j["a1"] = this->a1;
+    j["a2"] = this->a2;
+    j["b1"] = this->b1;
+    j["b2"] = this->b2;
+    return j;
 }
 
 inline Matrix3::Matrix3() {
@@ -1419,6 +1519,29 @@ inline Matrix3 Matrix3::inverse() const {
         -det2(a10)/d, det2(a11)/d, -det2(a12)/d,
         det2(a20)/d, -det2(a21)/d, det2(a22)/d
     };
+}
+
+inline Matrix3 Matrix3::fromJson(nlohmann::json json)
+{
+    return {json["a1"].get<double>(), json["a2"].get<double>(), json["a3"].get<double>(),
+    json["b1"].get<double>(), json["b2"].get<double>(), json["b3"].get<double>(),
+    json["c1"].get<double>(), json["c2"].get<double>(), json["c3"].get<double>()};
+}
+
+inline nlohmann::json Matrix3::toJson()
+{
+    nlohmann::json json;
+
+    json["a1"] = this->a1;
+    json["a2"] = this->a2;
+    json["a3"] = this->a3;
+    json["b1"] = this->b1;
+    json["b2"] = this->b2;
+    json["b3"] = this->b3;
+    json["c1"] = this->c1;
+    json["c2"] = this->c2;
+    json["c3"] = this->c3;
+    return json;
 }
 
 inline Matrix4::Matrix4() {
@@ -1700,4 +1823,35 @@ inline Matrix4 Matrix4::makeModelMatrix(const Vector3 &position, const Quaternio
         0, 0, 0, 1
     };
     return t * r * s;
+}
+
+inline Matrix4 Matrix4::fromJson(nlohmann::json json)
+{
+    return {json["a1"].get<double>(), json["a2"].get<double>(), json["a3"].get<double>(), json["a4"].get<double>(),
+    json["b1"].get<double>(), json["b2"].get<double>(), json["b3"].get<double>(), json["b4"].get<double>(),
+    json["c1"].get<double>(), json["c2"].get<double>(), json["c3"].get<double>(), json["c4"].get<double>(),
+    json["d1"].get<double>(), json["d2"].get<double>(), json["d3"].get<double>(), json["d4"].get<double>()};
+}
+
+inline nlohmann::json Matrix4::toJson()
+{
+    nlohmann::json j;
+
+    j["a1"] = this->a1;
+    j["a2"] = this->a2;
+    j["a3"] = this->a3;
+    j["a4"] = this->a4;
+    j["b1"] = this->b1;
+    j["b2"] = this->b2;
+    j["b3"] = this->b3;
+    j["b4"] = this->b4;
+    j["c1"] = this->c1;
+    j["c2"] = this->c2;
+    j["c3"] = this->c3;
+    j["c4"] = this->c4;
+    j["d1"] = this->d1;
+    j["d2"] = this->d2;
+    j["d3"] = this->d3;
+    j["d4"] = this->d4;
+    return j;
 }

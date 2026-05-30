@@ -11,56 +11,72 @@
 #include <functional>
 
 #include "Math.h"
-#include "Event.h"
 #include "WorldManager.h"
 
-struct ShaderPaths {
-    std::string vertexPath{};
-    std::string fragmentPath{};
-};
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 
-struct Shader {
-    std::string name{};
-    unsigned int shaderProgram{};
-};
-
-struct Material {
-    Material(std::string name, unsigned int shader);
-
+struct Texture
+{
+    friend class ResourceManager;
+    unsigned int m_textureID{};
 private:
-    std::string m_name{};
-
-    Shader m_shader{};
-    std::vector<unsigned int> m_textures{};
+    int listeners{1};
 };
 
-struct Vertex {
+struct Material
+{
+    friend class ResourceManager;
+    void load() const;
+    template <typename T> void setUniform(const std::string& name, T value);
+private:
+    unsigned int m_shaderProgram{};
+    std::map<std::string, std::function<void()>> m_uniforms{};
+    int listeners{1};
+};
+
+struct Vertex
+{
     Vector3 m_position{};
     Vector3 m_normal{};
-    Vector2 m_texCoords{};
-
-    Vertex() = default;
-    explicit Vertex(Vector3 position, Vector3 normal, Vector2 texCoords);
-    explicit Vertex(Vector3 position, Vector2 texCoords);
-    explicit Vertex(Vector3 position);
+    Vector2 m_uvs{};
 };
 
-struct Mesh {
+struct Mesh
+{
+    friend class ResourceManager;
+    [[nodiscard]] int indexCount() const
+    {
+        return m_indices.size();
+    }
+    [[nodiscard]] unsigned int VAO() const
+    {
+        return m_VAO;
+    };
+    [[nodiscard]] unsigned int VBO() const
+    {
+        return m_VBO;
+    };
+    [[nodiscard]] unsigned int EBO() const
+    {
+        return m_EBO;
+    };
+private:
     unsigned int m_VAO{};
     unsigned int m_VBO{};
     unsigned int m_EBO{};
-
-    Mesh(std::string name, std::vector<Vertex> vertices, std::vector<unsigned int> indices);
-
-    void setMaterial(Material* material);
-
+    std::vector<unsigned int> m_indices{};
+};
+struct Model
+{
+    friend class ResourceManager;
+    std::vector<Mesh> m_meshes{};
+    [[nodiscard]] int meshCount() const
+    {
+        return m_meshes.size();
+    }
 private:
-    std::string m_name{};
-
-    std::vector<Vertex> m_vertices;
-    std::vector<unsigned int> m_indices;
-
-    Material* p_material{};
+    int listeners{1};
 };
 
 class Object;
@@ -69,34 +85,21 @@ struct Scene {
     friend class WorldManager;
     friend class ResourceManager;
 
-    Scene(const std::string& name)
+    explicit Scene(const std::string& name)
     {
         m_name = name;
     };
 
     [[nodiscard]] std::string getName() const;
+    [[nodiscard]] nlohmann::json toJson() const;
 
-    EVENT_ACCESSORS(m_updateEvent);
-    EVENT_ACCESSORS(m_enableEvent);
-    EVENT_ACCESSORS(m_disableEvent);
-    EVENT_ACCESSORS(m_destroyEvent);
+    std::vector<Object*> m_rootObjects{};
 
 private:
     std::string m_name{};
 
-    Event<> m_updateEvent{};
-    Event<> m_enableEvent{};
-    Event<> m_disableEvent{};
-    Event<> m_destroyEvent{};
-
-    Event<> m_transparentDrawEvent{};
-    Event<> m_opaqueDrawEvent{};
-
-    std::vector<Object*> m_rootObjects{};
-
     CameraComponent* m_mainCamera{};
 
-    [[nodiscard]] nlohmann::json toJson() const;
     static Scene* fromJson(const nlohmann::json& j);
 
     void end() const;
@@ -122,7 +125,7 @@ public:
      * @param path the path to the JSON file containing all the information
      * @return the name of the scene if added or empty string if name of scene is already in map
      */
-    std::string addScene(const std::string& path);
+    std::string registerScene(const std::string& path);
     /**
      * @brief load scene from sceneMap into the loaded Scene map
      *
@@ -145,15 +148,66 @@ public:
     void flushLoadedScenes(const std::vector<std::string>& keepLoaded = {});
 
     /**
-     * @brief takes in an Object and component JSON and loads that component onto the object from the JSON file
+     * @brief ent JSON and loads that component onto the object from the JSON file
      *
      * @param obj The object that the component will be added to
      * @param component The JSON file that will be converted into a component
      */
     void loadComponent(Object* obj, nlohmann::json component) const;
-
+    /**
+     * @brief Function at the start of the engine to register components that will be added via the JSON file
+     *
+     * @tparam T The class of the new component
+     * @param type The name in the JSON of the component
+     */
     template<typename T>
     void registerComponent(const std::string& type);
+
+    /**
+     * @brief Function that loads a model into memory
+     *
+     * @param path The path to the model
+     */
+    void loadModel(const std::string& path);
+    /**
+     * @brief Function to get the VAO, VBO, EBO of the model
+     *
+     * @param path The path to the model in memory
+     * @return The model struct in memory
+     */
+    [[nodiscard]] Model getModel(const std::string& path);
+    /**
+     * @brief Function to unload a model from memory, when there are no listeners the texture gets model from memory
+     *
+     * @param path The path to the model in memory
+     */
+    void unloadModel(const std::string& path);
+
+    /**
+     * @brief Function to load a texture into memory from a path
+     *
+     * @param path The path to the texture
+     */
+    void loadTexture(const std::string& path);
+    /**
+     * @brief Function to get a loaded texture from memory
+     *
+     * @param path path to the texture and key in texture map
+     * @return The texture struct containing the unsigned int to the texture in OpenGL memory
+     */
+    [[nodiscard]] Texture getTexture(const std::string& path) const;
+    /**
+     * @brief Function to unload a texture from memory, when there are no listeners the texture gets removed from memory
+     *
+     * @param path Path to the texture and key in the texture map
+     */
+    void unloadTexture(const std::string& path);
+
+    void loadMaterial(const std::string& path);
+    Material getMaterial(const std::string& path);
+    void unloadMaterial(const std::string& path);
+
+    std::function<void()> makeUniform(nlohmann::json uniform);
 
 private:
     /**
@@ -175,8 +229,30 @@ private:
      */
     ~ResourceManager() override = default;
 
+    /**
+     * @brief Helper function for loading models
+     *
+     * @param node Assimp node
+     * @param scene Assimp scene
+     * @param path path of the model in the model map
+     */
+    void processNode(const aiNode* node, const aiScene* scene, const std::string &path);
+    /**
+     * @brief Helper function for loading models
+     *
+     * @param mesh Assimp mesh
+     * @param path path of the model in the model map
+     */
+    void processMesh(const aiMesh* mesh, const std::string &path);
+
     std::map<std::string, std::string> m_sceneMap{};
     std::map<std::string, Scene*> m_loadedScenes{};
 
     std::map<std::string, std::function<void(Object* obj, nlohmann::json j)>> m_componentMap{};
+
+    std::map<std::string, Model> m_loadedModels{};
+    std::map<std::string, Texture> m_loadedTextures{};
+    std::map<std::string, Material> m_loadedMaterials{};
+
+    std::map<std::string, std::function<void(unsigned int shaderProgram, nlohmann::json j)>> m_uniformMap{};
 };

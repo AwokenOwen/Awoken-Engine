@@ -134,6 +134,9 @@ void Object::end() {
         child->end();
     }
     m_destroyEvent.callEvent();
+
+    World.removeFrom_m_updateEvent(this, &Object::update);
+    World.removeFrom_m_updateEvent(this, &Object::destroy);
     delete this;
 }
 
@@ -201,8 +204,7 @@ Object* Object::fromJson(const nlohmann::json& j)
         a->m_children.push_back(child);
     }
 
-    World.getActiveScene()->addTo_m_updateEvent(a, &Object::update);
-    World.getActiveScene()->addTo_m_destroyEvent(a, &Object::destroy);
+    World.addTo_m_updateEvent(a, &Object::update);
 
     return a;
 }
