@@ -31,7 +31,7 @@ public:
     void load() override;
     void unload() override;
 
-private:
+//private:
     std::string m_modelName{};
     std::vector<std::string> m_materialNames{};
 

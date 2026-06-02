@@ -30,6 +30,7 @@ struct Material
     void load() const;
     template <typename T> void setUniform(const std::string& name, T value);
 private:
+    template <typename T> void forceSetUniform(const std::string& name, T value);
     unsigned int m_shaderProgram{};
     std::map<std::string, std::function<void()>> m_uniforms{};
     int listeners{1};
@@ -97,8 +98,6 @@ struct Scene {
 
 private:
     std::string m_name{};
-
-    CameraComponent* m_mainCamera{};
 
     static Scene* fromJson(const nlohmann::json& j);
 
@@ -183,6 +182,8 @@ public:
      */
     void unloadModel(const std::string& path);
 
+    void makeMesh(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+
     /**
      * @brief Function to load a texture into memory from a path
      *
@@ -207,7 +208,8 @@ public:
     Material getMaterial(const std::string& path);
     void unloadMaterial(const std::string& path);
 
-    std::function<void()> makeUniform(nlohmann::json uniform);
+    void setMainCamera(CameraComponent* camera);
+    [[nodiscard]] CameraComponent* getMainCamera() const;
 
 private:
     /**
@@ -255,4 +257,6 @@ private:
     std::map<std::string, Material> m_loadedMaterials{};
 
     std::map<std::string, std::function<void(unsigned int shaderProgram, nlohmann::json j)>> m_uniformMap{};
+
+    CameraComponent* m_mainCamera{};
 };

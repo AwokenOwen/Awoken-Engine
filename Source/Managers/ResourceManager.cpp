@@ -119,7 +119,7 @@ void ResourceManager::flushLoadedScenes(const std::vector<std::string>& keepLoad
         // Return true if the key should be erased (not in the vector)
         if (bool e = std::find(keepLoaded.begin(), keepLoaded.end(), pair.first) == keepLoaded.end()) {
             pair.second->end();
-            return true;
+            return e;
         }
         return false;
     });
@@ -130,16 +130,15 @@ void Material::setUniform(const std::string& name, T value)
 {
     if (!m_uniforms.contains(name))
     {
-        Log.logError("Cannot find uniform %s", name.c_str());
-        return;
+        m_uniforms.insert({name, []{}});
     }
+
     if (std::is_same_v<T, int> || std::is_same_v<T, bool>)
     {
         m_uniforms[name] = [this, name, value]()
         {
-            glUseProgram(m_shaderProgram);
             const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            glUniform1i(uniform, *reinterpret_cast<int*>(&value));
+            glUniform1i(uniform, *reinterpret_cast<const int*>(&value));
         };
         return;
     }
@@ -147,9 +146,8 @@ void Material::setUniform(const std::string& name, T value)
     {
         m_uniforms[name] = [this, name, value]()
         {
-            glUseProgram(m_shaderProgram);
-            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            glUniform1f(uniform, *reinterpret_cast<float*>(&value));
+            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            glUniform1f(uniform, *reinterpret_cast<const float*>(&value));
         };
         return;
     }
@@ -157,9 +155,8 @@ void Material::setUniform(const std::string& name, T value)
     {
         m_uniforms[name] = [this, name, value]()
         {
-            glUseProgram(m_shaderProgram);
-            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            Vector2 _value = *reinterpret_cast<Vector2*>(&value);
+            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            const Vector2 _value = *reinterpret_cast<const Vector2*>(&value);
             glUniform2f(uniform, _value.x, _value.y);
         };
         return;
@@ -168,9 +165,8 @@ void Material::setUniform(const std::string& name, T value)
     {
         m_uniforms[name] = [this, name, value]()
         {
-            glUseProgram(m_shaderProgram);
-            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            Vector3 _value = *reinterpret_cast<Vector3*>(&value);
+            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            const Vector3 _value = *reinterpret_cast<const Vector3*>(&value);
             glUniform3f(uniform, _value.x, _value.y, _value.z);
         };
         return;
@@ -179,9 +175,8 @@ void Material::setUniform(const std::string& name, T value)
     {
         m_uniforms[name] = [this, name, value]()
         {
-            glUseProgram(m_shaderProgram);
-            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            Vector4 _value = *reinterpret_cast<Vector4*>(&value);
+            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            const Vector4 _value = *reinterpret_cast<const Vector4*>(&value);
             glUniform4f(uniform, _value.x, _value.y, _value.z, _value.w);
         };
         return;
@@ -190,11 +185,56 @@ void Material::setUniform(const std::string& name, T value)
     {
         m_uniforms[name] = [this, name, value]()
         {
-            glUseProgram(m_shaderProgram);
-            int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            Matrix4 _value = *reinterpret_cast<Matrix4*>(&value);
+            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+            Matrix4 _value = *reinterpret_cast<const Matrix4*>(&value);
             glUniformMatrix4fv(uniform, 1, GL_FALSE, _value.toFloatArray());
         };
+        return;
+    }
+}
+
+template <typename T>
+void Material::forceSetUniform(const std::string& name, T value)
+{
+    glUseProgram(m_shaderProgram);
+    if (std::is_same_v<T, int> || std::is_same_v<T, bool>)
+    {
+        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+        glUniform1i(uniform, *reinterpret_cast<int*>(&value));
+        return;
+    }
+    if (std::is_same_v<T, float>)
+    {
+        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+        glUniform1f(uniform, *reinterpret_cast<float*>(&value));
+        return;
+    }
+    if (std::is_same_v<T, Vector2>)
+    {
+        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+        const Vector2 _value = *reinterpret_cast<Vector2*>(&value);
+        glUniform2f(uniform, _value.x, _value.y);
+        return;
+    }
+    if (std::is_same_v<T, Vector3>)
+    {
+        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+        const Vector3 _value = *reinterpret_cast<Vector3*>(&value);
+        glUniform3f(uniform, _value.x, _value.y, _value.z);
+        return;
+    }
+    if (std::is_same_v<T, Vector4>)
+    {
+        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+        const Vector4 _value = *reinterpret_cast<Vector4*>(&value);
+        glUniform4f(uniform, _value.x, _value.y, _value.z, _value.w);
+        return;
+    }
+    if (std::is_same_v<T, Matrix4>)
+    {
+        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+        Matrix4 _value = *reinterpret_cast<Matrix4*>(&value);
+        glUniformMatrix4fv(uniform, 1, GL_FALSE, _value.toFloatArray());
         return;
     }
 }
@@ -270,6 +310,56 @@ void ResourceManager::unloadModel(const std::string& path)
         m_loadedModels.erase(path);
     }
 }
+
+void ResourceManager::makeMesh(const std::string& name, const std::vector<Vertex>& vertices,
+    const std::vector<unsigned int>& indices)
+{
+    if (m_loadedModels.contains(name))
+    {
+        Log.logError("Model '%s' is already in the map", name.c_str());
+    }
+
+    Mesh map_mesh;
+    unsigned int VAO{};
+    unsigned int VBO{};
+    unsigned int EBO{};
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+                 &indices[0], GL_STATIC_DRAW);
+
+    // vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<void*>(nullptr));
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_normal)));
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_uvs)));
+
+    glBindVertexArray(0);
+
+    map_mesh.m_VAO = VAO;
+    map_mesh.m_VBO = VBO;
+    map_mesh.m_EBO = EBO;
+    map_mesh.m_indices = indices;
+
+    Model mapModel{};
+
+    mapModel.m_meshes.push_back(map_mesh);
+
+    m_loadedModels.insert({name, mapModel});
+}
+
 
 void ResourceManager::loadTexture(const std::string& path)
 {
@@ -442,15 +532,24 @@ void ResourceManager::loadMaterial(const std::string& path)
     auto mapMaterial = Material{};
     mapMaterial.m_shaderProgram = shaderProgram;
 
-    // Load Uniforms
+     // Load default Uniforms
+    mapMaterial.setUniform("model", Matrix4{});
+    mapMaterial.setUniform("view", Matrix4{});
+    mapMaterial.setUniform("projection", Matrix4{});
+
+    // Load Other Uniforms
     for (const std::vector<nlohmann::json> uniforms = j["Uniforms"]; const auto& u : uniforms)
     {
         auto name = u["Name"].get<std::string>();
         auto type = u["Type"].get<std::string>();
-        mapMaterial.m_uniforms.insert({name, [this, type, mapMaterial, u]()
+        if (u["Dynamic"].get<bool>())
         {
-            m_uniformMap[type](mapMaterial.m_shaderProgram, u);
-        }});
+            mapMaterial.m_uniforms.insert({name, [this, type, mapMaterial, u]()
+            {
+                m_uniformMap[type](mapMaterial.m_shaderProgram, u);
+            }});
+        }
+        m_uniformMap.at(type)(mapMaterial.m_shaderProgram, u);
     }
 
     m_loadedMaterials.insert({path, mapMaterial});
@@ -480,6 +579,21 @@ void ResourceManager::unloadMaterial(const std::string& path)
     }
 }
 
+void ResourceManager::setMainCamera(CameraComponent* camera)
+{
+    if (m_mainCamera != nullptr)
+    {
+        m_mainCamera->m_main = false;
+    }
+    m_mainCamera = camera;
+    m_mainCamera->m_main = true;
+}
+
+CameraComponent* ResourceManager::getMainCamera() const
+{
+    return m_mainCamera;
+}
+
 int ResourceManager::initialize() {
     std::ifstream f("gameInit.json");
     nlohmann::json j = nlohmann::json::parse(f);
@@ -496,13 +610,65 @@ int ResourceManager::initialize() {
     registerComponent<CameraComponent>("Camera");
     registerComponent<ModelRendererComponent>("ModelRenderer");
 
-    m_uniformMap.insert({"Int", [](unsigned int shaderProgram, nlohmann::json j)
+    m_uniformMap.insert({"Int", [](const unsigned int shaderProgram, const nlohmann::json& j)
     {
-        int uniform = glGetUniformLocation(shaderProgram, j["Name"].get<std::string>().c_str());
-        int value = j["Value"].get<int>();
+        const auto name = j["Name"].get<std::string>();
+        const auto value = j["Value"].get<int>();
 
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform1i(uniform, value);
     }});
 
+    m_uniformMap.insert({"Float", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = j["Value"].get<float>();
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform1f(uniform, value);
+    }});
+
+    m_uniformMap.insert({"Vector2", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = Vector2::fromJson(j["Value"]);
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform2f(uniform, value.x, value.y);
+    }});
+
+    m_uniformMap.insert({"Vector3", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = Vector3::fromJson(j["Value"]);
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform3f(uniform, value.x, value.y, value.z);
+    }});
+
+    m_uniformMap.insert({"Vector4", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = Vector4::fromJson(j["Value"]);
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform4f(uniform, value.x, value.y, value.z, value.w);
+    }});
+
+    m_uniformMap.insert({"Matrix4", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        auto value = Matrix4::fromJson(j["Value"]);
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniformMatrix4fv(uniform, 1, GL_FALSE, value.toFloatArray());
+    }});
 
     Log.log("Resource Manager initialized");
     return 0;

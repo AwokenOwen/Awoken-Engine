@@ -5,6 +5,7 @@
 #include "CameraComponent.h"
 
 #include "Object.h"
+#include "ResourceManager.h"
 #include "WindowManager.h"
 
 CameraComponent::CameraComponent(Object *parent) : Component(parent) {
@@ -55,6 +56,11 @@ void CameraComponent::disable()
 
 }
 
+void CameraComponent::setActiveState(const bool active)
+{
+    Component::setActiveState(active);
+}
+
 nlohmann::json CameraComponent::toJson()
 {
     nlohmann::json j;
@@ -66,6 +72,8 @@ nlohmann::json CameraComponent::toJson()
     j["Near"] = m_near;
     j["Far"] = m_far;
 
+    j["Main"] = m_main;
+
     return j;
 }
 
@@ -75,4 +83,10 @@ void CameraComponent::fromJson(nlohmann::json j)
     m_fov = j["FOV"].get<float>();
     m_near = j["Near"].get<float>();
     m_far = j["Far"].get<float>();
+
+    m_main = j["Main"].get<bool>();
+    if (m_main)
+    {
+        Resource.setMainCamera(this);
+    }
 }

@@ -13,11 +13,16 @@ class CameraComponent : public Component{
     friend class ResourceManager;
 public:
     explicit CameraComponent(Object* parent);
+    ~CameraComponent() override = default;
+
+    void setActiveState(bool active) override;
 
     [[nodiscard]] Matrix4 getViewMatrix() const;
     [[nodiscard]] Matrix4 getProjectionMatrix() const;
 
     void setProjectionType(bool projectionType);
+
+    bool m_main{false};
 
 private:
     bool m_projectionType{true};

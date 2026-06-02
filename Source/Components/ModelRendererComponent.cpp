@@ -4,6 +4,10 @@
 
 #include "ModelRendererComponent.h"
 
+#include "CameraComponent.h"
+#include "LogManager.h"
+#include "Object.h"
+
 ModelRendererComponent::ModelRendererComponent(Object *parent) : Component(parent), Renderer() {
 
 }
@@ -13,6 +17,7 @@ void ModelRendererComponent::setActiveState(const bool active) {
 }
 
 void ModelRendererComponent::start() {
+    
 }
 
 void ModelRendererComponent::update() {
@@ -37,6 +42,8 @@ nlohmann::json ModelRendererComponent::toJson()
 
     j["Transparency"] = getTransparency();
 
+    j["Materials"] = m_materialNames;
+
     return j;
 }
 
@@ -45,20 +52,51 @@ void ModelRendererComponent::fromJson(nlohmann::json j)
     m_modelName = j["Model"].get<std::string>();
 
     registerRenderer(j["Transparency"].get<bool>());
+
+    m_materialNames = j["Materials"].get<std::vector<std::string>>();
 }
 
 void ModelRendererComponent::draw()
 {
+    if (m_materials.size() != m_model.meshCount())
+    {
+        Log.logError("Material Count does not match Mesh Count.");
+        return;
+    }
+    for (int i = 0; i < m_model.meshCount(); ++i)
+    {
+        /*m_materials[i].setUniform("model", getParent()->getWorldMatrix());
+        m_materials[i].setUniform("view", Resource.getMainCamera()->getViewMatrix());
+        m_materials[i].setUniform("projection", Resource.getMainCamera()->getProjectionMatrix());*/
 
+        m_materials[i].load();
+
+        glBindVertexArray(m_model.m_meshes[i].VAO());
+        glDrawElements(GL_TRIANGLES, m_model.m_meshes[i].indexCount(), GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
+    }
 }
 
 void ModelRendererComponent::load()
 {
     Resource.loadModel(m_modelName);
     m_model = Resource.getModel(m_modelName);
+
+    for (const auto& m : m_materialNames)
+    {
+        Resource.loadMaterial(m);
+        m_materials.emplace_back(Resource.getMaterial(m));
+    }
 }
 
 void ModelRendererComponent::unload()
 {
+    Resource.unloadModel(m_modelName);
+    m_model = {};
 
+    for (const auto& m : m_materialNames)
+    {
+        Resource.unloadMaterial(m);
+    }
+    m_materials.clear();
 }

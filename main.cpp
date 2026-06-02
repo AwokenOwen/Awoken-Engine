@@ -4,6 +4,8 @@
 #include <fstream>
 
 #include "GameManager.h"
+#include "ModelRendererComponent.h"
+#include "CameraComponent.h"
 #include "Object.h"
 #include "ResourceManager.h"
 
@@ -13,19 +15,29 @@ int main(int argc, char* argv[])
     // Make a name
     // All the objects with their components turned into JSON
 
-    /*auto scene = new Scene("testScene");
+    auto scene = new Scene("testScene");
 
     auto image = new Object();
-    image->addComponent<ModelRendererComponent>();
+    auto rederer = image->addComponent<ModelRendererComponent>();
+    rederer->m_materialNames.emplace_back("assets/defaultAssets/Materials/unlit.json");
+    rederer->m_modelName = "assets/defaultAssets/Models/cube.fbx";
+
+    auto camera = new Object();
+    auto cameraComp = camera->addComponent<CameraComponent>();
+    cameraComp->m_main = true;
+
+    camera->setLocalPosition(Vector3(0, 0, 5));
 
 
 
     scene->m_rootObjects.push_back(image);
+    scene->m_rootObjects.push_back(camera);
     std::ofstream f("assets/defaultAssets/Scenes/testScene.scene");
     f << scene->toJson().dump(4)  << std::endl;
 
     delete image;
-    delete scene;*/
+    delete scene;
+    delete camera;
 
     // Then Alter gameInit.json to load the scene
     // Primary is the first scene that will be loaded at start
@@ -42,7 +54,7 @@ int main(int argc, char* argv[])
 
     // Material making
 
-    nlohmann::json material;
+    /*nlohmann::json material;
     material["VertexShader"] = "assets/defaultAssets/Shaders/unlit.vert";
     material["FragmentShader"] = "assets/defaultAssets/Shaders/unlit.frag";
 
@@ -64,18 +76,17 @@ int main(int argc, char* argv[])
     material["Uniforms"] = uniforms;
 
     std::ofstream unlit("assets/defaultAssets/Materials/unlit.json");
-    unlit << material.dump(4)  << std::endl;
+    unlit << material.dump(4)  << std::endl;*/
 
 
-    /*
-    // Here all the scenes will be added to a standby map and only the Primary will become the base scene
-    Game.initialize();
+     // Here all the scenes will be added to a standby map and only the Primary will become the base scene
+     Game.initialize();
 
-    // All custom components must be registered here, after initialize but before run
-    // call Resource.registerComponent<COMPONENT_TYPE>("THE NAME IN THE SCENE FILE")
+     // All custom components must be registered here, after initialize but before run
+     // call Resource.registerComponent<COMPONENT_TYPE>("THE NAME IN THE SCENE FILE")
 
-    // The starting base scene will be loaded with all the objects and components
-    Game.run();
-    // All heap data will be deleted (not that is matters since this is the end of the program)
-    Game.terminate();*/
+     // The starting base scene will be loaded with all the objects and components
+     Game.run();
+     // All heap data will be deleted (not that is matters since this is the end of the program)
+     Game.terminate();
 }
