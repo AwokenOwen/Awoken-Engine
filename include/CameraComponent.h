@@ -29,7 +29,7 @@ private:
 
     float m_fov{toRadians(90.0f)};
     float m_near{0.001f};
-    float m_far{100.0f};
+    float m_far{1000.0f};
 
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;

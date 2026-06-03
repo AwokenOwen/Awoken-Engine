@@ -34,12 +34,17 @@ Matrix4 CameraComponent::getProjectionMatrix() const {
         return {
             cot(m_fov / 2.0f) / Window.getAspectRatio(), 0, 0, 0,
             0, cot(m_fov / 2.0f), 0, 0,
-            0, 0, (m_near + m_far)/(m_near - m_far), -1,
-            0, 0, (2 * m_near * m_far)/(m_near - m_far), 0
+            0, 0, (m_near + m_far) / (m_near - m_far), (2 * m_near * m_far) / (m_near - m_far),
+            0, 0, -1, 0
         };
     }
+    float r = Window.getAspectRatio();
+    float t = 1.0f;
     return {
-
+        1.0f/r, 0, 0, 0,
+        0, 1.0f/t, 0, 0,
+        0, 0, -2.0f/(m_far - m_near), -(m_far + m_near)/(m_far - m_near),
+        0, 0, 0, 1
     };
 }
 

@@ -20,15 +20,15 @@ int main(int argc, char* argv[])
     auto image = new Object();
     auto rederer = image->addComponent<ModelRendererComponent>();
     rederer->m_materialNames.emplace_back("assets/defaultAssets/Materials/unlit.json");
-    rederer->m_modelName = "assets/defaultAssets/Models/cube.fbx";
+    rederer->m_modelName = "assets/defaultAssets/Models/image.fbx";
 
     auto camera = new Object();
     auto cameraComp = camera->addComponent<CameraComponent>();
     cameraComp->m_main = true;
 
-    camera->setLocalPosition(Vector3(0, 0, 5));
+    camera->setLocalPosition(Vector3(0, 0, 0));
 
-
+    image->setLocalPosition(Vector3(0, 0, -500));
 
     scene->m_rootObjects.push_back(image);
     scene->m_rootObjects.push_back(camera);

@@ -126,120 +126,6 @@ void ResourceManager::flushLoadedScenes(const std::vector<std::string>& keepLoad
 }
 
 template <typename T>
-void Material::setUniform(const std::string& name, T value)
-{
-    if (!m_uniforms.contains(name))
-    {
-        m_uniforms.insert({name, []{}});
-    }
-
-    if (std::is_same_v<T, int> || std::is_same_v<T, bool>)
-    {
-        m_uniforms[name] = [this, name, value]()
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            glUniform1i(uniform, *reinterpret_cast<const int*>(&value));
-        };
-        return;
-    }
-    if (std::is_same_v<T, float>)
-    {
-        m_uniforms[name] = [this, name, value]()
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            glUniform1f(uniform, *reinterpret_cast<const float*>(&value));
-        };
-        return;
-    }
-    if (std::is_same_v<T, Vector2>)
-    {
-        m_uniforms[name] = [this, name, value]()
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            const Vector2 _value = *reinterpret_cast<const Vector2*>(&value);
-            glUniform2f(uniform, _value.x, _value.y);
-        };
-        return;
-    }
-    if (std::is_same_v<T, Vector3>)
-    {
-        m_uniforms[name] = [this, name, value]()
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            const Vector3 _value = *reinterpret_cast<const Vector3*>(&value);
-            glUniform3f(uniform, _value.x, _value.y, _value.z);
-        };
-        return;
-    }
-    if (std::is_same_v<T, Vector4>)
-    {
-        m_uniforms[name] = [this, name, value]()
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            const Vector4 _value = *reinterpret_cast<const Vector4*>(&value);
-            glUniform4f(uniform, _value.x, _value.y, _value.z, _value.w);
-        };
-        return;
-    }
-    if (std::is_same_v<T, Matrix4>)
-    {
-        m_uniforms[name] = [this, name, value]()
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            Matrix4 _value = *reinterpret_cast<const Matrix4*>(&value);
-            glUniformMatrix4fv(uniform, 1, GL_FALSE, _value.toFloatArray());
-        };
-        return;
-    }
-}
-
-template <typename T>
-void Material::forceSetUniform(const std::string& name, T value)
-{
-    glUseProgram(m_shaderProgram);
-    if (std::is_same_v<T, int> || std::is_same_v<T, bool>)
-    {
-        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-        glUniform1i(uniform, *reinterpret_cast<int*>(&value));
-        return;
-    }
-    if (std::is_same_v<T, float>)
-    {
-        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-        glUniform1f(uniform, *reinterpret_cast<float*>(&value));
-        return;
-    }
-    if (std::is_same_v<T, Vector2>)
-    {
-        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-        const Vector2 _value = *reinterpret_cast<Vector2*>(&value);
-        glUniform2f(uniform, _value.x, _value.y);
-        return;
-    }
-    if (std::is_same_v<T, Vector3>)
-    {
-        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-        const Vector3 _value = *reinterpret_cast<Vector3*>(&value);
-        glUniform3f(uniform, _value.x, _value.y, _value.z);
-        return;
-    }
-    if (std::is_same_v<T, Vector4>)
-    {
-        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-        const Vector4 _value = *reinterpret_cast<Vector4*>(&value);
-        glUniform4f(uniform, _value.x, _value.y, _value.z, _value.w);
-        return;
-    }
-    if (std::is_same_v<T, Matrix4>)
-    {
-        const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-        Matrix4 _value = *reinterpret_cast<Matrix4*>(&value);
-        glUniformMatrix4fv(uniform, 1, GL_FALSE, _value.toFloatArray());
-        return;
-    }
-}
-
-template <typename T>
 void ResourceManager::registerComponent(const std::string& type)
 {
     static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
@@ -532,11 +418,6 @@ void ResourceManager::loadMaterial(const std::string& path)
     auto mapMaterial = Material{};
     mapMaterial.m_shaderProgram = shaderProgram;
 
-     // Load default Uniforms
-    mapMaterial.setUniform("model", Matrix4{});
-    mapMaterial.setUniform("view", Matrix4{});
-    mapMaterial.setUniform("projection", Matrix4{});
-
     // Load Other Uniforms
     for (const std::vector<nlohmann::json> uniforms = j["Uniforms"]; const auto& u : uniforms)
     {
@@ -757,13 +638,13 @@ void ResourceManager::processMesh(const aiMesh* mesh, const std::string &path)
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<void*>(nullptr));
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), static_cast<void*>(nullptr));
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_normal)));
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_normal)));
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_uvs)));
+    glVertexAttribPointer(2, 2, GL_DOUBLE, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_uvs)));
 
     glBindVertexArray(0);
 
