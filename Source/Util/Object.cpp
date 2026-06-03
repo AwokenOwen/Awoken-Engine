@@ -76,7 +76,7 @@ Matrix4 Object::getWorldMatrix() const {
 
 Vector3 Object::getWorldForward() const {
     const Matrix4 m = getWorldMatrix();
-    return Vector3(m.a3, m.b3, m.c3).normalize();
+    return Vector3(-m.a3, -m.b3, -m.c3).normalize();
 }
 
 Vector3 Object::getWorldRight() const {
