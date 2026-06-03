@@ -36,7 +36,8 @@ Matrix4 Object::getLocalMatrix() const {
 }
 
 Vector3 Object::getWorldPosition() const {
-    return Vector3(getWorldMatrix() * Vector4(m_localPosition));
+    const Matrix4 m = getWorldMatrix();
+    return Vector3(m.a4, m.b4, m.c4);
 }
 
 void Object::setWorldPosition(const Vector3 &position) {
@@ -74,15 +75,18 @@ Matrix4 Object::getWorldMatrix() const {
 }
 
 Vector3 Object::getWorldForward() const {
-    return Vector3(getWorldMatrix() * Vector4(Vector3::forward()));
+    const Matrix4 m = getWorldMatrix();
+    return Vector3(m.a3, m.b3, m.c3).normalize();
 }
 
 Vector3 Object::getWorldRight() const {
-    return Vector3(getWorldMatrix() * Vector4(Vector3::right()));
+    const Matrix4 m = getWorldMatrix();
+    return Vector3(m.a1, m.b1, m.c1).normalize();
 }
 
 Vector3 Object::getWorldUp() const {
-    return Vector3(getWorldMatrix() * Vector4(Vector3::up()));
+    const Matrix4 m = getWorldMatrix();
+    return Vector3(m.a2, m.b2, m.c2).normalize();
 }
 
 Object * Object::getParent() const {

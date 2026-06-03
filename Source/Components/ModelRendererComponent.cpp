@@ -70,11 +70,9 @@ void ModelRendererComponent::draw()
         auto view = Resource.getMainCamera()->getViewMatrix();
         auto proj = Resource.getMainCamera()->getProjectionMatrix();
 
-        Log.log("View row4: %f %f %f %f", view.a4, view.b4, view.c4, view.d4);
-
-        m_materials[i].setUniform("model", getParent()->getWorldMatrix());
-        m_materials[i].setUniform("view", Resource.getMainCamera()->getViewMatrix());
-        m_materials[i].setUniform("projection", Resource.getMainCamera()->getProjectionMatrix());
+        m_materials[i].setUniform("model", model);
+        m_materials[i].setUniform("view", view);
+        m_materials[i].setUniform("projection", proj);
 
         m_materials[i].load();
 
