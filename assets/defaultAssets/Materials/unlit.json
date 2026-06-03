@@ -1,0 +1,16 @@
+{
+    "FragmentShader": "assets/defaultAssets/Shaders/unlit.frag",
+    "Uniforms": [
+        {
+            "Dynamic": false,
+            "Name": "color",
+            "Type": "Vector3",
+            "Value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        }
+    ],
+    "VertexShader": "assets/defaultAssets/Shaders/unlit.vert"
+}

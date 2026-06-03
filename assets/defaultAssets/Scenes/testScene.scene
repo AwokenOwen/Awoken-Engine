@@ -1,0 +1,67 @@
+{
+    "Name": "testScene",
+    "Root Objects": [
+        {
+            "ActiveState": true,
+            "Children": [],
+            "Components": [
+                {
+                    "Materials": [
+                        "assets/defaultAssets/Materials/unlit.json"
+                    ],
+                    "Model": "assets/defaultAssets/Models/cube.fbx",
+                    "Transparency": false,
+                    "Type": "ModelRenderer"
+                }
+            ],
+            "Name": "Untitled_0",
+            "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        },
+        {
+            "ActiveState": true,
+            "Children": [],
+            "Components": [
+                {
+                    "FOV": 1.5707963705062866,
+                    "Far": 100.0,
+                    "Main": true,
+                    "Near": 0.0010000000474974513,
+                    "ProjectionType": true,
+                    "Type": "Camera"
+                }
+            ],
+            "Name": "Untitled_1",
+            "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 5.0
+            },
+            "Rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        }
+    ]
+}
