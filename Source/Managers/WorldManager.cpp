@@ -108,6 +108,8 @@ void WorldManager::awake() {
     // do important set up
     Log.log("Loading base scene...");
 
+    Resource.loadMaterial("assets/defaultAssets/Materials/postprocess.json");
+
     Resource.loadScene(m_baseScene);
     setActiveScene(m_baseScene);
 
@@ -133,8 +135,12 @@ void WorldManager::update() {
     m_updateEvent.callEvent();
 
     // Draw all drawers to the screen/framebuffer, transparent first then opaque
+    Resource.activateFramebuffer("post");
     m_transparentDrawEvent.callEvent();
     m_opaqueDrawEvent.callEvent();
+    Resource.activateFramebuffer();
+
+    drawPostprocess();
 
     // Call the destroy event
     m_destroyEvent.callEvent();
@@ -151,4 +157,16 @@ void WorldManager::update() {
     }
     // clear to be destroyed so no repeats
     m_tobeDestroyed.clear();
+}
+
+void WorldManager::drawPostprocess()
+{
+    auto screen = Resource.getModel("post").m_meshes[0];
+    auto mat = Resource.getMaterial("assets/defaultAssets/Materials/postprocess.json");
+
+    mat.load();
+
+    glBindVertexArray(screen.VAO());
+    glDrawElements(GL_TRIANGLES, screen.indexCount(), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(0);
 }

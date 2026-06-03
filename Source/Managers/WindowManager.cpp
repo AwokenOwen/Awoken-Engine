@@ -13,6 +13,11 @@ int WindowManager::initialize() {
     if(createWindow()) {
         return 1;
     }
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     // Log Done
     Log.log("WindowManager Initialized");
     return 0;

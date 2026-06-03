@@ -121,6 +121,8 @@ private:
     */
     ~WorldManager() override = default;
 
+    void drawPostprocess();
+
     std::vector<Object*> m_tobeAdded{};
     std::vector<Object*> m_tobeDestroyed{};
 

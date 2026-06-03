@@ -16,6 +16,13 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+struct FrameBuffer
+{
+    unsigned int m_id;
+    unsigned int m_colorBuffer;
+    unsigned int m_renderBuffer;
+};
+
 struct Texture
 {
     friend class ResourceManager;
@@ -27,124 +34,31 @@ private:
 struct Material
 {
     friend class ResourceManager;
-    void load() const;
+    void load();
     template <typename T>
     void setUniform(const std::string& name, T value)
     {
-        if (!m_uniforms.contains(name))
-        {
-            m_uniforms.insert({name, []{}});
-        }
-
-        if (std::is_same_v<T, int> || std::is_same_v<T, bool>)
-        {
-            m_uniforms[name] = [this, name, value]()
-            {
-                const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-                glUniform1i(uniform, *reinterpret_cast<const int*>(&value));
-            };
-            return;
-        }
-        if (std::is_same_v<T, float>)
-        {
-            m_uniforms[name] = [this, name, value]()
-            {
-                const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-                glUniform1f(uniform, *reinterpret_cast<const float*>(&value));
-            };
-            return;
-        }
-        if (std::is_same_v<T, Vector2>)
-        {
-            m_uniforms[name] = [this, name, value]()
-            {
-                const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-                const Vector2 _value = *reinterpret_cast<const Vector2*>(&value);
-                glUniform2f(uniform, _value.x, _value.y);
-            };
-            return;
-        }
-        if (std::is_same_v<T, Vector3>)
-        {
-            m_uniforms[name] = [this, name, value]()
-            {
-                const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-                const Vector3 _value = *reinterpret_cast<const Vector3*>(&value);
-                glUniform3f(uniform, _value.x, _value.y, _value.z);
-            };
-            return;
-        }
-        if (std::is_same_v<T, Vector4>)
-        {
-            m_uniforms[name] = [this, name, value]()
-            {
-                const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-                const Vector4 _value = *reinterpret_cast<const Vector4*>(&value);
-                glUniform4f(uniform, _value.x, _value.y, _value.z, _value.w);
-            };
-            return;
-        }
-        if (std::is_same_v<T, Matrix4>)
-        {
-            m_uniforms[name] = [this, name, value]()
-            {
-                const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-                Matrix4 _value = *reinterpret_cast<const Matrix4*>(&value);
-                glUniformMatrix4fv(uniform, 1, GL_FALSE, _value.toFloatArray());
-            };
-            return;
-        }
-    }
-
-private:
-    template <typename T>
-    void forceSetUniform(const std::string& name, T value)
-    {
         glUseProgram(m_shaderProgram);
-        if (std::is_same_v<T, int> || std::is_same_v<T, bool>)
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            glUniform1i(uniform, *reinterpret_cast<int*>(&value));
-            return;
-        }
-        if (std::is_same_v<T, float>)
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            glUniform1f(uniform, *reinterpret_cast<float*>(&value));
-            return;
-        }
-        if (std::is_same_v<T, Vector2>)
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            const Vector2 _value = *reinterpret_cast<Vector2*>(&value);
-            glUniform2f(uniform, _value.x, _value.y);
-            return;
-        }
-        if (std::is_same_v<T, Vector3>)
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            const Vector3 _value = *reinterpret_cast<Vector3*>(&value);
-            glUniform3f(uniform, _value.x, _value.y, _value.z);
-            return;
-        }
-        if (std::is_same_v<T, Vector4>)
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            const Vector4 _value = *reinterpret_cast<Vector4*>(&value);
-            glUniform4f(uniform, _value.x, _value.y, _value.z, _value.w);
-            return;
-        }
-        if (std::is_same_v<T, Matrix4>)
-        {
-            const int uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
-            Matrix4 _value = *reinterpret_cast<Matrix4*>(&value);
-            glUniformMatrix4fv(uniform, 1, GL_FALSE, _value.toFloatArray());
-            return;
-        }
-    }
 
+        auto uniform = glGetUniformLocation(m_shaderProgram, name.c_str());
+
+        if constexpr (std::is_same_v<T, int> || std::is_same_v<T, bool>)
+            glUniform1i(uniform, static_cast<int>(value));
+        else if constexpr (std::is_same_v<T, float>)
+            glUniform1f(uniform, value);
+        else if constexpr (std::is_same_v<T, Vector2>)
+            glUniform2f(uniform, value.x, value.y);
+        else if constexpr (std::is_same_v<T, Vector3>)
+            glUniform3f(uniform, value.x, value.y, value.z);
+        else if constexpr (std::is_same_v<T, Vector4>)
+            glUniform4f(uniform, value.x, value.y, value.z, value.w);
+        else if constexpr (std::is_same_v<T, Matrix4>)
+            glUniformMatrix4fv(uniform, 1, GL_FALSE, value.toFloatArray());
+    }
+private:
     unsigned int m_shaderProgram{};
     std::map<std::string, std::function<void()>> m_uniforms{};
+    std::vector<Texture> m_textures{};
     int listeners{1};
 };
 
@@ -323,6 +237,10 @@ public:
     void setMainCamera(CameraComponent* camera);
     [[nodiscard]] CameraComponent* getMainCamera() const;
 
+    FrameBuffer makeFramebuffer(const std::string& name, int width = -1, int height = -1);
+
+    void activateFramebuffer(const std::string& name = "");
+
 private:
     /**
      * @brief Starts the Resource Manager
@@ -359,6 +277,8 @@ private:
      */
     void processMesh(const aiMesh* mesh, const std::string &path);
 
+    void makePostprocessingScreen();
+
     std::map<std::string, std::string> m_sceneMap{};
     std::map<std::string, Scene*> m_loadedScenes{};
 
@@ -371,4 +291,6 @@ private:
     std::map<std::string, std::function<void(unsigned int shaderProgram, nlohmann::json j)>> m_uniformMap{};
 
     CameraComponent* m_mainCamera{};
+
+    std::map<std::string, FrameBuffer> m_framebuffers{};
 };

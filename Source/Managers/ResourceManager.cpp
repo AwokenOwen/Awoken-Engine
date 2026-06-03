@@ -13,6 +13,7 @@
 
 #include "CameraComponent.h"
 #include "ModelRendererComponent.h"
+#include "WindowManager.h"
 
 #include "assimp/postprocess.h"
 
@@ -34,12 +35,19 @@ nlohmann::json Scene::toJson() const {
     return j;
 }
 
-void Material::load() const
+void Material::load()
 {
     glUseProgram(m_shaderProgram);
     for (const auto& func : m_uniforms | std::views::values)
     {
         func();
+    }
+    for (int i = 0; i < m_textures.size(); ++i)
+    {
+        setUniform(std::string("textures[" + std::to_string(i) + "]"), i);
+
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, m_textures[i].m_textureID);
     }
 }
 
@@ -224,13 +232,13 @@ void ResourceManager::makeMesh(const std::string& name, const std::vector<Vertex
 
     // vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<void*>(nullptr));
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), static_cast<void*>(nullptr));
     // vertex normals
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_normal)));
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_normal)));
     // vertex texture coords
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_uvs)));
+    glVertexAttribPointer(2, 2, GL_DOUBLE, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, m_uvs)));
 
     glBindVertexArray(0);
 
@@ -433,6 +441,12 @@ void ResourceManager::loadMaterial(const std::string& path)
         m_uniformMap.at(type)(mapMaterial.m_shaderProgram, u);
     }
 
+    for (const std::vector<nlohmann::json> textures = j["Textures"]; const auto& t : textures)
+    {
+        Resource.loadTexture(t.get<std::string>());
+        mapMaterial.m_textures.push_back(Resource.getTexture(t.get<std::string>()));
+    }
+
     m_loadedMaterials.insert({path, mapMaterial});
 }
 
@@ -473,6 +487,77 @@ void ResourceManager::setMainCamera(CameraComponent* camera)
 CameraComponent* ResourceManager::getMainCamera() const
 {
     return m_mainCamera;
+}
+
+FrameBuffer ResourceManager::makeFramebuffer(const std::string& name, int width, int height)
+{
+    if (m_framebuffers.contains(name))
+    {
+        Log.logWarning("Framebuffer %s already exists returning...", name.c_str());
+        return m_framebuffers.at(name);
+    }
+
+    if (width == -1)
+    {
+        width = Window.getViewportWidth();
+    }
+    if (height == -1)
+    {
+        height = Window.getViewportHeight();
+    }
+
+    auto frameBuffer = FrameBuffer{};
+
+    glGenFramebuffers(1, &frameBuffer.m_id);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_id);
+    // create a color attachment texture
+    glGenTextures(1, &frameBuffer.m_colorBuffer);
+    glBindTexture(GL_TEXTURE_2D, frameBuffer.m_colorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBuffer.m_colorBuffer, 0);
+    // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+    glGenRenderbuffers(1, &frameBuffer.m_renderBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, frameBuffer.m_renderBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); // use a single renderbuffer object for both a depth AND stencil buffer.
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, frameBuffer.m_renderBuffer); // now actually attach it
+    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+
+    auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+        Log.logError("Framebuffer not complete: %d", fboStatus);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    auto texture = Texture{};
+    texture.m_textureID = frameBuffer.m_colorBuffer;
+    texture.listeners = 0;
+
+    m_framebuffers.insert({name, frameBuffer});
+    m_loadedTextures.insert({name, texture});
+
+    return frameBuffer;
+}
+
+void ResourceManager::activateFramebuffer(const std::string& name)
+{
+    if (name.empty())
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        return;
+    }
+
+    if (!m_framebuffers.contains(name))
+    {
+        Log.logError("Cannot find framebuffer %s", name.c_str());
+        return;
+    }
+    const auto frameBuffer = m_framebuffers.at(name);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_id);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 int ResourceManager::initialize() {
@@ -550,6 +635,8 @@ int ResourceManager::initialize() {
         const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
         glUniformMatrix4fv(uniform, 1, GL_FALSE, value.toFloatArray());
     }});
+
+    makePostprocessingScreen();
 
     Log.log("Resource Manager initialized");
     return 0;
@@ -654,4 +741,23 @@ void ResourceManager::processMesh(const aiMesh* mesh, const std::string &path)
     map_mesh.m_indices = indices;
 
     m_loadedModels.at(path).m_meshes.push_back(map_mesh);
+}
+
+void ResourceManager::makePostprocessingScreen()
+{
+    const std::vector vertices
+    {
+        Vertex{Vector3(-1, -1, 0)},
+        Vertex{Vector3(1, -1, 0)},
+        Vertex{Vector3(1, 1, 0)},
+        Vertex{Vector3(-1, 1, 0)},
+    };
+    const std::vector<unsigned int> indices
+    {
+        0, 1, 2,
+        0, 2, 3,
+    };
+
+    makeMesh("post", vertices, indices);
+    makeFramebuffer("post");
 }

@@ -17,10 +17,10 @@ int main(int argc, char* argv[])
 
     auto scene = new Scene("testScene");
 
-    auto image = new Object();
-    auto rederer = image->addComponent<ModelRendererComponent>();
+    auto cube = new Object();
+    auto rederer = cube->addComponent<ModelRendererComponent>();
     rederer->m_materialNames.emplace_back("assets/defaultAssets/Materials/unlit.json");
-    rederer->m_modelName = "assets/defaultAssets/Models/image.fbx";
+    rederer->m_modelName = "assets/defaultAssets/Models/cube.fbx";
 
     auto camera = new Object();
     auto cameraComp = camera->addComponent<CameraComponent>();
@@ -28,14 +28,15 @@ int main(int argc, char* argv[])
 
     camera->setLocalPosition(Vector3(0, 0, 0));
 
-    image->setLocalPosition(Vector3(0, 0, -500));
+    cube->setLocalPosition(Vector3(0, 0, -5));
+    cube->setLocalRotation(Quaternion(Vector3(45, 45, 0)));
 
-    scene->m_rootObjects.push_back(image);
+    scene->m_rootObjects.push_back(cube);
     scene->m_rootObjects.push_back(camera);
     std::ofstream f("assets/defaultAssets/Scenes/testScene.scene");
     f << scene->toJson().dump(4)  << std::endl;
 
-    delete image;
+    delete cube;
     delete scene;
     delete camera;
 
@@ -44,12 +45,12 @@ int main(int argc, char* argv[])
     // Scenes is a list of all the scenes on stand by
     // Models is a list of all the paths to models in the game
 
-    /*nlohmann::json j;
+    nlohmann::json j;
     j["Primary"] = "assets/defaultAssets/Scenes/testScene.scene";
     j["Scenes"] = std::vector<std::string>({ "assets/defaultAssets/Scenes/default.scene" });
 
     std::ofstream gameInit("gameInit.json");
-    gameInit << j.dump(4)  << std::endl;*/
+    gameInit << j.dump(4)  << std::endl;
 
 
     // Material making
