@@ -10,7 +10,7 @@
 
 #include "Object.h"
 #include "LogManager.h"
-
+#include "Math.h"
 #include "CameraComponent.h"
 #include "ModelRendererComponent.h"
 #include "WindowManager.h"
@@ -312,6 +312,96 @@ void ResourceManager::loadTexture(const std::string& path)
     mapTexture.m_textureID = texture;
 
     m_loadedTextures.insert({path, mapTexture});
+}
+
+void ResourceManager::loadHDR(const std::string& path)
+{
+    stbi_set_flip_vertically_on_load(true);
+    int width, height, nrComponents;
+    float *data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
+    unsigned int hdrTexture;
+    if (data)
+    {
+        glGenTextures(1, &hdrTexture);
+        glBindTexture(GL_TEXTURE_2D, hdrTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Failed to load HDR image." << std::endl;
+        return;
+    }
+
+    makeFramebuffer("HDR", 512, 512);
+    auto frameBuffer = m_framebuffers.at("HDR");
+
+    unsigned int cubeMap;
+    glGenTextures(1, &cubeMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        // note that we store each face with 16 bit floating point values
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F,
+                     512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    auto captureProjection = CameraComponent::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
+    Matrix4 captureViews[] = {
+        Matrix4::lookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::lookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  1.0f,  0.0f), Vector3(0.0f, 0.0f,  1.0f)),
+        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  -1.0f,  0.0f), Vector3(0.0f, 0.0f,  -1.0f)),
+        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  -1.0f), Vector3(0.0f, -1.0f,  0.0f))
+    };
+
+    auto mat = getMaterial("assets/defaultAssets/Materials/equirectangular.json");
+    const auto model = getModel("assets/defaultAssets/Models/cube.fbx");
+
+    mat.setUniform("projection", captureProjection);
+
+    glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_id);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, hdrTexture);
+
+    glBindVertexArray(model.m_meshes[0].VAO());
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        mat.setUniform("view", captureViews[i]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                               GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMap, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+        glDrawElements(GL_TRIANGLES, model.m_meshes[0].indexCount(), GL_UNSIGNED_INT, nullptr);
+    }
+    glBindVertexArray(0);
+    activateFramebuffer();
+    Window.resetViewport();
+
+    auto texture = Texture{};
+    texture.m_textureID = cubeMap;
+    texture.listeners = 0;
+    texture.cubeMap = true;
+
+    m_loadedTextures.insert({path, texture});
 }
 
 Texture ResourceManager::getTexture(const std::string& path) const
@@ -637,6 +727,10 @@ int ResourceManager::initialize() {
     }});
 
     makePostprocessingScreen();
+
+    loadMaterial("assets/defaultAssets/Materials/equirectangular.json");
+    loadModel("assets/defaultAssets/Models/cube.fbx");
+    loadHDR("assets/defaultAssets/Skybox/skybox.hdr");
 
     Log.log("Resource Manager initialized");
     return 0;

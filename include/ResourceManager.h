@@ -27,6 +27,7 @@ struct Texture
 {
     friend class ResourceManager;
     unsigned int m_textureID{};
+    bool cubeMap{false};
 private:
     int listeners{1};
 };
@@ -216,6 +217,7 @@ public:
      * @param path The path to the texture
      */
     void loadTexture(const std::string& path);
+    void loadHDR(const std::string& path);
     /**
      * @brief Function to get a loaded texture from memory
      *
@@ -240,6 +242,8 @@ public:
     FrameBuffer makeFramebuffer(const std::string& name, int width = -1, int height = -1);
 
     void activateFramebuffer(const std::string& name = "");
+
+
 
 private:
     /**

@@ -68,7 +68,7 @@ void ModelRendererComponent::draw()
     {
         auto model = getParent()->getWorldMatrix();
         auto view = Resource.getMainCamera()->getViewMatrix();
-        auto proj = Resource.getMainCamera()->getProjectionMatrix();
+        auto proj = Resource.getMainCamera()->getPerspectiveMatrix();
 
         m_materials[i].setUniform("model", model);
         m_materials[i].setUniform("view", view);

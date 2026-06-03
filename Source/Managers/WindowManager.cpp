@@ -62,6 +62,11 @@ int WindowManager::getViewportHeight() const
     return m_viewportHeight;
 }
 
+void WindowManager::resetViewport()
+{
+    glViewport(0, 0, m_viewportWidth, m_viewportHeight);
+}
+
 void WindowManager::clear() {
     // Clear the screen
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

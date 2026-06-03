@@ -29,27 +29,47 @@ Matrix4 CameraComponent::getViewMatrix() const {
     };
 }
 
-Matrix4 CameraComponent::getProjectionMatrix() const {
-    if (m_projectionType) {
-        return {
-            cot(m_fov / 2.0f) / Window.getAspectRatio(), 0, 0, 0,
-            0, cot(m_fov / 2.0f), 0, 0,
-            0, 0, (m_near + m_far) / (m_near - m_far), (2 * m_near * m_far) / (m_near - m_far),
-            0, 0, -1, 0
-        };
-    }
-    float r = Window.getAspectRatio();
-    float t = 1.0f;
+Matrix4 CameraComponent::getPerspectiveMatrix()const {
     return {
-        1.0f/r, 0, 0, 0,
-        0, 1.0f/t, 0, 0,
-        0, 0, -2.0f/(m_far - m_near), -(m_far + m_near)/(m_far - m_near),
-        0, 0, 0, 1
+        cot(m_fov / 2.0f) / Window.getAspectRatio(), 0, 0, 0,
+        0, cot(m_fov / 2.0f), 0, 0,
+        0, 0, (m_near + m_far) / (m_near - m_far), (2 * m_near * m_far) / (m_near - m_far),
+        0, 0, -1, 0
     };
 }
 
-void CameraComponent::setProjectionType(const bool projectionType) {
-    m_projectionType = projectionType;
+Matrix4 CameraComponent::getOrthographicMatrix() const
+{
+    float right = Window.getViewportWidth() / 2.0f;
+    float left = -Window.getViewportWidth() / 2.0f;
+    float top = Window.getViewportHeight() / 2.0f;
+    float bottom = -Window.getViewportHeight() / 2.0f;
+    return {
+        2.0 / (right - left),  0.0,                   0.0,                  -(right + left) / (right - left),
+        0.0,                   2.0 / (top - bottom),  0.0,                  -(top + bottom) / (top - bottom),
+        0.0,                   0.0,                  -2.0 / (m_far - m_near),-(m_far + m_near)   / (m_far - m_near),
+        0.0,                   0.0,                   0.0,                   1.0
+    };
+}
+
+Matrix4 CameraComponent::makePerspectiveMatrix(float fov, float aspect, float near, float far)
+{
+    return {
+        cot(fov / 2.0f) / aspect, 0, 0, 0,
+        0, cot(fov / 2.0f), 0, 0,
+        0, 0, (near + far) / (near - far), (2 * near * far) / (near - far),
+        0, 0, -1, 0
+    };
+}
+
+Matrix4 CameraComponent::makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far)
+{
+    return {
+        2.0 / (right - left),  0.0,                   0.0,                  -(right + left) / (right - left),
+        0.0,                   2.0 / (top - bottom),  0.0,                  -(top + bottom) / (top - bottom),
+        0.0,                   0.0,                  -2.0 / (far - near),   -(far + near)   / (far - near),
+        0.0,                   0.0,                   0.0,                   1.0
+    };
 }
 
 void CameraComponent::start()
@@ -83,7 +103,6 @@ nlohmann::json CameraComponent::toJson()
 
     j["Type"] = "Camera";
 
-    j["ProjectionType"] = m_projectionType;
     j["FOV"] = m_fov;
     j["Near"] = m_near;
     j["Far"] = m_far;
@@ -95,7 +114,6 @@ nlohmann::json CameraComponent::toJson()
 
 void CameraComponent::fromJson(nlohmann::json j)
 {
-    m_projectionType = j["ProjectionType"].get<bool>();
     m_fov = j["FOV"].get<float>();
     m_near = j["Near"].get<float>();
     m_far = j["Far"].get<float>();

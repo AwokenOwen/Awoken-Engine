@@ -39,6 +39,8 @@ public:
 
     [[nodiscard]] int getViewportWidth() const;
     [[nodiscard]] int getViewportHeight() const;
+
+    void resetViewport();
 private:
     /**
      * @brief Starts the Window Manager and creates the window for the game

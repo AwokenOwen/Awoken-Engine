@@ -5,9 +5,18 @@
 #pragma once
 #include "Component.h"
 #include "Math.h"
+#include "ResourceManager.h"
 
 #define PERSPECTIVE true
 #define ORTHOGRAPHIC false
+
+struct Texture;
+
+enum BackgroundType
+{
+    SOLID = 0,
+    SKYBOX = 1
+};
 
 class CameraComponent : public Component{
     friend class ResourceManager;
@@ -18,15 +27,14 @@ public:
     void setActiveState(bool active) override;
 
     [[nodiscard]] Matrix4 getViewMatrix() const;
-    [[nodiscard]] Matrix4 getProjectionMatrix() const;
-
-    void setProjectionType(bool projectionType);
+    [[nodiscard]] Matrix4 getPerspectiveMatrix() const;
+    [[nodiscard]] Matrix4 getOrthographicMatrix() const;
+    [[nodiscard]] static Matrix4 makePerspectiveMatrix(float fov, float aspect, float near, float far);
+    [[nodiscard]] static Matrix4 makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far);
 
     bool m_main{false};
 
 private:
-    bool m_projectionType{true};
-
     float m_fov{toRadians(90.0f)};
     float m_near{0.001f};
     float m_far{1000.0f};
@@ -38,4 +46,7 @@ private:
     void update() override;
     void enable() override;
     void disable() override;
+
+    Vector3 background_color{0.0f, 0.0f, 0.0f};
+    Texture skyboxTexture{};
 };

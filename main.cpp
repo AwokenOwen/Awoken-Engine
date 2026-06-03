@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     // Make a name
     // All the objects with their components turned into JSON
 
-    auto scene = new Scene("testScene");
+    /*auto scene = new Scene("testScene");
 
     auto cube = new Object();
     auto rederer = cube->addComponent<ModelRendererComponent>();
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
     delete cube;
     delete scene;
-    delete camera;
+    delete camera;*/
 
     // Then Alter gameInit.json to load the scene
     // Primary is the first scene that will be loaded at start

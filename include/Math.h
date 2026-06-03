@@ -269,6 +269,7 @@ public:
     [[nodiscard]] Matrix4 inverse() const;
 
     [[nodiscard]] static Matrix4 makeModelMatrix(const Vector3 &position, const Quaternion &rotation, const Vector3 &scale);
+    [[nodiscard]] static Matrix4 lookAt(const Vector3 &eye, const Vector3 &target, const Vector3 &up);
 
     const float* toFloatArray() {
         floatArray[0]=a1; floatArray[1]=b1; floatArray[2]=c1; floatArray[3]=d1;
@@ -1810,6 +1811,20 @@ inline Matrix4 Matrix4::makeModelMatrix(const Vector3 &position, const Quaternio
         0, 0, 0, 1
     };
     return t * r * s;
+}
+
+inline Matrix4 Matrix4::lookAt(const Vector3& eye, const Vector3& target, const Vector3& up)
+{
+    const Vector3 f = (target - eye).normalize();
+    const Vector3 r = Vector3::cross(f, up).normalize();
+    const Vector3 u = Vector3::cross(r, f);
+
+    return {
+        r.x,  r.y,  r.z, -Vector3::dot(r, eye),
+        u.x,  u.y,  u.z, -Vector3::dot(u, eye),
+       -f.x, -f.y, -f.z,  Vector3::dot(f, eye),
+        0.0,  0.0,  0.0,  1.0
+   };
 }
 
 inline Matrix4 Matrix4::fromJson(nlohmann::json json)
