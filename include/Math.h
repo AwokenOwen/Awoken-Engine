@@ -173,8 +173,8 @@ public:
 
     float* toFloatArray() {
         floatArray[0] = a1;
-        floatArray[1] = a2;
-        floatArray[2] = b1;
+        floatArray[1] = b1;
+        floatArray[2] = a2;
         floatArray[3] = b2;
 
         return floatArray;
@@ -215,13 +215,13 @@ public:
 
     float* toFloatArray() {
         floatArray[0] = a1;
-        floatArray[1] = a2;
-        floatArray[2] = a3;
-        floatArray[3] = b1;
+        floatArray[1] = b1;
+        floatArray[2] = c1;
+        floatArray[3] = a2;
         floatArray[4] = b2;
-        floatArray[5] = b3;
-        floatArray[6] = c1;
-        floatArray[7] = c2;
+        floatArray[5] = c2;
+        floatArray[6] = a3;
+        floatArray[7] = b3;
         floatArray[8] = c3;
 
         return floatArray;
@@ -270,26 +270,13 @@ public:
 
     [[nodiscard]] static Matrix4 makeModelMatrix(const Vector3 &position, const Quaternion &rotation, const Vector3 &scale);
 
-    const float *toFloatArray() {
-        floatArray[0] = a1;
-        floatArray[1] = a2;
-        floatArray[2] = a3;
-        floatArray[3] = a4;
-        floatArray[4] = b1;
-        floatArray[5] = b2;
-        floatArray[6] = b3;
-        floatArray[7] = b4;
-        floatArray[8] = c1;
-        floatArray[9] = c2;
-        floatArray[10] = c3;
-        floatArray[11] = c4;
-        floatArray[12] = d1;
-        floatArray[13] = d2;
-        floatArray[14] = d3;
-        floatArray[15] = d4;
-
+    const float* toFloatArray() {
+        floatArray[0]=a1; floatArray[1]=b1; floatArray[2]=c1; floatArray[3]=d1;
+        floatArray[4]=a2; floatArray[5]=b2; floatArray[6]=c2; floatArray[7]=d2;
+        floatArray[8]=a3; floatArray[9]=b3; floatArray[10]=c3; floatArray[11]=d3;
+        floatArray[12]=a4; floatArray[13]=b4; floatArray[14]=c4; floatArray[15]=d4;
         return floatArray;
-    };
+    }
 
     static Matrix4 fromJson(nlohmann::json json);
     nlohmann::json toJson();
@@ -1810,9 +1797,9 @@ inline Matrix4 Matrix4::inverse() const {
 
 inline Matrix4 Matrix4::makeModelMatrix(const Vector3 &position, const Quaternion &rotation, const Vector3 &scale) {
     const Matrix4 t = {
-        0, 0, 0, position.x,
-        0, 0, 0, position.y,
-        0, 0, 0, position.z,
+        1, 0, 0, position.x,
+        0, 1, 0, position.y,
+        0, 0, 1, position.z,
         0, 0, 0, 1,
     };
     const Matrix4 r = rotation.toMatrix();

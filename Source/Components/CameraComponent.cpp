@@ -12,10 +12,21 @@ CameraComponent::CameraComponent(Object *parent) : Component(parent) {
 }
 
 Matrix4 CameraComponent::getViewMatrix() const {
-    if (getParent() == nullptr) {
-        return Matrix4{};
-    }
-    return Matrix4{};
+    if (getParent() == nullptr) return Matrix4{};
+
+    const Vector3 pos     = getParent()->getWorldPosition();
+    const Vector3 forward = getParent()->getWorldForward();
+    const Vector3 up      = getParent()->getWorldUp();
+    const Vector3 f       = (forward).normalize();
+    const Vector3 r       = Vector3::cross(f, up).normalize();
+    const Vector3 u       = Vector3::cross(r, f);
+
+    return {
+         r.x,  r.y,  r.z, -Vector3::dot(r, pos),
+         u.x,  u.y,  u.z, -Vector3::dot(u, pos),
+        -f.x, -f.y, -f.z,  Vector3::dot(f, pos),
+         0,    0,    0,    1
+    };
 }
 
 Matrix4 CameraComponent::getProjectionMatrix() const {

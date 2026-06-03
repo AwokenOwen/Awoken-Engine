@@ -113,7 +113,7 @@ int WindowManager::createWindow() {
     }
 
     // Set viewport
-    glViewport(0, 0, m_windowWidth, m_windowWidth);
+    glViewport(0, 0, m_windowWidth, m_windowHeight);
 
     // Set GLFW owner for call backs
     glfwSetWindowUserPointer(p_window, this);

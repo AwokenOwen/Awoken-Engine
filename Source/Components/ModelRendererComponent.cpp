@@ -58,6 +58,7 @@ void ModelRendererComponent::fromJson(nlohmann::json j)
 
 void ModelRendererComponent::draw()
 {
+    glDisable(GL_CULL_FACE);
     if (m_materials.size() != m_model.meshCount())
     {
         Log.logError("Material Count does not match Mesh Count.");
@@ -65,9 +66,15 @@ void ModelRendererComponent::draw()
     }
     for (int i = 0; i < m_model.meshCount(); ++i)
     {
-        /*m_materials[i].setUniform("model", getParent()->getWorldMatrix());
+        auto model = getParent()->getWorldMatrix();
+        auto view = Resource.getMainCamera()->getViewMatrix();
+        auto proj = Resource.getMainCamera()->getProjectionMatrix();
+
+        Log.log("View row4: %f %f %f %f", view.a4, view.b4, view.c4, view.d4);
+
+        m_materials[i].setUniform("model", getParent()->getWorldMatrix());
         m_materials[i].setUniform("view", Resource.getMainCamera()->getViewMatrix());
-        m_materials[i].setUniform("projection", Resource.getMainCamera()->getProjectionMatrix());*/
+        m_materials[i].setUniform("projection", Resource.getMainCamera()->getProjectionMatrix());
 
         m_materials[i].load();
 
