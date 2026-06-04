@@ -72,6 +72,34 @@ Matrix4 CameraComponent::makeOrthographicMatrix(float left, float right, float b
     };
 }
 
+void CameraComponent::load()
+{
+    skyboxModel = Resource.getModel("assets/defaultAssets/Models/cube.fbx");
+    Resource.loadMaterial("assets/defaultAssets/Materials/skybox.json");
+    skyboxMaterial = Resource.getMaterial("assets/defaultAssets/Materials/skybox.json");
+    skyboxTexture = Resource.getTexture("assets/defaultAssets/Skybox/skybox.hdr");
+}
+
+void CameraComponent::unload()
+{
+
+}
+
+void CameraComponent::draw()
+{
+    skyboxMaterial.setUniform("view", getViewMatrix());
+    skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
+    skyboxMaterial.load();
+
+    skyboxMaterial.setUniform<int>("skybox", 1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture.m_textureID);
+
+    glBindVertexArray(skyboxModel.m_meshes[0].VAO());
+    glDrawElements(GL_TRIANGLES, skyboxModel.m_meshes[0].indexCount(), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(0);
+}
+
 void CameraComponent::start()
 {
 
@@ -123,4 +151,5 @@ void CameraComponent::fromJson(nlohmann::json j)
     {
         Resource.setMainCamera(this);
     }
+    registerRenderer(false);
 }

@@ -316,6 +316,7 @@ void ResourceManager::loadTexture(const std::string& path)
 
 void ResourceManager::loadHDR(const std::string& path)
 {
+    glDisable(GL_CULL_FACE);
     stbi_set_flip_vertically_on_load(true);
     int width, height, nrComponents;
     float *data = stbi_loadf(path.c_str(), &width, &height, &nrComponents, 0);
@@ -339,8 +340,7 @@ void ResourceManager::loadHDR(const std::string& path)
         return;
     }
 
-    makeFramebuffer("HDR", 512, 512);
-    auto frameBuffer = m_framebuffers.at("HDR");
+    const auto frameBuffer = makeFramebuffer("HDR", 512, 512);
 
     unsigned int cubeMap;
     glGenTextures(1, &cubeMap);
@@ -521,13 +521,6 @@ void ResourceManager::loadMaterial(const std::string& path)
     {
         auto name = u["Name"].get<std::string>();
         auto type = u["Type"].get<std::string>();
-        if (u["Dynamic"].get<bool>())
-        {
-            mapMaterial.m_uniforms.insert({name, [this, type, mapMaterial, u]()
-            {
-                m_uniformMap[type](mapMaterial.m_shaderProgram, u);
-            }});
-        }
         m_uniformMap.at(type)(mapMaterial.m_shaderProgram, u);
     }
 

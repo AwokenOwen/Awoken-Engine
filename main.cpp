@@ -45,12 +45,12 @@ int main(int argc, char* argv[])
     // Scenes is a list of all the scenes on stand by
     // Models is a list of all the paths to models in the game
 
-    nlohmann::json j;
+    /*nlohmann::json j;
     j["Primary"] = "assets/defaultAssets/Scenes/testScene.scene";
     j["Scenes"] = std::vector<std::string>({ "assets/defaultAssets/Scenes/default.scene" });
 
     std::ofstream gameInit("gameInit.json");
-    gameInit << j.dump(4)  << std::endl;
+    gameInit << j.dump(4)  << std::endl;*/
 
 
     // Material making

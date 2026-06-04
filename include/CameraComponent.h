@@ -5,6 +5,7 @@
 #pragma once
 #include "Component.h"
 #include "Math.h"
+#include "Renderer.h"
 #include "ResourceManager.h"
 
 #define PERSPECTIVE true
@@ -18,7 +19,7 @@ enum BackgroundType
     SKYBOX = 1
 };
 
-class CameraComponent : public Component{
+class CameraComponent : public Component, public Renderer{
     friend class ResourceManager;
 public:
     explicit CameraComponent(Object* parent);
@@ -32,12 +33,14 @@ public:
     [[nodiscard]] static Matrix4 makePerspectiveMatrix(float fov, float aspect, float near, float far);
     [[nodiscard]] static Matrix4 makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far);
 
-    bool m_main{false};
+    void load() override;
+    void unload() override;
 
 private:
     float m_fov{toRadians(90.0f)};
     float m_near{0.001f};
     float m_far{1000.0f};
+    bool m_main{false};
 
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;
@@ -47,6 +50,9 @@ private:
     void enable() override;
     void disable() override;
 
+    void draw() override;
     Vector3 background_color{0.0f, 0.0f, 0.0f};
     Texture skyboxTexture{};
+    Model skyboxModel{};
+    Material skyboxMaterial{};
 };
