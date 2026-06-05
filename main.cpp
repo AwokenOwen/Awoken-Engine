@@ -15,12 +15,10 @@ int main(int argc, char* argv[])
     // Make a name
     // All the objects with their components turned into JSON
 
-    /*auto scene = new Scene("testScene");
+    auto scene = new Scene("testScene");
 
     auto cube = new Object();
-    auto rederer = cube->addComponent<ModelRendererComponent>();
-    rederer->m_materialNames.emplace_back("assets/defaultAssets/Materials/unlit.json");
-    rederer->m_modelName = "assets/defaultAssets/Models/cube.fbx";
+    cube->addComponent<ModelRendererComponent>();
 
     auto camera = new Object();
     auto cameraComp = camera->addComponent<CameraComponent>();
@@ -38,7 +36,7 @@ int main(int argc, char* argv[])
 
     delete cube;
     delete scene;
-    delete camera;*/
+    delete camera;
 
     // Then Alter gameInit.json to load the scene
     // Primary is the first scene that will be loaded at start

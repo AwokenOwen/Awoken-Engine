@@ -16,6 +16,14 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+enum TextureType
+{
+    PNG = 0,
+    JPEG = 1,
+    HDR = 2,
+    CUBEMAP = 3,
+};
+
 struct FrameBuffer
 {
     unsigned int m_id;

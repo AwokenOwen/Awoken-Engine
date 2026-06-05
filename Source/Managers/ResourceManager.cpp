@@ -369,6 +369,7 @@ void ResourceManager::loadHDR(const std::string& path)
     };
 
     auto mat = getMaterial("assets/defaultAssets/Materials/equirectangular.json");
+    loadModel("assets/defaultAssets/Models/cube.fbx");
     const auto model = getModel("assets/defaultAssets/Models/cube.fbx");
 
     mat.setUniform("projection", captureProjection);
@@ -722,8 +723,6 @@ int ResourceManager::initialize() {
     makePostprocessingScreen();
 
     loadMaterial("assets/defaultAssets/Materials/equirectangular.json");
-    loadModel("assets/defaultAssets/Models/cube.fbx");
-    loadHDR("assets/defaultAssets/Skybox/skybox.hdr");
 
     Log.log("Resource Manager initialized");
     return 0;

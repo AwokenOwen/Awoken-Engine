@@ -36,11 +36,14 @@ public:
     void load() override;
     void unload() override;
 
+    void setBackgroundType(BackgroundType type);
+
+    bool m_main{false};
+
 private:
     float m_fov{toRadians(90.0f)};
     float m_near{0.001f};
     float m_far{1000.0f};
-    bool m_main{false};
 
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;
@@ -51,8 +54,14 @@ private:
     void disable() override;
 
     void draw() override;
-    Vector3 background_color{0.0f, 0.0f, 0.0f};
-    Texture skyboxTexture{};
-    Model skyboxModel{};
-    Material skyboxMaterial{};
+
+    BackgroundType m_currentBackgroundType{BackgroundType::SKYBOX};
+
+    Vector3 m_backgroundColor{0.0f, 0.0f, 0.0f};
+    std::string m_skyboxTextureName{"assets/defaultAssets/Skybox/skybox.hdr"};
+    Texture m_skyboxTexture{};
+    std::string m_skyboxModelName{"assets/defaultAssets/Models/cube.fbx"};
+    Model m_skyboxModel{};
+    std::string m_skyboxMaterialName{"assets/defaultAssets/Materials/skybox.json"};
+    Material m_skyboxMaterial{};
 };

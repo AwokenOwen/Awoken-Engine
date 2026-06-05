@@ -74,10 +74,13 @@ Matrix4 CameraComponent::makeOrthographicMatrix(float left, float right, float b
 
 void CameraComponent::load()
 {
-    skyboxModel = Resource.getModel("assets/defaultAssets/Models/cube.fbx");
-    Resource.loadMaterial("assets/defaultAssets/Materials/skybox.json");
-    skyboxMaterial = Resource.getMaterial("assets/defaultAssets/Materials/skybox.json");
-    skyboxTexture = Resource.getTexture("assets/defaultAssets/Skybox/skybox.hdr");
+    Resource.loadHDR(m_skyboxTextureName);
+    Resource.loadModel(m_skyboxModelName);
+    Resource.loadMaterial(m_skyboxMaterialName);
+
+    m_skyboxTexture = Resource.getTexture(m_skyboxTextureName);
+    m_skyboxModel = Resource.getModel(m_skyboxModelName);
+    m_skyboxMaterial = Resource.getMaterial(m_skyboxMaterialName);
 }
 
 void CameraComponent::unload()
@@ -85,19 +88,31 @@ void CameraComponent::unload()
 
 }
 
+void CameraComponent::setBackgroundType(BackgroundType type)
+{
+    m_currentBackgroundType = type;
+}
+
 void CameraComponent::draw()
 {
-    skyboxMaterial.setUniform("view", getViewMatrix());
-    skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
-    skyboxMaterial.load();
+    if (m_currentBackgroundType == BackgroundType::SKYBOX)
+    {
+        m_skyboxMaterial.setUniform("view", getViewMatrix());
+        m_skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
+        m_skyboxMaterial.load();
 
-    skyboxMaterial.setUniform<int>("skybox", 1);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture.m_textureID);
+        m_skyboxMaterial.setUniform<int>("skybox", 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxTexture.m_textureID);
 
-    glBindVertexArray(skyboxModel.m_meshes[0].VAO());
-    glDrawElements(GL_TRIANGLES, skyboxModel.m_meshes[0].indexCount(), GL_UNSIGNED_INT, nullptr);
-    glBindVertexArray(0);
+        glBindVertexArray(m_skyboxModel.m_meshes[0].VAO());
+        glDrawElements(GL_TRIANGLES, m_skyboxModel.m_meshes[0].indexCount(), GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
+    }else
+    {
+        glClearColor(m_backgroundColor.x, m_backgroundColor.y, m_backgroundColor.z, 1.0);
+    }
+
 }
 
 void CameraComponent::start()
@@ -137,6 +152,14 @@ nlohmann::json CameraComponent::toJson()
 
     j["Main"] = m_main;
 
+    j["BackgroundColor"] = m_backgroundColor.toJson();
+
+    j["SkyboxTexture"] = m_skyboxTextureName;
+
+    j["SkyboxModel"] = m_skyboxModelName;
+
+    j["SkyboxMaterial"] = m_skyboxMaterialName;
+
     return j;
 }
 
@@ -152,4 +175,12 @@ void CameraComponent::fromJson(nlohmann::json j)
         Resource.setMainCamera(this);
     }
     registerRenderer(false);
+
+    m_backgroundColor = Vector3::fromJson(j["BackgroundColor"]);
+
+    m_skyboxTextureName = j["SkyboxTexture"].get<std::string>();
+
+    m_skyboxModelName = j["SkyboxModel"].get<std::string>();
+
+    m_skyboxMaterialName = j["SkyboxMaterial"].get<std::string>();
 }

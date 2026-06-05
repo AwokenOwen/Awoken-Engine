@@ -32,8 +32,8 @@ public:
     void unload() override;
 
 private:
-    std::string m_modelName{};
-    std::vector<std::string> m_materialNames{};
+    std::string m_modelName{"assets/defaultAssets/Models/cube.fbx"};
+    std::vector<std::string> m_materialNames{"assets/defaultAssets/Materials/unlit.json"};
 
     Model m_model{};
     std::vector<Material> m_materials{};
