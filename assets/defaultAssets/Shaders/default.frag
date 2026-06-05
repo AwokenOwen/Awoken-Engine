@@ -1,5 +1,4 @@
 #version 330 core
-#extension GL_NV_shadow_samplers_cube : enable
 out vec4 FragColor;
 in vec2 TexCoords;
 in vec3 WorldPos;
@@ -7,8 +6,8 @@ in vec3 Normal;
 
 // change to number of textures needed for object
 // Make sure it's changed in vertex as well
-#define NUM_TEXTURES 12
-uniform sampler2D textures[NUM_TEXTURES];
+#define NUM_TEXTURES 1
+uniform sampler2D texture[NUM_TEXTURES];
 
 //Skybox
 uniform samplerCube skybox;
@@ -21,7 +20,7 @@ uniform vec3 dirLightDir;
 uniform vec3 dirLightColor;
 uniform float dirLightPow;
 
-#define NUM_LIGHTS 20
+#define NUM_LIGHTS 4
 uniform vec3 lightPositions[NUM_LIGHTS];
 uniform vec3 lightColors[NUM_LIGHTS];
 uniform float lightPowers[NUM_LIGHTS];
@@ -42,11 +41,12 @@ vec3 CalcOtherLight(vec3 albedo, float metallic, float roughness, vec3 N, vec3 V
 
 void main() {
     // Default Values can be removed
-    vec3 albedo     = vec3(1.0);
+    vec3 albedo     = pow(vec3(1.0), vec3(2.2));
     vec3 normal     = normalize(Normal);
     float metallic  = 0.0;
     float roughness = 1.0;
     float ao        = 1.0;
+    //Coming Soon
     vec3 emission = vec3(0.0);
     // Do calculations here to customize input values
 
@@ -55,12 +55,10 @@ void main() {
 
 
     // Running Normal Lighting Calculations
-    albedo = pow(albedo, vec3(2.2));
     vec3 color = CreateMaterial(albedo, normal, metallic, roughness, ao, emission);
 
     // Setting Color
     FragColor = vec4(color, 1.0);
-    //FragColor = vec4(lightPositions[0], 1.0);
 }
 
 vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughness, float _ao, vec3 _emission){
@@ -84,7 +82,7 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
     Lo += CalcDirectionalLight(albedo, metallic, roughness, N, V, dirLightDir, F0);
 
     //All other lights
-    for(int i = 0; i < NUM_LIGHTS; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         Lo += CalcOtherLight(albedo, metallic, roughness, N, V, lightPositions[i], F0, lightColors[i], lightPowers[i]);
     }
@@ -95,7 +93,7 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 irradiance = textureCube(irradianceMap, N).rgb;
     vec3 diffuse    = irradiance * albedo;
 
     const float MAX_REFLECTION_LOD = 4.0;
@@ -105,7 +103,7 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
 
     vec3 ambient = (kD * diffuse + specular) * ao;
 
-    vec3 color = Lo + ambient + emission;
+    vec3 color = Lo + ambient;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));

@@ -1,15 +1,16 @@
 #version 330 core
-#extension GL_NV_shadow_samplers_cube : enable
 
 in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
 
-#define NUM_TEXTURES 12
-uniform sampler2D textures[NUM_TEXTURES];
+// change to number of textures needed for object
+// Make sure it's changed in fragment as well
+#define NUM_TEXTURES 1
+uniform sampler2D texture[NUM_TEXTURES];
 
 uniform vec3 color;
 
 void main() {
-    gl_FragColor = vec4(vec3(1.0), 1.0);
+    gl_FragColor = vec4(color, 1.0);
 }

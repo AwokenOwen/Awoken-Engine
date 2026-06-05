@@ -1,12 +1,8 @@
 #version 330 core
-#extension GL_NV_shadow_samplers_cube : enable
 in vec2 TexCoords;
 
 uniform sampler2D text;
 uniform vec3 color;
-
-#define NUM_TEXTURES 12
-uniform sampler2D textures[NUM_TEXTURES];
 
 void main()
 {
