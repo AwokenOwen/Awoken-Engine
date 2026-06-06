@@ -598,7 +598,7 @@ FrameBuffer ResourceManager::makeFramebuffer(const std::string& name, int width,
     // create a color attachment texture
     glGenTextures(1, &frameBuffer.m_colorBuffer);
     glBindTexture(GL_TEXTURE_2D, frameBuffer.m_colorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBuffer.m_colorBuffer, 0);
