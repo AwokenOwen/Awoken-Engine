@@ -83,7 +83,7 @@ struct Mesh
     friend class ResourceManager;
     [[nodiscard]] int indexCount() const
     {
-        return m_indices.size();
+        return static_cast<int>(m_indices.size());
     }
     [[nodiscard]] unsigned int VAO() const
     {
@@ -109,7 +109,7 @@ struct Model
     std::vector<Mesh> m_meshes{};
     [[nodiscard]] int meshCount() const
     {
-        return m_meshes.size();
+        return static_cast<int>(m_meshes.size());
     }
 private:
     int listeners{1};

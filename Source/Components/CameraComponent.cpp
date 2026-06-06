@@ -45,10 +45,10 @@ Matrix4 CameraComponent::getOrthographicMatrix() const
     float top = Window.getViewportHeight() / 2.0f;
     float bottom = -Window.getViewportHeight() / 2.0f;
     return {
-        2.0 / (right - left),  0.0,                   0.0,                  -(right + left) / (right - left),
-        0.0,                   2.0 / (top - bottom),  0.0,                  -(top + bottom) / (top - bottom),
-        0.0,                   0.0,                  -2.0 / (m_far - m_near),-(m_far + m_near)   / (m_far - m_near),
-        0.0,                   0.0,                   0.0,                   1.0
+        2.0f / (right - left),  0.0f,                   0.0f,                  -(right + left) / (right - left),
+        0.0f,                   2.0f / (top - bottom),  0.0f,                  -(top + bottom) / (top - bottom),
+        0.0f,                   0.0f,                  -2.0f / (m_far - m_near),-(m_far + m_near)   / (m_far - m_near),
+        0.0f,                   0.0f,                   0.0f,                   1.0f
     };
 }
 
@@ -65,10 +65,10 @@ Matrix4 CameraComponent::makePerspectiveMatrix(float fov, float aspect, float ne
 Matrix4 CameraComponent::makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far)
 {
     return {
-        2.0 / (right - left),  0.0,                   0.0,                  -(right + left) / (right - left),
-        0.0,                   2.0 / (top - bottom),  0.0,                  -(top + bottom) / (top - bottom),
-        0.0,                   0.0,                  -2.0 / (far - near),   -(far + near)   / (far - near),
-        0.0,                   0.0,                   0.0,                   1.0
+        2.0f / (right - left),  0.0f,                   0.0f,                  -(right + left) / (right - left),
+        0.0f,                   2.0f / (top - bottom),  0.0f,                  -(top + bottom) / (top - bottom),
+        0.0f,                   0.0f,                  -2.0f / (far - near),   -(far + near)   / (far - near),
+        0.0f,                   0.0f,                   0.0f,                   1.0f
     };
 }
 

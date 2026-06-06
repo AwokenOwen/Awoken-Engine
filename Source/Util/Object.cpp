@@ -194,9 +194,9 @@ Object* Object::fromJson(const nlohmann::json& j)
 
     a->m_name = j["Name"];
 
-    a->m_localPosition = Vector3(j["Position"]["x"].get<double>(), j["Position"]["y"].get<double>(),j["Position"]["z"].get<double>());
-    a->m_localRotation = Quaternion(j["Rotation"]["x"].get<double>(), j["Rotation"]["y"].get<double>(), j["Rotation"]["z"].get<double>(), j["Rotation"]["w"].get<double>());
-    a->m_localScale = Vector3(j["Scale"]["x"].get<double>(), j["Scale"]["y"].get<double>(), j["Scale"]["z"].get<double>());
+    a->m_localPosition = Vector3(j["Position"]["x"].get<float>(), j["Position"]["y"].get<float>(),j["Position"]["z"].get<float>());
+    a->m_localRotation = Quaternion(j["Rotation"]["x"].get<float>(), j["Rotation"]["y"].get<float>(), j["Rotation"]["z"].get<float>(), j["Rotation"]["w"].get<float>());
+    a->m_localScale = Vector3(j["Scale"]["x"].get<float>(), j["Scale"]["y"].get<float>(), j["Scale"]["z"].get<float>());
 
     for (const std::vector<nlohmann::json> components = j["Components"]; const auto& c : components) {
         Resource.loadComponent(a, c);

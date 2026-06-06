@@ -7,10 +7,10 @@
 
 #include "nlohmann/json.hpp"
 
-#define PI std::numbers::pi
+#define PI static_cast<float>(std::numbers::pi)
 
 inline float toRadians(const float degrees) {
-    return degrees * PI / 180;
+    return degrees * PI / 180.f;
 };
 
 inline float cot(const float a) {
@@ -28,17 +28,16 @@ public:
     Vector2();
     explicit Vector2(int x, int y);
     explicit Vector2(float x, float y);
-    explicit Vector2(double x, double y);
 
-    double x{};
-    double y{};
+    float x{};
+    float y{};
 
-    [[nodiscard]] double magnitude() const;
+    [[nodiscard]] float magnitude() const;
     void Normalize();
     [[nodiscard]] Vector2 normalize() const;
     void translate(const Vector2 &v);
 
-    static double dot(const Vector2 &a, const Vector2 &b);
+    static float dot(const Vector2 &a, const Vector2 &b);
     static Vector2 lerp(Vector2 a, Vector2 b, float t);
 
     static Vector2 fromJson(nlohmann::json json);
@@ -51,27 +50,24 @@ public:
     Vector3();
     explicit Vector3(int x, int y, int z);
     explicit Vector3(float x, float y, float z);
-    explicit Vector3(double x, double y, double z);
     explicit Vector3(const Vector2 &v);
     explicit Vector3(const Vector2 &v, int z);
     explicit Vector3(const Vector2 &v, float z);
-    explicit Vector3(const Vector2 &v, double z);
     explicit Vector3(int x, const Vector2 &v);
     explicit Vector3(float x, const Vector2 &v);
-    explicit Vector3(double x, const Vector2 &v);
     explicit Vector3(const Vector4 &v);
 
-    double x{};
-    double y{};
-    double z{};
+    float x{};
+    float y{};
+    float z{};
 
-    [[nodiscard]] double magnitude() const;
+    [[nodiscard]] float magnitude() const;
     void Normalize();
     [[nodiscard]] Vector3 normalize() const;
     void translate(const Vector3 &v);
 
     [[nodiscard]] static Vector3 cross(const Vector3 &a, const Vector3 &b);
-    [[nodiscard]] static double dot(const Vector3 &a, const Vector3 &b);
+    [[nodiscard]] static float dot(const Vector3 &a, const Vector3 &b);
     [[nodiscard]] static Vector3 lerp(const Vector3 &a, const Vector3 &b, float t);
     [[nodiscard]] static Vector3 forward();
     [[nodiscard]] static Vector3 right();
@@ -86,35 +82,29 @@ public:
     Vector4();
     explicit Vector4(int x, int y, int z, int w);
     explicit Vector4(float x, float y, float z, float w);
-    explicit Vector4(double x, double y, double z, double w);
     explicit Vector4(const Vector3 &v);
     explicit Vector4(const Vector3 &v, int w);
     explicit Vector4(const Vector3 &v, float w);
-    explicit Vector4(const Vector3 &v, double w);
     explicit Vector4(int x, const Vector3 &v);
     explicit Vector4(float x, const Vector3 &v);
-    explicit Vector4(double x, const Vector3 &v);
     explicit Vector4(const Vector2 &v);
     explicit Vector4(const Vector2 &v, int z, int w);
     explicit Vector4(const Vector2 &v, float z, float w);
-    explicit Vector4(const Vector2 &v, double z, double w);
     explicit Vector4(int x, const Vector2 &v, int w);
     explicit Vector4(float x, const Vector2 &v, float w);
-    explicit Vector4(double x, const Vector2 &v, double w);
     explicit Vector4(int x, int y, const Vector2 &v);
     explicit Vector4(float x, float y, const Vector2 &v);
-    explicit Vector4(double x, double y, const Vector2 &v);
 
-    double x{};
-    double y{};
-    double z{};
-    double w{};
+    float x{};
+    float y{};
+    float z{};
+    float w{};
 
-    [[nodiscard]] double magnitude() const;
+    [[nodiscard]] float magnitude() const;
     void Normalize();
     [[nodiscard]] Vector4 normalize() const;
 
-    static double dot(const Vector4 &a, const Vector4 &b);
+    static float dot(const Vector4 &a, const Vector4 &b);
     static Vector4 lerp(const Vector4 &a, const Vector4 &b, float t);
 
     static Vector4 fromJson(nlohmann::json json);
@@ -126,24 +116,23 @@ public:
     Quaternion();
     explicit Quaternion(int x, int y, int z, int w);
     explicit Quaternion(float x, float y, float z, float w);
-    explicit Quaternion(double x, double y, double z, double w);
     explicit Quaternion(const Vector3 &axis, float angle);
     explicit Quaternion(const Vector3 &EulerAngles);
     explicit Quaternion(const Matrix4 &m);
 
-    double x{};
-    double y{};
-    double z{};
-    double w{};
+    float x{};
+    float y{};
+    float z{};
+    float w{};
 
-    [[nodiscard]] double magnitude() const;
+    [[nodiscard]] float magnitude() const;
     void Normalize();
     [[nodiscard]] Quaternion normalize() const;
     [[nodiscard]] Vector3 eulerAngles() const;
     [[nodiscard]] Matrix4 toMatrix() const;
     void rotate(const Vector3 &euler);
 
-    static double dot(const Quaternion &a, const Quaternion &b);
+    static float dot(const Quaternion &a, const Quaternion &b);
     static Quaternion slerp(const Quaternion &a, const Quaternion &b, float t);
 
     static Quaternion fromJson(nlohmann::json json);
@@ -154,16 +143,16 @@ class Matrix2 {
 public:
     Matrix2();
     Matrix2(
-        double a1, double a2,
-        double b1, double b2
+        float a1, float a2,
+        float b1, float b2
     );
     explicit Matrix2(const Matrix3 &a);
     explicit Matrix2(const Matrix4 &a);
 
-    double a1{};
-    double a2{};
-    double b1{};
-    double b2{};
+    float a1{};
+    float a2{};
+    float b1{};
+    float b2{};
 
     void Transpose();
     [[nodiscard]] Matrix2 transpose() const;
@@ -191,21 +180,21 @@ class Matrix3 {
 public:
     Matrix3();
     Matrix3(
-        double a1, double a2, double a3,
-        double b1, double b2, double b3,
-        double c1, double c2, double c3
+        float a1, float a2, float a3,
+        float b1, float b2, float b3,
+        float c1, float c2, float c3
     );
     explicit Matrix3(const Matrix4 &a);
 
-    double a1{};
-    double a2{};
-    double a3{};
-    double b1{};
-    double b2{};
-    double b3{};
-    double c1{};
-    double c2{};
-    double c3{};
+    float a1{};
+    float a2{};
+    float a3{};
+    float b1{};
+    float b2{};
+    float b3{};
+    float c1{};
+    float c2{};
+    float c3{};
 
     void Transpose();
     [[nodiscard]] Matrix3 transpose() const;
@@ -238,29 +227,29 @@ class Matrix4 {
 public:
     Matrix4();
     Matrix4(
-        double a1, double a2, double a3, double a4,
-        double b1, double b2, double b3, double b4,
-        double c1, double c2, double c3, double c4,
-        double d1, double d2, double d3, double d4
+        float a1, float a2, float a3, float a4,
+        float b1, float b2, float b3, float b4,
+        float c1, float c2, float c3, float c4,
+        float d1, float d2, float d3, float d4
     );
     explicit Matrix4(const Matrix3 &a);
 
-    double a1{};
-    double a2{};
-    double a3{};
-    double a4{};
-    double b1{};
-    double b2{};
-    double b3{};
-    double b4{};
-    double c1{};
-    double c2{};
-    double c3{};
-    double c4{};
-    double d1{};
-    double d2{};
-    double d3{};
-    double d4{};
+    float a1{};
+    float a2{};
+    float a3{};
+    float a4{};
+    float b1{};
+    float b2{};
+    float b3{};
+    float b4{};
+    float c1{};
+    float c2{};
+    float c3{};
+    float c4{};
+    float d1{};
+    float d2{};
+    float d3{};
+    float d4{};
 
     void Transpose();
     [[nodiscard]] Matrix4 transpose() const;
@@ -286,11 +275,11 @@ private:
     float floatArray[16] {};
 };
 
-inline double det2(const Matrix2 &a) {
+inline float det2(const Matrix2 &a) {
     return a.a1 * a.b2 - a.a2 * a.b1;
 }
 
-inline double det3(const Matrix3 &a) {
+inline float det3(const Matrix3 &a) {
     return (
           a.a1 * a.b2 * a.c3
         + a.a2 * a.b3 * a.c1
@@ -301,7 +290,7 @@ inline double det3(const Matrix3 &a) {
     );
 }
 
-inline double det4(const Matrix4 &a) {
+inline float det4(const Matrix4 &a) {
 
     const Matrix3 m0 = {
         a.b2, a.b3, a.b4,
@@ -346,16 +335,10 @@ inline Vector2 operator*(const int a, const Vector2 b) {
 inline Vector2 operator*(const float a, const Vector2 b) {
     return Vector2(a * b.x, a * b.y);
 }
-inline Vector2 operator*(const double a, const Vector2 b) {
-    return Vector2(a * b.x, a * b.y);
-}
 inline Vector2 operator*(const Vector2 a, const int b) {
     return Vector2(b * a.x, b * a.y);
 }
 inline Vector2 operator*(const Vector2 a, const float b) {
-    return Vector2(b * a.x, b * a.y);
-}
-inline Vector2 operator*(const Vector2 a, const double b) {
     return Vector2(b * a.x, b * a.y);
 }
 inline Vector2 operator/(const Vector2 a, const Vector2 b) {
@@ -367,16 +350,10 @@ inline Vector2 operator/(const int a, const Vector2 b) {
 inline Vector2 operator/(const float a, const Vector2 b) {
     return Vector2(a / b.x, a / b.y);
 }
-inline Vector2 operator/(const double a, const Vector2 b) {
-    return Vector2(a / b.x, a / b.y);
-}
 inline Vector2 operator/(const Vector2 a, const int b) {
     return Vector2(a.x / b, a.y / b);
 }
 inline Vector2 operator/(const Vector2 a, const float b) {
-    return Vector2(a.x / b, a.y / b);
-}
-inline Vector2 operator/(const Vector2 a, const double b) {
     return Vector2(a.x / b, a.y / b);
 }
 inline Vector2 operator*(const Matrix2 &a, const Vector2 b) {
@@ -401,16 +378,10 @@ inline Vector3 operator*(const int a, const Vector3 &b) {
 inline Vector3 operator*(const float a, const Vector3 &b) {
     return Vector3(a * b.x, a * b.y, a * b.z);
 }
-inline Vector3 operator*(const double a, const Vector3 &b) {
-    return Vector3(a * b.x, a * b.y, a * b.z);
-}
 inline Vector3 operator*(const Vector3 &a, const int b) {
     return Vector3(b * a.x, b * a.y, b * a.z);
 }
 inline Vector3 operator*(const Vector3 &a, const float b) {
-    return Vector3(b * a.x, b * a.y, b * a.z);
-}
-inline Vector3 operator*(const Vector3 &a, const double b) {
     return Vector3(b * a.x, b * a.y, b * a.z);
 }
 inline Vector3 operator/(const Vector3 &a, const Vector3 &b) {
@@ -422,16 +393,10 @@ inline Vector3 operator/(const int a, const Vector3 &b) {
 inline Vector3 operator/(const float a, const Vector3 &b) {
     return Vector3(a / b.x, a / b.y, a / b.z);
 }
-inline Vector3 operator/(const double a, const Vector3 &b) {
-    return Vector3(a / b.x, a / b.y, a / b.z);
-}
 inline Vector3 operator/(const Vector3 &a, const int b) {
     return Vector3(a.x / b, a.y / b, a.z / b);
 }
 inline Vector3 operator/(const Vector3 &a, const float b) {
-    return Vector3(a.x / b, a.y / b, a.z / b);
-}
-inline Vector3 operator/(const Vector3 &a, const double b) {
     return Vector3(a.x / b, a.y / b, a.z / b);
 }
 inline Vector3 operator*(const Matrix3 &a, const Vector3 &b) {
@@ -457,16 +422,10 @@ inline Vector4 operator*(const int a, const Vector4 &b) {
 inline Vector4 operator*(const float a, const Vector4 &b) {
     return Vector4(a * b.x, a * b.y, a * b.z, a * b.w);
 }
-inline Vector4 operator*(const double a, const Vector4 &b) {
-    return Vector4(a * b.x, a * b.y, a * b.z, a * b.w);
-}
 inline Vector4 operator*(const Vector4 &a, const int b) {
     return Vector4(b * a.x, b * a.y, b * a.z, b * a.w);
 }
 inline Vector4 operator*(const Vector4 &a, const float b) {
-    return Vector4(b * a.x, b * a.y, b * a.z, b * a.w);
-}
-inline Vector4 operator*(const Vector4 &a, const double b) {
     return Vector4(b * a.x, b * a.y, b * a.z, b * a.w);
 }
 inline Vector4 operator/(const Vector4 &a, const Vector4 &b) {
@@ -478,16 +437,10 @@ inline Vector4 operator/(const int a, const Vector4 &b) {
 inline Vector4 operator/(const float a, const Vector4 &b) {
     return Vector4(a / b.x, a / b.y, a / b.z, a / b.w);
 }
-inline Vector4 operator/(const double a, const Vector4 &b) {
-    return Vector4(a / b.x, a / b.y, a / b.z, a / b.w);
-}
 inline Vector4 operator/(const Vector4 &a, const int b) {
     return Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
 }
 inline Vector4 operator/(const Vector4 &a, const float b) {
-    return Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
-}
-inline Vector4 operator/(const Vector4 &a, const double b) {
     return Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
 }
 inline Vector4 operator*(const Matrix4 &a, const Vector4 &b) {
@@ -511,16 +464,10 @@ inline Quaternion operator*(const int a, const Quaternion &b) {
 inline Quaternion operator*(const float a, const Quaternion &b) {
     return Quaternion(a * b.x, a * b.y, a * b.z, a * b.w);
 }
-inline Quaternion operator*(const double a, const Quaternion &b) {
-    return Quaternion(a * b.x, a * b.y, a * b.z, a * b.w);
-}
 inline Quaternion operator*(const Quaternion &a, const int b) {
     return Quaternion(b * a.x, b * a.y, b * a.z, b * a.w);
 }
 inline Quaternion operator*(const Quaternion &a, const float b) {
-    return Quaternion(b * a.x, b * a.y, b * a.z, b * a.w);
-}
-inline Quaternion operator*(const Quaternion &a, const double b) {
     return Quaternion(b * a.x, b * a.y, b * a.z, b * a.w);
 }
 inline Quaternion operator/(const int a, const Quaternion &b) {
@@ -529,16 +476,10 @@ inline Quaternion operator/(const int a, const Quaternion &b) {
 inline Quaternion operator/(const float a, const Quaternion &b) {
     return Quaternion(a / b.x, a / b.y, a / b.z, a / b.w);
 }
-inline Quaternion operator/(const double a, const Quaternion &b) {
-    return Quaternion(a / b.x, a / b.y, a / b.z, a / b.w);
-}
 inline Quaternion operator/(const Quaternion &a, const int b) {
     return Quaternion(a.x / b, a.y / b, a.z / b, a.w / b);
 }
 inline Quaternion operator/(const Quaternion &a, const float b) {
-    return Quaternion(a.x / b, a.y / b, a.z / b, a.w / b);
-}
-inline Quaternion operator/(const Quaternion &a, const double b) {
     return Quaternion(a.x / b, a.y / b, a.z / b, a.w / b);
 }
 
@@ -572,12 +513,6 @@ inline Matrix2 operator*(const Matrix2 &a, const float b) {
         a.b1 * b, a.a2 * b
     };
 }
-inline Matrix2 operator*(const Matrix2 &a, const double b) {
-    return {
-        a.a1 * b, a.a2 * b,
-        a.b1 * b, a.a2 * b
-    };
-}
 inline Matrix2 operator*(const int a, const Matrix2 &b) {
     return {
         a * b.a1, a * b.a2,
@@ -585,12 +520,6 @@ inline Matrix2 operator*(const int a, const Matrix2 &b) {
     };
 }
 inline Matrix2 operator*(const float a, const Matrix2 &b) {
-    return {
-        a * b.a1, a * b.a2,
-        a * b.b1, a * b.b2,
-    };
-}
-inline Matrix2 operator*(const double a, const Matrix2 &b) {
     return {
         a * b.a1, a * b.a2,
         a * b.b1, a * b.b2,
@@ -632,13 +561,6 @@ inline Matrix3 operator*(const float &a, const Matrix3 &b) {
         a * b.c1, a * b.c2, a * b.c3
     };
 }
-inline Matrix3 operator*(const double &a, const Matrix3 &b) {
-    return {
-        a * b.a1, a * b.a2, a * b.a3,
-        a * b.b1, a * b.b2, a * b.b3,
-        a * b.c1, a * b.c2, a * b.c3
-    };
-}
 inline Matrix3 operator*(const Matrix3 &a, const int &b) {
     return {
         b * a.a1, b * a.a2, b * a.a3,
@@ -647,13 +569,6 @@ inline Matrix3 operator*(const Matrix3 &a, const int &b) {
     };
 }
 inline Matrix3 operator*(const Matrix3 &a, const float &b) {
-    return {
-        b * a.a1, b * a.a2, b * a.a3,
-        b * a.b1, b * a.b2, b * a.b3,
-        b * a.c1, b * a.c2, b * a.c3
-    };
-}
-inline Matrix3 operator*(const Matrix3 &a, const double &b) {
     return {
         b * a.a1, b * a.a2, b * a.a3,
         b * a.b1, b * a.b2, b * a.b3,
@@ -713,14 +628,6 @@ inline Matrix4 operator*(const float a, const Matrix4 &b) {
         a * b.d1, a * b.d2, a * b.d3, a * b.d4,
     };
 }
-inline Matrix4 operator*(const double a, const Matrix4 &b) {
-    return {
-        a * b.a1, a * b.a2, a * b.a3, a * b.a4,
-        a * b.b1, a * b.b2, a * b.b3, a * b.b4,
-        a * b.c1, a * b.c2, a * b.c3, a * b.c4,
-        a * b.d1, a * b.d2, a * b.d3, a * b.d4
-    };
-}
 inline Matrix4 operator*(const Matrix4 &a, const int b) {
     return {
         b * a.a1, b * a.a2, b * a.a3, b * a.a4,
@@ -737,14 +644,6 @@ inline Matrix4 operator*(const Matrix4 &a, const float b) {
         b * a.d1, b * a.d2, b * a.d3, b * a.d4
     };
 }
-inline Matrix4 operator*(const Matrix4 &a, const double b) {
-    return {
-        b * a.a1, b * a.a2, b * a.a3, b * a.a4,
-        b * a.b1, b * a.b2, b * a.b3, b * a.b4,
-        b * a.c1, b * a.c2, b * a.c3, b * a.c4,
-        b * a.d1, b * a.d2, b * a.d3, b * a.d4
-    };
-}
 #pragma endregion
 
 inline Vector2::Vector2() {
@@ -753,26 +652,22 @@ inline Vector2::Vector2() {
 }
 
 inline Vector2::Vector2(const int x, const int y) {
-    this->x = static_cast<double>(x);
-    this->y = static_cast<double>(y);
+    this->x = static_cast<float>(x);
+    this->y = static_cast<float>(y);
 }
 
 inline Vector2::Vector2(const float x, const float y) {
-    this->x = static_cast<double>(x);
-    this->y = static_cast<double>(y);
+    this->x = static_cast<float>(x);
+    this->y = static_cast<float>(y);
 }
 
-inline Vector2::Vector2(const double x, const double y) {
-    this->x = x;
-    this->y = y;
-}
 
-inline double Vector2::magnitude() const {
+inline float Vector2::magnitude() const {
     return ::sqrt(x * x + y * y);
 }
 
 inline void Vector2::Normalize() {
-    const double magnitude = this->magnitude();
+    const float magnitude = this->magnitude();
     if (magnitude == 0)
         return;
     x /= magnitude;
@@ -780,7 +675,7 @@ inline void Vector2::Normalize() {
 }
 
 inline Vector2 Vector2::normalize() const {
-    const double magnitude = this->magnitude();
+    const float magnitude = this->magnitude();
     if (magnitude == 0) {
         return {};
     }
@@ -791,7 +686,7 @@ inline void Vector2::translate(const Vector2 &v) {
     *this = *this + v;
 }
 
-inline double Vector2::dot(const Vector2 &a, const Vector2 &b) {
+inline float Vector2::dot(const Vector2 &a, const Vector2 &b) {
     return a.x * b.x + a.y * b.y;
 }
 
@@ -801,7 +696,7 @@ inline Vector2 Vector2::lerp(const Vector2 a, const Vector2 b, const float t) {
 
 inline Vector2 Vector2::fromJson(nlohmann::json json)
 {
-    return Vector2(json["x"].get<double>(), json["y"].get<double>());
+    return Vector2(json["x"].get<float>(), json["y"].get<float>());
 }
 
 inline nlohmann::json Vector2::toJson()
@@ -820,21 +715,15 @@ inline Vector3::Vector3() {
 }
 
 inline Vector3::Vector3(const int x, const int y, const int z) {
-    this->x = static_cast<double>(x);
-    this->y = static_cast<double>(y);
-    this->z = static_cast<double>(z);
+    this->x = static_cast<float>(x);
+    this->y = static_cast<float>(y);
+    this->z = static_cast<float>(z);
 }
 
 inline Vector3::Vector3(const float x, const float y, const float z) {
-    this->x = static_cast<double>(x);
-    this->y = static_cast<double>(y);
-    this->z = static_cast<double>(z);
-}
-
-inline Vector3::Vector3(const double x, const double y, const double z) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
+    this->x = static_cast<float>(x);
+    this->y = static_cast<float>(y);
+    this->z = static_cast<float>(z);
 }
 
 inline Vector3::Vector3(const Vector2 &v) {
@@ -846,7 +735,7 @@ inline Vector3::Vector3(const Vector2 &v) {
 inline Vector3::Vector3(const Vector2 &v, int z) {
     x = v.x;
     y = v.y;
-    this->z = z;
+    this->z = static_cast<float>(z);
 }
 
 inline Vector3::Vector3(const Vector2 &v, float z) {
@@ -855,25 +744,13 @@ inline Vector3::Vector3(const Vector2 &v, float z) {
     this->z = z;
 }
 
-inline Vector3::Vector3(const Vector2 &v, double z) {
-    x = v.x;
-    y = v.y;
-    this->z = z;
-}
-
 inline Vector3::Vector3(int x, const Vector2 &v) {
-    this->x = x;
+    this->x = static_cast<float>(x);
     y = v.x;
     z = v.y;
 }
 
 inline Vector3::Vector3(float x, const Vector2 &v) {
-    this->x = x;
-    y = v.x;
-    z = v.y;
-}
-
-inline Vector3::Vector3(double x, const Vector2 &v) {
     this->x = x;
     y = v.x;
     z = v.y;
@@ -885,12 +762,12 @@ inline Vector3::Vector3(const Vector4 &v) {
     this->z = v.z;
 }
 
-inline double Vector3::magnitude() const {
+inline float Vector3::magnitude() const {
     return ::sqrt(x * x + y * y + z * z);
 }
 
 inline void Vector3::Normalize() {
-    const double magnitude = this->magnitude();
+    const float magnitude = this->magnitude();
     if (magnitude == 0)
         return;
     this->x /= magnitude;
@@ -902,12 +779,12 @@ inline Vector3 Vector3::cross(const Vector3 &a, const Vector3 &b) {
     return Vector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
-inline double Vector3::dot(const Vector3 &a, const Vector3 &b) {
+inline float Vector3::dot(const Vector3 &a, const Vector3 &b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 inline Vector3 Vector3::normalize() const {
-    const double magnitude = this->magnitude();
+    const float magnitude = this->magnitude();
     if (magnitude == 0) {
         return {};
     }
@@ -932,7 +809,7 @@ inline Vector3 Vector3::up() {
 
 inline Vector3 Vector3::fromJson(nlohmann::json json)
 {
-    return Vector3(json["x"].get<double>(), json["y"].get<double>(), json["z"].get<double>());
+    return Vector3(json["x"].get<float>(), json["y"].get<float>(), json["z"].get<float>());
 }
 
 inline nlohmann::json Vector3::toJson()
@@ -957,20 +834,13 @@ inline Vector4::Vector4() {
 }
 
 inline Vector4::Vector4(int x, int y, int z, int w) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->w = w;
+    this->x = static_cast<float>(x);
+    this->y = static_cast<float>(y);
+    this->z = static_cast<float>(z);
+    this->w = static_cast<float>(w);
 }
 
 inline Vector4::Vector4(float x, float y, float z, float w) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->w = w;
-}
-
-inline Vector4::Vector4(double x, double y, double z, double w) {
     this->x = x;
     this->y = y;
     this->z = z;
@@ -988,7 +858,7 @@ inline Vector4::Vector4(const Vector3 &v, int w) {
     x = v.x;
     y = v.y;
     z = v.z;
-    this->w = w;
+    this->w = static_cast<float>(w);
 }
 
 inline Vector4::Vector4(const Vector3 &v, float w) {
@@ -998,28 +868,14 @@ inline Vector4::Vector4(const Vector3 &v, float w) {
     this->w = w;
 }
 
-inline Vector4::Vector4(const Vector3 &v, double w) {
-    x = v.x;
-    y = v.y;
-    z = v.z;
-    this->w = w;
-}
-
 inline Vector4::Vector4(int x, const Vector3 &v) {
-    this->x = x;
+    this->x = static_cast<float>(x);
     y = v.x;
     z = v.y;
     w = v.z;
 }
 
 inline Vector4::Vector4(float x, const Vector3 &v) {
-    this->x = x;
-    y = v.x;
-    z = v.y;
-    w = v.z;
-}
-
-inline Vector4::Vector4(double x, const Vector3 &v) {
     this->x = x;
     y = v.x;
     z = v.y;
@@ -1036,8 +892,8 @@ inline Vector4::Vector4(const Vector2 &v) {
 inline Vector4::Vector4(const Vector2 &v, int z, int w) {
     x = v.x;
     y = v.y;
-    this->z = z;
-    this->w = w;
+    this->z = static_cast<float>(z);;
+    this->w = static_cast<float>(w);;
 }
 
 inline Vector4::Vector4(const Vector2 &v, float z, float w) {
@@ -1047,18 +903,11 @@ inline Vector4::Vector4(const Vector2 &v, float z, float w) {
     this->w = w;
 }
 
-inline Vector4::Vector4(const Vector2 &v, double z, double w) {
-    x = v.x;
-    y = v.y;
-    this->z = z;
-    this->w = w;
-}
-
 inline Vector4::Vector4(int x, const Vector2 &v, int w) {
-    this->x = x;
+    this->x = static_cast<float>(x);
     y = v.x;
     z = v.y;
-    this->w = w;
+    this->w = static_cast<float>(w);
 }
 
 inline Vector4::Vector4(float x, const Vector2 &v, float w) {
@@ -1068,16 +917,9 @@ inline Vector4::Vector4(float x, const Vector2 &v, float w) {
     this->w = w;
 }
 
-inline Vector4::Vector4(double x, const Vector2 &v, double w) {
-    this->x = x;
-    y = v.x;
-    z = v.y;
-    this->w = w;
-}
-
 inline Vector4::Vector4(int x, int y, const Vector2 &v) {
-    this->x = x;
-    this->y = y;
+    this->x = static_cast<float>(x);
+    this->y = static_cast<float>(y);
     this->z = v.x;
     this->w = v.y;
 }
@@ -1089,14 +931,7 @@ inline Vector4::Vector4(float x, float y, const Vector2 &v) {
     this->w = v.y;
 }
 
-inline Vector4::Vector4(double x, double y, const Vector2 &v) {
-    this->x = x;
-    this->y = y;
-    this->z = v.x;
-    this->w = v.y;
-}
-
-inline double Vector4::magnitude() const {
+inline float Vector4::magnitude() const {
     return x*x + y*y + z*z + w*w;
 }
 
@@ -1108,7 +943,7 @@ inline Vector4 Vector4::normalize() const {
     return *this / magnitude();
 }
 
-inline double Vector4::dot(const Vector4 &a, const Vector4 &b) {
+inline float Vector4::dot(const Vector4 &a, const Vector4 &b) {
     return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;
 }
 
@@ -1118,7 +953,7 @@ inline Vector4 Vector4::lerp(const Vector4 &a, const Vector4 &b, float t) {
 
 inline Vector4 Vector4::fromJson(nlohmann::json json)
 {
-    return Vector4(json["x"].get<double>(), json["y"].get<double>(), json["z"].get<double>(), json["w"].get<double>());
+    return Vector4(json["x"].get<float>(), json["y"].get<float>(), json["z"].get<float>(), json["w"].get<float>());
 }
 
 inline nlohmann::json Vector4::toJson()
@@ -1140,10 +975,10 @@ inline Quaternion::Quaternion() {
 }
 
 inline Quaternion::Quaternion(int x, int y, int z, int w) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->w = w;
+    this->x = static_cast<float>(x);
+    this->y = static_cast<float>(y);
+    this->z = static_cast<float>(z);
+    this->w = static_cast<float>(w);
 }
 
 inline Quaternion::Quaternion(float x, float y, float z, float w) {
@@ -1153,17 +988,10 @@ inline Quaternion::Quaternion(float x, float y, float z, float w) {
     this->w = w;
 }
 
-inline Quaternion::Quaternion(double x, double y, double z, double w) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->w = w;
-}
-
 inline Quaternion::Quaternion(const Vector3 &axis, float angle) {
     Vector3 u = axis.normalize();
     u = u * sin(angle / 2.0f);
-    const double _w = cos(angle / 2.0f);
+    const float _w = cos(angle / 2.0f);
 
     x = u.x;
     y = u.y;
@@ -1172,20 +1000,20 @@ inline Quaternion::Quaternion(const Vector3 &axis, float angle) {
 }
 
 inline Quaternion::Quaternion(const Vector3 &EulerAngles) {
-    double phi = (PI / 180.0) * EulerAngles.x;
-    double theta = (PI / 180.0) * EulerAngles.y;
-    double psi = (PI / 180.0) * EulerAngles.z;
+    float phi = (PI / 180.0f) * EulerAngles.x;
+    float theta = (PI / 180.0f) * EulerAngles.y;
+    float psi = (PI / 180.0f) * EulerAngles.z;
 
-    psi = psi / 2.0;
-    theta = theta / 2.0;
-    phi = phi / 2.0;
+    psi = psi / 2.0f;
+    theta = theta / 2.0f;
+    phi = phi / 2.0f;
 
-    double sin_psi = sin(psi);
-    double cos_psi = cos(psi);
-    double sin_theta = sin(theta);
-    double cos_theta = cos(theta);
-    double sin_phi = sin(phi);
-    double cos_phi = cos(phi);
+    float sin_psi = sin(psi);
+    float cos_psi = cos(psi);
+    float sin_theta = sin(theta);
+    float cos_theta = cos(theta);
+    float sin_phi = sin(phi);
+    float cos_phi = cos(phi);
 
     x = sin_phi*cos_theta*cos_psi - cos_phi*sin_theta*sin_psi;
     y = cos_phi*sin_theta*cos_psi + sin_phi*cos_theta*sin_psi;
@@ -1194,10 +1022,10 @@ inline Quaternion::Quaternion(const Vector3 &EulerAngles) {
 }
 
 inline Quaternion::Quaternion(const Matrix4 &m) {
-    const double _w = std::sqrt(1.0 + m.a1 + m.b2 + m.c3) / 2.0;
-    const double _x = (m.c2 - m.b3) / (4.0 * _w);
-    const double _y = (m.a3 - m.c1) / (4.0 * _w);
-    const double _z = (m.b1 - m.a2) / (4.0 * _w);
+    const float _w = std::sqrt(1.0f + m.a1 + m.b2 + m.c3) / 2.0f;
+    const float _x = (m.c2 - m.b3) / (4.0f * _w);
+    const float _y = (m.a3 - m.c1) / (4.0f * _w);
+    const float _z = (m.b1 - m.a2) / (4.0f * _w);
     x = _x;
     y = _y;
     z = _z;
@@ -1205,7 +1033,7 @@ inline Quaternion::Quaternion(const Matrix4 &m) {
 }
 
 inline void Quaternion::Normalize() {
-    const double n = 1.0/sqrt(x * x + y * y + z * z + w * w);
+    const float n = 1.0f/sqrt(x * x + y * y + z * z + w * w);
 
     x *= n;
     y *= n;
@@ -1213,7 +1041,7 @@ inline void Quaternion::Normalize() {
     w *= n;
 }
 
-inline double Quaternion::magnitude() const {
+inline float Quaternion::magnitude() const {
     return x * x + y * y + z * z + w * w;
 }
 
@@ -1241,36 +1069,36 @@ inline void Quaternion::rotate(const Vector3 &euler) {
 }
 
 inline Quaternion Quaternion::normalize() const {
-    const double n = 1.0/sqrt(x * x + y * y + z * z + w * w);
+    const float n = 1.0f/sqrt(x * x + y * y + z * z + w * w);
 
-    const double _x = x * n;
-    const double _y = y * n;
-    const double _z = z * n;
-    const double _w = w * n;
+    const float _x = x * n;
+    const float _y = y * n;
+    const float _z = z * n;
+    const float _w = w * n;
 
     return Quaternion(_x, _y, _z, _w);
 }
 
-inline double Quaternion::dot(const Quaternion &a, const Quaternion &b) {
+inline float Quaternion::dot(const Quaternion &a, const Quaternion &b) {
     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
 inline Quaternion Quaternion::slerp(const Quaternion &a, const Quaternion &b, const float t) {
-    const double angle = ::acos(abs(dot(a, b)));
+    const float angle = ::acos(abs(dot(a, b)));
 
     if (angle == 0)
         return a;
 
-    const double sin_t = ::sin(t * angle);
-    const double sin_one_minus_t = ::sin((1.0f-t) * angle);
-    const double sin_angle = ::sin(angle);
+    const float sin_t = ::sin(t * angle);
+    const float sin_one_minus_t = ::sin((1.0f-t) * angle);
+    const float sin_angle = ::sin(angle);
 
     return ((a * sin_one_minus_t) + b * sin_t) / sin_angle;
 }
 
 inline Quaternion Quaternion::fromJson(nlohmann::json json)
 {
-    return Quaternion(json["x"].get<double>(), json["y"].get<double>(), json["z"].get<double>(), json["w"].get<double>());
+    return Quaternion(json["x"].get<float>(), json["y"].get<float>(), json["z"].get<float>(), json["w"].get<float>());
 }
 
 inline nlohmann::json Quaternion::toJson()
@@ -1289,7 +1117,7 @@ inline Matrix2::Matrix2() {
     b1 = 0.0; b2 = 1.0;
 }
 
-inline Matrix2::Matrix2(double a1, double a2, double b1, double b2) {
+inline Matrix2::Matrix2(float a1, float a2, float b1, float b2) {
     this->a1 = a1; this->a2 = a2;
     this->b1 = b1; this->b2 = b2;
 }
@@ -1305,16 +1133,16 @@ inline Matrix2::Matrix2(const Matrix4 &a) {
 }
 
 inline void Matrix2::Transpose() {
-    double _a1 = a1; double _a2 = b1;
-    double _b1 = a2; double _b2 = b2;
+    float _a1 = a1; float _a2 = b1;
+    float _b1 = a2; float _b2 = b2;
 
     a1 = _a1; a2 = _a2;
     b1 = _b1; b2 = _b2;
 }
 
 inline Matrix2 Matrix2::transpose() const {
-    double _a1 = a1; double _a2 = b1;
-    double _b1 = a2; double _b2 = b2;
+    float _a1 = a1; float _a2 = b1;
+    float _b1 = a2; float _b2 = b2;
 
     return {
         _a1, _a2,
@@ -1323,7 +1151,7 @@ inline Matrix2 Matrix2::transpose() const {
 }
 
 inline void Matrix2::Inverse() {
-    double d = det2(*this);
+    float d = det2(*this);
     *this = {
         b2 / d, -a2 / d,
         -b1 / d, a1 / d,
@@ -1331,7 +1159,7 @@ inline void Matrix2::Inverse() {
 }
 
 inline Matrix2 Matrix2::inverse() const {
-    double d = det2(*this);
+    float d = det2(*this);
 
     return {
         b2 / d, -a2 / d,
@@ -1341,8 +1169,8 @@ inline Matrix2 Matrix2::inverse() const {
 
 inline Matrix2 Matrix2::fromJson(nlohmann::json json)
 {
-    return {json["a1"].get<double>(), json["a2"].get<double>(),
-     json["b1"].get<double>(), json["b2"].get<double>()};
+    return {json["a1"].get<float>(), json["a2"].get<float>(),
+     json["b1"].get<float>(), json["b2"].get<float>()};
 }
 
 inline nlohmann::json Matrix2::toJson()
@@ -1362,8 +1190,8 @@ inline Matrix3::Matrix3() {
     c1 = 0.0; c2 = 0.0; c3 = 1.0;
 }
 
-inline Matrix3::Matrix3(double a1, double a2, double a3, double b1, double b2, double b3, double c1, double c2,
-    double c3) {
+inline Matrix3::Matrix3(float a1, float a2, float a3, float b1, float b2, float b3, float c1, float c2,
+    float c3) {
     this->a1 = a1; this->a2 = a2; this->a3 = a3;
     this->b1 = b1; this->b2 = b2; this->b3 = b3;
     this->c1 = c1; this->c2 = c2; this->c3 = c3;
@@ -1377,9 +1205,9 @@ inline Matrix3::Matrix3(const Matrix4 &a) {
 
 
 inline void Matrix3::Transpose() {
-    const double _a1 = a1; const double _a2 = b1; const double _a3 = c1;
-    const double _b1 = a2; const double _b2 = b2; const double _b3 = c2;
-    const double _c1 = a3; const double _c2 = b3; const double _c3 = c3;
+    const float _a1 = a1; const float _a2 = b1; const float _a3 = c1;
+    const float _b1 = a2; const float _b2 = b2; const float _b3 = c2;
+    const float _c1 = a3; const float _c2 = b3; const float _c3 = c3;
 
     a1 = _a1; a2 = _a2; a3 = _a3;
     b1 = _b1; b2 = _b2; b3 = _b3;
@@ -1387,9 +1215,9 @@ inline void Matrix3::Transpose() {
 }
 
 inline Matrix3 Matrix3::transpose() const {
-    const double _a1 = a1; const double _a2 = b1; const double _a3 = c1;
-    const double _b1 = a2; const double _b2 = b2; const double _b3 = c2;
-    const double _c1 = a3; const double _c2 = b3; const double _c3 = c3;
+    const float _a1 = a1; const float _a2 = b1; const float _a3 = c1;
+    const float _b1 = a2; const float _b2 = b2; const float _b3 = c2;
+    const float _c1 = a3; const float _c2 = b3; const float _c3 = c3;
 
     return {
         _a1, _a2, _a3,
@@ -1399,7 +1227,7 @@ inline Matrix3 Matrix3::transpose() const {
 }
 
 inline void Matrix3::Inverse() {
-    double d = det3(*this);
+    float d = det3(*this);
 
     Matrix2 a00 = {
         b2, b3,
@@ -1455,7 +1283,7 @@ inline void Matrix3::Inverse() {
 }
 
 inline Matrix3 Matrix3::inverse() const {
-    double d = det3(*this);
+    float d = det3(*this);
 
     Matrix2 a00 = {
         b2, b3,
@@ -1511,9 +1339,9 @@ inline Matrix3 Matrix3::inverse() const {
 
 inline Matrix3 Matrix3::fromJson(nlohmann::json json)
 {
-    return {json["a1"].get<double>(), json["a2"].get<double>(), json["a3"].get<double>(),
-    json["b1"].get<double>(), json["b2"].get<double>(), json["b3"].get<double>(),
-    json["c1"].get<double>(), json["c2"].get<double>(), json["c3"].get<double>()};
+    return {json["a1"].get<float>(), json["a2"].get<float>(), json["a3"].get<float>(),
+    json["b1"].get<float>(), json["b2"].get<float>(), json["b3"].get<float>(),
+    json["c1"].get<float>(), json["c2"].get<float>(), json["c3"].get<float>()};
 }
 
 inline nlohmann::json Matrix3::toJson()
@@ -1539,8 +1367,8 @@ inline Matrix4::Matrix4() {
     d1 = 0.0; d2 = 0.0; d3 = 0.0; d4 = 1.0;
 }
 
-inline Matrix4::Matrix4(double a1, double a2, double a3, double a4, double b1, double b2, double b3, double b4,
-    double c1, double c2, double c3, double c4, double d1, double d2, double d3, double d4)
+inline Matrix4::Matrix4(float a1, float a2, float a3, float a4, float b1, float b2, float b3, float b4,
+    float c1, float c2, float c3, float c4, float d1, float d2, float d3, float d4)
 {
     this->a1 = a1; this->a2 = a2; this->a3 = a3; this->a4 = a4;
     this->b1 = b1; this->b2 = b2; this->b3 = b3; this->b4 = b4;
@@ -1556,10 +1384,10 @@ inline Matrix4::Matrix4(const Matrix3 &a) {
 }
 
 inline void Matrix4::Transpose() {
-    const double _a1 = a1; const double _a2 = b1; const double _a3 = c1; const double _a4 = d1;
-    const double _b1 = a2; const double _b2 = b2; const double _b3 = c2; const double _b4 = d2;
-    const double _c1 = a3; const double _c2 = b3; const double _c3 = c3; const double _c4 = d3;
-    const double _d1 = a4; const double _d2 = b4; const double _d3 = c4; const double _d4 = d4;
+    const float _a1 = a1; const float _a2 = b1; const float _a3 = c1; const float _a4 = d1;
+    const float _b1 = a2; const float _b2 = b2; const float _b3 = c2; const float _b4 = d2;
+    const float _c1 = a3; const float _c2 = b3; const float _c3 = c3; const float _c4 = d3;
+    const float _d1 = a4; const float _d2 = b4; const float _d3 = c4; const float _d4 = d4;
 
     a1 = _a1; a2 = _a2; a3 = _a3; a4 = _a4;
     b1 = _b1; b2 = _b2; b3 = _b3; b4 = _b4;
@@ -1577,7 +1405,7 @@ inline Matrix4 Matrix4::transpose() const {
 }
 
 inline void Matrix4::Inverse() {
-    double d = det4(*this);
+    float d = det4(*this);
 
     Matrix3 a00 = {
         b2, b3, b4,
@@ -1661,22 +1489,22 @@ inline void Matrix4::Inverse() {
         c1, c2, c3
     };
 
-    double _a1 = det3(a00)/d;
-    double _a2 = -det3(a10)/d;
-    double _a3 = det3(a20)/d;
-    double _a4 = -det3(a30)/d;
-    double _b1 = -det3(a01)/d;
-    double _b2 = det3(a11)/d;
-    double _b3 = -det3(a21)/d;
-    double _b4 = det3(a31)/d;
-    double _c1 = det3(a02)/d;
-    double _c2 = -det3(a12)/d;
-    double _c3 = det3(a22)/d;
-    double _c4 = -det3(a32)/d;
-    double _d1 = -det3(a03)/d;
-    double _d2 = det3(a13)/d;
-    double _d3 = -det3(a23)/d;
-    double _d4 = det3(a33)/d;
+    float _a1 = det3(a00)/d;
+    float _a2 = -det3(a10)/d;
+    float _a3 = det3(a20)/d;
+    float _a4 = -det3(a30)/d;
+    float _b1 = -det3(a01)/d;
+    float _b2 = det3(a11)/d;
+    float _b3 = -det3(a21)/d;
+    float _b4 = det3(a31)/d;
+    float _c1 = det3(a02)/d;
+    float _c2 = -det3(a12)/d;
+    float _c3 = det3(a22)/d;
+    float _c4 = -det3(a32)/d;
+    float _d1 = -det3(a03)/d;
+    float _d2 = det3(a13)/d;
+    float _d3 = -det3(a23)/d;
+    float _d4 = det3(a33)/d;
 
     *this = {
         _a1, _a2, _a3, _a4,
@@ -1687,7 +1515,7 @@ inline void Matrix4::Inverse() {
 }
 
 inline Matrix4 Matrix4::inverse() const {
-    double d = det4(*this);
+    float d = det4(*this);
 
     Matrix3 a00 = {
         b2, b3, b4,
@@ -1771,22 +1599,22 @@ inline Matrix4 Matrix4::inverse() const {
         c1, c2, c3
     };
 
-    double _a1 = det3(a00)/d;
-    double _a2 = -det3(a10)/d;
-    double _a3 = det3(a20)/d;
-    double _a4 = -det3(a30)/d;
-    double _b1 = -det3(a01)/d;
-    double _b2 = det3(a11)/d;
-    double _b3 = -det3(a21)/d;
-    double _b4 = det3(a31)/d;
-    double _c1 = det3(a02)/d;
-    double _c2 = -det3(a12)/d;
-    double _c3 = det3(a22)/d;
-    double _c4 = -det3(a32)/d;
-    double _d1 = -det3(a03)/d;
-    double _d2 = det3(a13)/d;
-    double _d3 = -det3(a23)/d;
-    double _d4 = det3(a33)/d;
+    float _a1 = det3(a00)/d;
+    float _a2 = -det3(a10)/d;
+    float _a3 = det3(a20)/d;
+    float _a4 = -det3(a30)/d;
+    float _b1 = -det3(a01)/d;
+    float _b2 = det3(a11)/d;
+    float _b3 = -det3(a21)/d;
+    float _b4 = det3(a31)/d;
+    float _c1 = det3(a02)/d;
+    float _c2 = -det3(a12)/d;
+    float _c3 = det3(a22)/d;
+    float _c4 = -det3(a32)/d;
+    float _d1 = -det3(a03)/d;
+    float _d2 = det3(a13)/d;
+    float _d3 = -det3(a23)/d;
+    float _d4 = det3(a33)/d;
 
     return {
         _a1, _a2, _a3, _a4,
@@ -1829,10 +1657,10 @@ inline Matrix4 Matrix4::lookAt(const Vector3& eye, const Vector3& target, const 
 
 inline Matrix4 Matrix4::fromJson(nlohmann::json json)
 {
-    return {json["a1"].get<double>(), json["a2"].get<double>(), json["a3"].get<double>(), json["a4"].get<double>(),
-    json["b1"].get<double>(), json["b2"].get<double>(), json["b3"].get<double>(), json["b4"].get<double>(),
-    json["c1"].get<double>(), json["c2"].get<double>(), json["c3"].get<double>(), json["c4"].get<double>(),
-    json["d1"].get<double>(), json["d2"].get<double>(), json["d3"].get<double>(), json["d4"].get<double>()};
+    return {json["a1"].get<float>(), json["a2"].get<float>(), json["a3"].get<float>(), json["a4"].get<float>(),
+    json["b1"].get<float>(), json["b2"].get<float>(), json["b3"].get<float>(), json["b4"].get<float>(),
+    json["c1"].get<float>(), json["c2"].get<float>(), json["c3"].get<float>(), json["c4"].get<float>(),
+    json["d1"].get<float>(), json["d2"].get<float>(), json["d3"].get<float>(), json["d4"].get<float>()};
 }
 
 inline nlohmann::json Matrix4::toJson()
