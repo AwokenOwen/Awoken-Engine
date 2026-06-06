@@ -990,7 +990,7 @@ inline Quaternion::Quaternion(float x, float y, float z, float w) {
 
 inline Quaternion::Quaternion(const Vector3 &axis, float angle) {
     Vector3 u = axis.normalize();
-    u = u * sin(angle / 2.0f);
+    u = u * std::sin(angle / 2.0f);
     const float _w = cos(angle / 2.0f);
 
     x = u.x;
@@ -1047,9 +1047,9 @@ inline float Quaternion::magnitude() const {
 
 inline Vector3 Quaternion::eulerAngles() const {
     return Vector3(
-      atan2(2 * (w * y + z * x), 1 - 2 * (y * y + z * z)),
-      asin(2 * (w * y - z * x)),
-      atan2(2 * (w * z + x * y), 1 - 2 * (x * x + y * y))
+      std::atan2(2 * (w * y + z * x), 1 - 2 * (y * y + z * z)),
+      std::asin(2 * (w * y - z * x)),
+      std::atan2(2 * (w * z + x * y), 1 - 2 * (x * x + y * y))
     );
 }
 

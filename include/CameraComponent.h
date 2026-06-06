@@ -4,7 +4,7 @@
 
 #pragma once
 #include "Component.h"
-#include "Math.h"
+#include "LinearMath.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
 
