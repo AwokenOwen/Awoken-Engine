@@ -1,0 +1,6 @@
+{
+  "FragmentShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/equirectangular.frag",
+  "Textures": [],
+  "Uniforms": [],
+  "VertexShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/equirectangular.vert"
+}

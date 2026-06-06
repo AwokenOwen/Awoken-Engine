@@ -1,0 +1,8 @@
+{
+    "FragmentShader": "assets/defaultAssets/Shaders/defaultPostProcess.frag",
+    "Textures": [
+        "post"
+    ],
+    "Uniforms": [],
+    "VertexShader": "assets/defaultAssets/Shaders/defaultPostProcess.vert"
+}

@@ -17,8 +17,11 @@ int main(int argc, char* argv[])
 
     auto scene = new Scene("testScene");
 
-    auto cube = new Object();
+    /*auto cube = new Object();
     cube->addComponent<ModelRendererComponent>();
+
+    cube->setLocalPosition(Vector3(0, 0, -5));
+    cube->setLocalRotation(Quaternion(Vector3(45, 45, 0)));*/
 
     auto camera = new Object();
     auto cameraComp = camera->addComponent<CameraComponent>();
@@ -26,15 +29,12 @@ int main(int argc, char* argv[])
 
     camera->setLocalPosition(Vector3(0, 0, 0));
 
-    cube->setLocalPosition(Vector3(0, 0, -5));
-    cube->setLocalRotation(Quaternion(Vector3(45, 45, 0)));
-
-    scene->m_rootObjects.push_back(cube);
+    //scene->m_rootObjects.push_back(cube);
     scene->m_rootObjects.push_back(camera);
     std::ofstream f("assets/defaultAssets/Scenes/testScene.scene");
     f << scene->toJson().dump(4)  << std::endl;
 
-    delete cube;
+    //delete cube;
     delete scene;
     delete camera;
 
@@ -62,17 +62,13 @@ int main(int argc, char* argv[])
     uniform["Type"] = "Vector3";
     uniform["Name"] = "color";
 
-    nlohmann::json colorvector;
-
-    colorvector["x"] = 1.0f;
-    colorvector["y"] = 1.0f;
-    colorvector["z"] = 1.0f;
-
-    uniform["Value"] = colorvector;
+    uniform["Value"] = Vector3(1.0f, 0.0f, 1.0f).toJson();
 
     uniforms.push_back(uniform);
 
     material["Uniforms"] = uniforms;
+
+    material["Textures"] = std::vector<std::string>();
 
     std::ofstream unlit("assets/defaultAssets/Materials/unlit.json");
     unlit << material.dump(4)  << std::endl;*/

@@ -1,5 +1,5 @@
 {
-    "FragmentShader": "assets/defaultAssets/Shaders/unlit.frag",
+    "FragmentShader": "assets/defaultAssets/Shaders/default.frag",
     "Textures": [],
     "Uniforms": [
         {
@@ -7,10 +7,10 @@
             "Type": "Vector3",
             "Value": {
                 "x": 1.0,
-                "y": 1.0,
+                "y": 0.0,
                 "z": 1.0
             }
         }
     ],
-    "VertexShader": "assets/defaultAssets/Shaders/unlit.vert"
+    "VertexShader": "assets/defaultAssets/Shaders/default.vert"
 }

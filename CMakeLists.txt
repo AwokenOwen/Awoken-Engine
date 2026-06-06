@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.3)
+cmake_minimum_required(VERSION 3.20)
 
 # Redirect all output to a 'bin' folder in the build directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
@@ -8,35 +8,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 project(Awoken_Engine)
 set(CMAKE_CXX_STANDARD 20)
 
-add_definitions(-Wno-unused-but-set-variable)
-
-include(FetchContent)
-
-FetchContent_Declare(assimp
-        GIT_REPOSITORY https://github.com/assimp/assimp.git
-        GIT_TAG master)
-
-FetchContent_Declare(glfw
-        GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG 3.4
-        GIT_SHALLOW ON)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-
-FetchContent_Declare(FreeType
-        GIT_REPOSITORY https://github.com/freetype/freetype.git
-        GIT_TAG master)
-
-FetchContent_Declare(json
-        GIT_REPOSITORY https://github.com/nlohmann/json.git
-        GIT_TAG master)
-
-FetchContent_Declare(OpenAL
-        GIT_REPOSITORY https://github.com/kcat/openal-soft.git
-        GIT_TAG master)
-
-FetchContent_MakeAvailable(assimp glfw FreeType json OpenAL)
+# Detect MinGW cross-compile
+if(CMAKE_CXX_COMPILER MATCHES "mingw" OR CMAKE_CXX_COMPILER MATCHES "w64")
+    set(IS_MINGW TRUE)
+else()
+    set(IS_MINGW FALSE)
+endif()
 
 add_library(Awoken_Engine STATIC
         include/Renderer.h
@@ -70,39 +47,61 @@ add_library(Awoken_Engine STATIC
 target_include_directories(Awoken_Engine PUBLIC
         glad/include
         include
-        ${freetype_SOURCE_DIR}/include
-        ${glfw_SOURCE_DIR}/include
-        ${json_SOURCE_DIR}/include
-        ${openal_SOURCE_DIR}/include
+        assimp/include
+        freetype/include
+        glfw/include
+        json/include
+        openAL/include
 )
 
-target_link_libraries(Awoken_Engine PUBLIC
-        assimp::assimp
+target_link_directories(Awoken_Engine PUBLIC
+        assimp
         freetype
         glfw
-        nlohmann_json::nlohmann_json
-        OpenAL::OpenAL
+        openAL
 )
+
+if(IS_MINGW)
+    target_link_libraries(Awoken_Engine PUBLIC
+            libassimp.dll.a
+            libfreetype.a
+            libglfw3.a
+            libopenal.dll.a
+            opengl32
+            gdi32
+            winmm
+            ole32
+            uuid
+            imm32
+            dwmapi
+    )
+else()
+    target_link_libraries(Awoken_Engine PUBLIC
+            libassimp.so
+            libfreetype.a
+            libglfw3LINUX.a
+            libopenal.so
+            GL
+            dl
+            pthread
+    )
+endif()
 
 file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}/bin")
 file(COPY gameInit.json DESTINATION "${CMAKE_BINARY_DIR}/bin")
 
 # For testing purposes
-
 project(Awoken_Engine_Test)
+add_executable(Awoken_Engine_Test main.cpp)
 
-add_executable(Awoken_Engine_Test
-        main.cpp)
-
-target_link_libraries(Awoken_Engine_Test PUBLIC
-        Awoken_Engine
-)
+target_link_libraries(Awoken_Engine_Test PUBLIC Awoken_Engine)
 
 target_include_directories(Awoken_Engine_Test PUBLIC
         glad/include
         include
-        ${freetype_SOURCE_DIR}/include
-        ${glfw_SOURCE_DIR}/include
-        ${json_SOURCE_DIR}/include
-        ${openal_SOURCE_DIR}/include
+        assimp/include
+        freetype/include
+        glfw/include
+        json/include
+        openAL/include
 )
