@@ -4,7 +4,7 @@
 
 #pragma once
 #include "Event.h"
-#include "Math.h"
+#include "LinearMath.h"
 #include "WindowManager.h"
 
 /**
