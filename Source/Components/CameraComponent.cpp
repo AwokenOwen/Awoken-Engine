@@ -174,7 +174,6 @@ void CameraComponent::fromJson(nlohmann::json j)
     {
         Resource.setMainCamera(this);
     }
-    registerRenderer(false);
 
     m_backgroundColor = Vector3::fromJson(j["BackgroundColor"]);
 
@@ -183,4 +182,6 @@ void CameraComponent::fromJson(nlohmann::json j)
     m_skyboxModelName = j["SkyboxModel"].get<std::string>();
 
     m_skyboxMaterialName = j["SkyboxMaterial"].get<std::string>();
+
+    registerRenderer(false);
 }

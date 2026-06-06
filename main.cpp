@@ -15,13 +15,13 @@ int main(int argc, char* argv[])
     // Make a name
     // All the objects with their components turned into JSON
 
-    auto scene = new Scene("testScene");
+    /*auto scene = new Scene("testScene");
 
-    /*auto cube = new Object();
+    auto cube = new Object();
     cube->addComponent<ModelRendererComponent>();
 
     cube->setLocalPosition(Vector3(0, 0, -5));
-    cube->setLocalRotation(Quaternion(Vector3(45, 45, 0)));*/
+    cube->setLocalRotation(Quaternion(Vector3(45, 45, 0)));
 
     auto camera = new Object();
     auto cameraComp = camera->addComponent<CameraComponent>();
@@ -29,14 +29,14 @@ int main(int argc, char* argv[])
 
     camera->setLocalPosition(Vector3(0, 0, 0));
 
-    //scene->m_rootObjects.push_back(cube);
+    scene->m_rootObjects.push_back(cube);
     scene->m_rootObjects.push_back(camera);
     std::ofstream f("assets/defaultAssets/Scenes/testScene.scene");
     f << scene->toJson().dump(4)  << std::endl;
 
-    //delete cube;
+    delete cube;
     delete scene;
-    delete camera;
+    delete camera;*/
 
     // Then Alter gameInit.json to load the scene
     // Primary is the first scene that will be loaded at start

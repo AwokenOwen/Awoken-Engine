@@ -336,7 +336,7 @@ void ResourceManager::loadHDR(const std::string& path)
     }
     else
     {
-        std::cout << "Failed to load HDR image." << std::endl;
+        Log.logError("Could not load hdr '%s'", path.c_str());
         return;
     }
 
@@ -368,6 +368,7 @@ void ResourceManager::loadHDR(const std::string& path)
         Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  -1.0f), Vector3(0.0f, -1.0f,  0.0f))
     };
 
+    loadMaterial("assets/defaultAssets/Materials/equirectangular.json");
     auto mat = getMaterial("assets/defaultAssets/Materials/equirectangular.json");
     loadModel("assets/defaultAssets/Models/cube.fbx");
     const auto model = getModel("assets/defaultAssets/Models/cube.fbx");
@@ -376,7 +377,7 @@ void ResourceManager::loadHDR(const std::string& path)
 
     glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_id);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glActiveTexture(GL_TEXTURE0);
@@ -721,8 +722,6 @@ int ResourceManager::initialize() {
     }});
 
     makePostprocessingScreen();
-
-    loadMaterial("assets/defaultAssets/Materials/equirectangular.json");
 
     Log.log("Resource Manager initialized");
     return 0;
