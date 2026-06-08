@@ -67,6 +67,7 @@ struct Material
 private:
     unsigned int m_shaderProgram{};
     std::map<std::string, std::function<void()>> m_uniforms{};
+    std::vector<Texture> m_preTextures{};
     std::vector<Texture> m_textures{};
     int listeners{1};
 };
@@ -133,6 +134,7 @@ struct Scene {
 
 private:
     std::string m_name{};
+    std::string m_skyboxName{"assets/defaultAssets/Skybox/skybox.hdr"};
 
     static Scene* fromJson(const nlohmann::json& j);
 
@@ -248,10 +250,11 @@ public:
     [[nodiscard]] CameraComponent* getMainCamera() const;
 
     FrameBuffer makeFramebuffer(const std::string& name, int width = -1, int height = -1);
-
     void activateFramebuffer(const std::string& name = "");
+    void resizeFrameBuffer(std::string name, int width, int height);
 
-
+    void makeIrradiancePrefilterMap(unsigned int cubeMap);
+    void updateIrradiancePrefilterMap(unsigned int cubeMap);
 
 private:
     /**
@@ -290,6 +293,8 @@ private:
     void processMesh(const aiMesh* mesh, const std::string &path);
 
     void makePostprocessingScreen();
+
+    void makeBRDFMap();
 
     std::map<std::string, std::string> m_sceneMap{};
     std::map<std::string, Scene*> m_loadedScenes{};

@@ -74,12 +74,12 @@ Matrix4 CameraComponent::makeOrthographicMatrix(float left, float right, float b
 
 void CameraComponent::load()
 {
-    Resource.loadHDR(m_skyboxTextureName);
-    Resource.loadModel(m_skyboxModelName);
-    Resource.loadMaterial(m_skyboxMaterialName);
-
     m_skyboxTexture = Resource.getTexture(m_skyboxTextureName);
+
+    Resource.loadModel(m_skyboxModelName);
     m_skyboxModel = Resource.getModel(m_skyboxModelName);
+
+    Resource.loadMaterial(m_skyboxMaterialName);
     m_skyboxMaterial = Resource.getMaterial(m_skyboxMaterialName);
 }
 

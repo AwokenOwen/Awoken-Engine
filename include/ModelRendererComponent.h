@@ -33,7 +33,7 @@ public:
 
 private:
     std::string m_modelName{"assets/defaultAssets/Models/cube.fbx"};
-    std::vector<std::string> m_materialNames{"assets/defaultAssets/Materials/unlit.json"};
+    std::vector<std::string> m_materialNames{"assets/defaultAssets/Materials/default.json"};
 
     Model m_model{};
     std::vector<Material> m_materials{};

@@ -5,6 +5,7 @@
 #include "WindowManager.h"
 
 #include "LogManager.h"
+#include "ResourceManager.h"
 
 int WindowManager::initialize() {
     // Init GLFW
@@ -167,7 +168,7 @@ void WindowManager::framebuffer_size_callback(const int width, const int height)
     }
     // Set the viewport so that it's in the middle of the window rather than starting at the bottom right
     glViewport(static_cast<int>((width - m_viewportWidth) / 2), static_cast<int>((height - m_viewportHeight) / 2), m_viewportWidth, m_viewportHeight);
-
+    Resource.resizeFrameBuffer("post", m_viewportWidth, m_viewportHeight);
 }
 
 // Helper static function that GLFW calls
