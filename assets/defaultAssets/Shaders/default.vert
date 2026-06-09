@@ -14,7 +14,7 @@ out vec3 camPos;
 uniform sampler2D texture[NUM_TEXTURES];
 
 #define NUM_CUBEMAPS 6
-uniform sampler2D cubeMaps[NUM_CUBEMAPS];
+uniform samplerCube cubeMaps[NUM_CUBEMAPS];
 
 uniform mat4 model;
 uniform mat4 view;
