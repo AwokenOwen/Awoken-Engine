@@ -1,0 +1,36 @@
+{
+    "FragmentShader": "assets/defaultAssets/Shaders/default.frag",
+    "PreTextures": [
+        "irradiance",
+        "prefilter",
+        "brdf"
+    ],
+    "Textures": [
+    ],
+    "Uniforms": [
+        {
+            "Name": "dirLightDir",
+            "Type": "Vector3",
+            "Value": {
+                "x": 0.0,
+                "y": -0.707,
+                "z": -0.707
+            }
+        },
+        {
+            "Name": "dirLightColor",
+            "Type": "Vector3",
+            "Value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        },
+        {
+            "Name": "dirLightPow",
+            "Type": "Float",
+            "Value": 1.0
+        }
+    ],
+    "VertexShader": "assets/defaultAssets/Shaders/default.vert"
+}

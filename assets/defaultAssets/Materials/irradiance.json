@@ -1,0 +1,7 @@
+{
+  "FragmentShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.frag",
+  "PreTextures": [],
+  "Textures": [],
+  "Uniforms": [],
+  "VertexShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.vert"
+}

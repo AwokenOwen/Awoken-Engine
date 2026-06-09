@@ -1,5 +1,6 @@
 {
     "FragmentShader": "assets/defaultAssets/Shaders/defaultPostProcess.frag",
+    "PreTextures": [],
     "Textures": [
         "post"
     ],

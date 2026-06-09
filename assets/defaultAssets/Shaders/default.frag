@@ -3,17 +3,18 @@ out vec4 FragColor;
 in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
+in vec3 camPos;
 
 // change to number of textures needed for object
 // Make sure it's changed in vertex as well
-#define NUM_TEXTURES 1
-uniform sampler2D texture[NUM_TEXTURES];
+// The first texture is the BRDF map
+// The first two cube maps are the irradiance and prefilter maps
+// MAKE SURE NOT TO CHANGE THAT UNLESS YOU KNOW WHAT YOU'RE DOING
+#define NUM_TEXTURES 6
+uniform sampler2D textures[NUM_TEXTURES];
 
-//Skybox
-uniform samplerCube skybox;
-uniform samplerCube irradianceMap;
-uniform samplerCube prefilteredMap;
-uniform sampler2D BRDFMap;
+#define NUM_CUBEMAPS 6
+uniform samplerCube cubeMaps[NUM_CUBEMAPS];
 
 // lights
 uniform vec3 dirLightDir;
@@ -24,8 +25,6 @@ uniform float dirLightPow;
 uniform vec3 lightPositions[NUM_LIGHTS];
 uniform vec3 lightColors[NUM_LIGHTS];
 uniform float lightPowers[NUM_LIGHTS];
-
-uniform vec3 camPos;
 
 const float PI = 3.14159265359;
 
@@ -56,7 +55,6 @@ void main() {
 
     // Running Normal Lighting Calculations
     vec3 color = CreateMaterial(albedo, normal, metallic, roughness, ao, emission);
-
     // Setting Color
     FragColor = vec4(color, 1.0);
 }
@@ -79,13 +77,13 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
     vec3 Lo = vec3(0.0);
 
     //Directional Light
-    Lo += CalcDirectionalLight(albedo, metallic, roughness, N, V, dirLightDir, F0);
+    Lo += CalcDirectionalLight(albedo, metallic, roughness, N, V, -dirLightDir, F0);
 
     //All other lights
-    for(int i = 0; i < 4; ++i)
-    {
-        Lo += CalcOtherLight(albedo, metallic, roughness, N, V, lightPositions[i], F0, lightColors[i], lightPowers[i]);
-    }
+//    for(int i = 0; i < 4; ++i)
+//    {
+//        Lo += CalcOtherLight(albedo, metallic, roughness, N, V, lightPositions[i], F0, lightColors[i], lightPowers[i]);
+//    }
 
     vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 
@@ -93,12 +91,12 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 irradiance = textureCube(irradianceMap, N).rgb;
+    vec3 irradiance = texture(cubeMaps[0], N).rgb;
     vec3 diffuse    = irradiance * albedo;
 
     const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(prefilteredMap, R,  roughness * MAX_REFLECTION_LOD).rgb;
-    vec2 envBRDF  = texture2D(BRDFMap, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 prefilteredColor = textureLod(cubeMaps[1], R,  roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 envBRDF  = texture(textures[0], vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
 
     vec3 ambient = (kD * diffuse + specular) * ao;
