@@ -14,6 +14,7 @@
             "Path": "brdf"
         }
     ],
+    "Type": 2,
     "Uniforms": [
         {
             "Name": "dirLightDir",

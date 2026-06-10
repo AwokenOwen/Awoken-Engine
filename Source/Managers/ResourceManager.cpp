@@ -549,6 +549,8 @@ void ResourceManager::loadMaterial(const std::string& path)
         mapMaterial.m_textures.insert({t["Name"].get<std::string>(), Resource.getTexture(location)});
     }
 
+    mapMaterial.m_type = static_cast<MaterialType>(j["Type"].get<int>());
+
     m_loadedMaterials.insert({path, mapMaterial});
 }
 

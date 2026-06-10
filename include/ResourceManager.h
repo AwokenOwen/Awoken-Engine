@@ -40,10 +40,22 @@ private:
     int listeners{1};
 };
 
+enum MaterialType
+{
+    NONE = 0,
+    UNLIT = 1,
+    DEFAULT_LIT = 2,
+    DEFAULT_SPRITE = 3,
+};
+
 struct Material
 {
     friend class ResourceManager;
     void load();
+    [[nodiscard]] MaterialType getType() const
+    {
+        return m_type;
+    };
     template <typename T>
     void setUniform(const std::string& name, T value)
     {
@@ -68,6 +80,7 @@ private:
     unsigned int m_shaderProgram{};
     std::map<std::string, std::function<void()>> m_uniforms{};
     std::map<std::string, Texture> m_textures{};
+    MaterialType m_type;
     int listeners{1};
 };
 

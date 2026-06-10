@@ -1,6 +1,7 @@
 {
   "FragmentShader": "assets/defaultAssets/Shaders/skybox.frag",
   "Textures": [],
+  "Type": 0,
   "Uniforms": [],
   "VertexShader": "assets/defaultAssets/Shaders/skybox.vert"
 }

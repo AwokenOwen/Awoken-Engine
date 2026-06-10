@@ -1,6 +1,7 @@
 {
     "FragmentShader": "assets/defaultAssets/Shaders/unlit.frag",
     "Textures": [],
+    "Type": 1,
     "Uniforms": [
         {
             "Name": "color",

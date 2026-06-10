@@ -6,6 +6,7 @@
             "Path": "post"
         }
     ],
+    "Type": 0,
     "Uniforms": [],
     "VertexShader": "assets/defaultAssets/Shaders/defaultPostProcess.vert"
 }
