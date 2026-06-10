@@ -250,7 +250,7 @@ public:
     [[nodiscard]] CameraComponent* getMainCamera() const;
 
     FrameBuffer makeFramebuffer(const std::string& name, int width = -1, int height = -1);
-    void activateFramebuffer(const std::string& name = "");
+    void activateFramebuffer(const std::string& name = "") const;
     void resizeFrameBuffer(std::string name, int width, int height);
 
     void makeIrradiancePrefilterMap(unsigned int cubeMap);

@@ -665,8 +665,7 @@ FrameBuffer ResourceManager::makeFramebuffer(const std::string& name, int width,
     return frameBuffer;
 }
 
-void ResourceManager::activateFramebuffer(const std::string& name)
-{
+void ResourceManager::activateFramebuffer(const std::string& name) const {
     if (name.empty())
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
@@ -819,13 +818,13 @@ void ResourceManager::makeIrradiancePrefilterMap(unsigned int cubeMap)
     for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
     {
         // reisze framebuffer according to mip-level size.
-        unsigned int mipWidth  = 128 * std::pow(0.5, mip);
-        unsigned int mipHeight = 128 * std::pow(0.5, mip);
+        const auto mipWidth  = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+        const auto mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
         glViewport(0, 0, mipWidth, mipHeight);
 
-        float roughness = (float)mip / (float)(maxMipLevels - 1);
+        float roughness = static_cast<float>(mip) / static_cast<float>(maxMipLevels - 1);
         mat.setUniform("roughness", roughness);
 
         for (unsigned int i = 0; i < 6; ++i)
@@ -904,14 +903,14 @@ void ResourceManager::updateIrradiancePrefilterMap(unsigned int cubeMap)
     unsigned int maxMipLevels = 5;
     for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
     {
-        // reisze framebuffer according to mip-level size.
-        unsigned int mipWidth  = 128 * std::pow(0.5, mip);
-        unsigned int mipHeight = 128 * std::pow(0.5, mip);
+        // resize framebuffer according to mip-level size.
+        const auto mipWidth  = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+        const auto mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
         glViewport(0, 0, mipWidth, mipHeight);
 
-        float roughness = (float)mip / (float)(maxMipLevels - 1);
+        const float roughness = static_cast<float>(mip) / static_cast<float>(maxMipLevels - 1);
         mat.setUniform("roughness", roughness);
 
         for (unsigned int i = 0; i < 6; ++i)
@@ -1142,7 +1141,7 @@ void ResourceManager::makeBRDFMap()
 
     // pre-allocate enough memory for the LUT texture.
     glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, nullptr);
     // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
