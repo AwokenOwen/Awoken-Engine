@@ -1,6 +1,5 @@
 {
     "FragmentShader": "assets/defaultAssets/Shaders/unlit.frag",
-    "PreTextures": [],
     "Textures": [],
     "Uniforms": [
         {

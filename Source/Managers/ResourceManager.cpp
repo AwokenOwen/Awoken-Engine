@@ -44,38 +44,19 @@ void Material::load()
     {
         func();
     }
-    int textureID = 0;
-    int cubeMapID = 0;
+
     int shaderTexture = 0;
-    for (auto texture : m_preTextures)
+    for (const auto& [key, texture] : m_textures)
     {
         glActiveTexture(GL_TEXTURE0 + shaderTexture);
         if (texture.cubeMap)
         {
-            setUniform<int>(std::string("cubeMaps[" + std::to_string(cubeMapID) + "]"), shaderTexture);
+            setUniform<int>(std::string(key), shaderTexture);
             glBindTexture(GL_TEXTURE_CUBE_MAP, texture.m_textureID);
-            cubeMapID++;
         }else
         {
-            setUniform<int>(std::string("textures[" + std::to_string(textureID) + "]"), shaderTexture);
+            setUniform<int>(std::string(key), shaderTexture);
             glBindTexture(GL_TEXTURE_2D, texture.m_textureID);
-            textureID++;
-        }
-        shaderTexture++;
-    }
-    for (auto texture : m_textures)
-    {
-        glActiveTexture(GL_TEXTURE0 + shaderTexture);
-        if (texture.cubeMap)
-        {
-            setUniform<int>(std::string("cubeMaps[" + std::to_string(cubeMapID) + "]"), shaderTexture);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, texture.m_textureID);
-            cubeMapID++;
-        }else
-        {
-            setUniform<int>(std::string("textures[" + std::to_string(textureID) + "]"), shaderTexture);
-            glBindTexture(GL_TEXTURE_2D, texture.m_textureID);
-            textureID++;
         }
         shaderTexture++;
     }
@@ -416,6 +397,7 @@ void ResourceManager::loadHDR(const std::string& path)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, hdrTexture);
+    mat.setUniform("hdr", 0);
 
     glBindVertexArray(model.m_meshes[0].VAO());
     for (unsigned int i = 0; i < 6; ++i)
@@ -560,16 +542,11 @@ void ResourceManager::loadMaterial(const std::string& path)
         m_uniformMap.at(type)(mapMaterial.m_shaderProgram, u);
     }
 
-    for (const std::vector<nlohmann::json> textures = j["PreTextures"]; const auto& t : textures)
-    {
-        Resource.loadTexture(t.get<std::string>());
-        mapMaterial.m_preTextures.push_back(Resource.getTexture(t.get<std::string>()));
-    }
-
     for (const std::vector<nlohmann::json> textures = j["Textures"]; const auto& t : textures)
     {
-        Resource.loadTexture(t.get<std::string>());
-        mapMaterial.m_textures.push_back(Resource.getTexture(t.get<std::string>()));
+        auto location = t["Path"].get<std::string>();
+        Resource.loadTexture(location);
+        mapMaterial.m_textures.insert({t["Name"].get<std::string>(), Resource.getTexture(location)});
     }
 
     m_loadedMaterials.insert({path, mapMaterial});

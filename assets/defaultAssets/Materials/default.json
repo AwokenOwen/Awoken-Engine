@@ -1,11 +1,18 @@
 {
     "FragmentShader": "assets/defaultAssets/Shaders/default.frag",
-    "PreTextures": [
-        "irradiance",
-        "prefilter",
-        "brdf"
-    ],
     "Textures": [
+        {
+            "Name": "irradiance",
+            "Path": "irradiance"
+        },
+        {
+            "Name": "prefilter",
+            "Path": "prefilter"
+        },
+        {
+            "Name": "brdf",
+            "Path": "brdf"
+        }
     ],
     "Uniforms": [
         {

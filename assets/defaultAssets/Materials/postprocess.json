@@ -1,8 +1,10 @@
 {
     "FragmentShader": "assets/defaultAssets/Shaders/defaultPostProcess.frag",
-    "PreTextures": [],
     "Textures": [
-        "post"
+        {
+            "Name": "post",
+            "Path": "post"
+        }
     ],
     "Uniforms": [],
     "VertexShader": "assets/defaultAssets/Shaders/defaultPostProcess.vert"

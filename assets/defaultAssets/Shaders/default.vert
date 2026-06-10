@@ -8,14 +8,6 @@ out vec3 WorldPos;
 out vec3 Normal;
 out vec3 camPos;
 
-// change to number of textures needed for object
-// Make sure it's changed in fragment as well
-#define NUM_TEXTURES 6
-uniform sampler2D texture[NUM_TEXTURES];
-
-#define NUM_CUBEMAPS 6
-uniform samplerCube cubeMaps[NUM_CUBEMAPS];
-
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;

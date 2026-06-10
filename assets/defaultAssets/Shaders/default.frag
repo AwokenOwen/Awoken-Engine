@@ -5,16 +5,9 @@ in vec3 WorldPos;
 in vec3 Normal;
 in vec3 camPos;
 
-// change to number of textures needed for object
-// Make sure it's changed in vertex as well
-// The first texture is the BRDF map
-// The first two cube maps are the irradiance and prefilter maps
-// MAKE SURE NOT TO CHANGE THAT UNLESS YOU KNOW WHAT YOU'RE DOING
-#define NUM_TEXTURES 6
-uniform sampler2D textures[NUM_TEXTURES];
-
-#define NUM_CUBEMAPS 6
-uniform samplerCube cubeMaps[NUM_CUBEMAPS];
+uniform samplerCube irradiance;
+uniform samplerCube prefilter;
+uniform sampler2D brdf;
 
 // lights
 uniform vec3 dirLightDir;
@@ -91,12 +84,12 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 irradiance = texture(cubeMaps[0], N).rgb;
-    vec3 diffuse    = irradiance * albedo;
+    vec3 irradianceColor = texture(irradiance, N).rgb;
+    vec3 diffuse    = irradianceColor * albedo;
 
     const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(cubeMaps[1], R,  roughness * MAX_REFLECTION_LOD).rgb;
-    vec2 envBRDF  = texture(textures[0], vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 prefilteredColor = textureLod(prefilter, R,  roughness * MAX_REFLECTION_LOD).rgb;
+    vec2 envBRDF  = texture(brdf, vec2(max(dot(N, V), 0.0), roughness)).rg;
     vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
 
     vec3 ambient = (kD * diffuse + specular) * ao;

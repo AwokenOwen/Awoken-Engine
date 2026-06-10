@@ -67,8 +67,7 @@ struct Material
 private:
     unsigned int m_shaderProgram{};
     std::map<std::string, std::function<void()>> m_uniforms{};
-    std::vector<Texture> m_preTextures{};
-    std::vector<Texture> m_textures{};
+    std::map<std::string, Texture> m_textures{};
     int listeners{1};
 };
 

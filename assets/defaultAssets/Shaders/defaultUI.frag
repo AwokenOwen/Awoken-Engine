@@ -3,11 +3,10 @@ out vec4 FragColor;
 
 in vec2 TexCoords;
 
-#define NUM_TEXTURES 1
-uniform sampler2D texture[NUM_TEXTURES];
+uniform sampler2D sprite;
 
 void main()
 {    
 	//FragColor = vec4(1.0);
-	FragColor = texture2D(texture[0], normalize(TexCoords));
+	FragColor = texture2D(sprite, normalize(TexCoords));
 }
