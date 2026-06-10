@@ -32,9 +32,16 @@ nlohmann::json Scene::toJson() const {
 
     j["Root Objects"] = temp;
 
-    j["Skybox"] = m_skyboxName;
+    j["ReflectionMap"] = m_reflectionMapName;
 
     return j;
+}
+
+void Scene::setReflectiveMap(const std::string& name)
+{
+    m_reflectionMapName = name;
+    Resource.loadHDR(name);
+    Resource.makeIrradiancePrefilterMap(Resource.getTexture(name).m_textureID);
 }
 
 void Material::load()
@@ -72,9 +79,9 @@ Scene * Scene::fromJson(const nlohmann::json &j) {
         scene->m_rootObjects.emplace_back(Object::fromJson(o));
     }
 
-    scene->m_skyboxName = j["Skybox"].get<std::string>();
-    Resource.loadHDR(scene->m_skyboxName);
-    Resource.makeIrradiancePrefilterMap(Resource.getTexture(scene->m_skyboxName).m_textureID);
+    scene->m_reflectionMapName = j["ReflectionMap"].get<std::string>();
+    Resource.loadHDR(scene->m_reflectionMapName);
+    Resource.makeIrradiancePrefilterMap(Resource.getTexture(scene->m_reflectionMapName).m_textureID);
 
     return scene;
 }

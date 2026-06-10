@@ -83,6 +83,7 @@ Matrix4 CameraComponent::makeOrthographicMatrix(float left, float right, float b
 
 void CameraComponent::load()
 {
+    Resource.loadTexture(m_skyboxTextureName);
     m_skyboxTexture = Resource.getTexture(m_skyboxTextureName);
 
     Resource.loadModel(m_skyboxModelName);
@@ -106,6 +107,7 @@ void CameraComponent::draw()
 {
     if (m_currentBackgroundType == BackgroundType::SKYBOX)
     {
+        glDisable(GL_CULL_FACE);
         m_skyboxMaterial.setUniform("view", getViewMatrix());
         m_skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
         m_skyboxMaterial.load();

@@ -20,14 +20,8 @@ int main(int argc, char* argv[])
     auto cube = new Object();
     cube->addComponent<ModelRendererComponent>();
 
-    //cube->setLocalPosition(Vector3(0, -200, 0));
-    //cube->setLocalScale(Vector3(10000, 1, 10000));
-
-    cube->setLocalPosition(Vector3(0.0f, 0.0f, -500.0f));
-    cube->setLocalScale(Vector3(100.0f, 100.0f, 100.0f));
-    //cube->setLocalPosition(Vector3(0, 0, -5));
-
-    cube->setLocalRotation(Quaternion(Vector3(45, 45, 0)));
+    cube->setLocalPosition(Vector3(0, -200, 0));
+    cube->setLocalScale(Vector3(40000, 1, 40000));
 
     auto camera = new Object();
     camera->addComponent<CameraComponent>();

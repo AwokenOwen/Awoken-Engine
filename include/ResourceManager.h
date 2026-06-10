@@ -144,9 +144,11 @@ struct Scene {
 
     std::vector<Object*> m_rootObjects{};
 
+    void setReflectiveMap(const std::string& name);
+
 private:
     std::string m_name{};
-    std::string m_skyboxName{"assets/defaultAssets/Skybox/skybox.hdr"};
+    std::string m_reflectionMapName{"assets/defaultAssets/Skybox/skybox.hdr"};
 
     static Scene* fromJson(const nlohmann::json& j);
 

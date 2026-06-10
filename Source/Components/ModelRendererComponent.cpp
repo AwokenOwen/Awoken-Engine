@@ -58,7 +58,6 @@ void ModelRendererComponent::fromJson(nlohmann::json j)
 
 void ModelRendererComponent::draw()
 {
-    glDisable(GL_CULL_FACE);
     if (m_materials.size() != m_model.meshCount())
     {
         Log.logError("Material Count does not match Mesh Count.");
@@ -100,7 +99,7 @@ void ModelRendererComponent::unload()
 
 void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
 {
-    glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     mat.load();
 
     const auto model = getParent()->getWorldMatrix();
