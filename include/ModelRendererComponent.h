@@ -32,6 +32,8 @@ public:
     void unload() override;
 
 private:
+    void defaultDynamicUniformLoader(Material mat) const;
+
     std::string m_modelName{"assets/defaultAssets/Models/cube.fbx"};
     std::vector<std::string> m_materialNames{"assets/defaultAssets/Materials/default.json"};
 

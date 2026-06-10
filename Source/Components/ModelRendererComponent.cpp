@@ -66,15 +66,7 @@ void ModelRendererComponent::draw()
     }
     for (int i = 0; i < m_model.meshCount(); ++i)
     {
-        auto model = getParent()->getWorldMatrix();
-        auto view = Resource.getMainCamera()->getViewMatrix();
-        auto proj = Resource.getMainCamera()->getPerspectiveMatrix();
-
-        m_materials[i].setUniform("model", model);
-        m_materials[i].setUniform("view", view);
-        m_materials[i].setUniform("projection", proj);
-
-        m_materials[i].load();
+        defaultDynamicUniformLoader(m_materials[i]);
 
         glBindVertexArray(m_model.m_meshes[i].VAO());
         glDrawElements(GL_TRIANGLES, m_model.m_meshes[i].indexCount(), GL_UNSIGNED_INT, nullptr);
@@ -104,4 +96,39 @@ void ModelRendererComponent::unload()
         Resource.unloadMaterial(m);
     }
     m_materials.clear();
+}
+
+void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
+{
+    glDisable(GL_CULL_FACE);
+    mat.load();
+
+    const auto model = getParent()->getWorldMatrix();
+    const auto view = Resource.getMainCamera()->getViewMatrix();
+    const auto proj = Resource.getMainCamera()->getProjectionMatrix();
+    const auto orthographic = Resource.getMainCamera()->getOrthographicMatrix();
+
+    switch (mat.getType())
+    {
+    case NONE:
+        break;
+    case UNLIT:
+        mat.setUniform("model", model);
+        mat.setUniform("view", view);
+        mat.setUniform("projection", proj);
+        break;
+    case DEFAULT_LIT:
+        mat.setUniform("model", model);
+        mat.setUniform("view", view);
+        mat.setUniform("projection", proj);
+
+        // Also add lighting here
+
+        break;
+    case DEFAULT_SPRITE:
+        mat.setUniform("model", model);
+        mat.setUniform("view", view);
+        mat.setUniform("projection", orthographic);
+        break;
+    }
 }

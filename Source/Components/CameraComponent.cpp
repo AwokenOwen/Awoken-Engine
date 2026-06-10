@@ -52,6 +52,15 @@ Matrix4 CameraComponent::getOrthographicMatrix() const
     };
 }
 
+Matrix4 CameraComponent::getProjectionMatrix() const
+{
+    if (m_perspective)
+    {
+        return getPerspectiveMatrix();
+    }
+    return getOrthographicMatrix();
+}
+
 Matrix4 CameraComponent::makePerspectiveMatrix(float fov, float aspect, float near, float far)
 {
     return {
@@ -160,6 +169,8 @@ nlohmann::json CameraComponent::toJson()
 
     j["SkyboxMaterial"] = m_skyboxMaterialName;
 
+    j["Perspective"] = m_perspective;
+
     return j;
 }
 
@@ -182,6 +193,8 @@ void CameraComponent::fromJson(nlohmann::json j)
     m_skyboxModelName = j["SkyboxModel"].get<std::string>();
 
     m_skyboxMaterialName = j["SkyboxMaterial"].get<std::string>();
+
+    m_perspective = j["Perspective"].get<bool>();
 
     registerRenderer(false);
 }

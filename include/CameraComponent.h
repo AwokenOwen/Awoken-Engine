@@ -30,6 +30,7 @@ public:
     [[nodiscard]] Matrix4 getViewMatrix() const;
     [[nodiscard]] Matrix4 getPerspectiveMatrix() const;
     [[nodiscard]] Matrix4 getOrthographicMatrix() const;
+    [[nodiscard]] Matrix4 getProjectionMatrix() const;
     [[nodiscard]] static Matrix4 makePerspectiveMatrix(float fov, float aspect, float near, float far);
     [[nodiscard]] static Matrix4 makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far);
 
@@ -37,13 +38,13 @@ public:
     void unload() override;
 
     void setBackgroundType(BackgroundType type);
-
-    bool m_main{false};
-
 private:
     float m_fov{toRadians(90.0f)};
     float m_near{0.001f};
     float m_far{1000.0f};
+
+    bool m_main{true};
+    bool m_perspective{true};
 
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;

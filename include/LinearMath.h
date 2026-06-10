@@ -932,7 +932,7 @@ inline Vector4::Vector4(float x, float y, const Vector2 &v) {
 }
 
 inline float Vector4::magnitude() const {
-    return x*x + y*y + z*z + w*w;
+    return std::sqrt(x*x + y*y + z*z + w*w);
 }
 
 inline void Vector4::Normalize() {
@@ -1042,7 +1042,7 @@ inline void Quaternion::Normalize() {
 }
 
 inline float Quaternion::magnitude() const {
-    return x * x + y * y + z * z + w * w;
+    return std::sqrt(x * x + y * y + z * z + w * w);
 }
 
 inline Vector3 Quaternion::eulerAngles() const {
