@@ -1,5 +1,6 @@
 {
     "Name": "testScene",
+    "ReflectionMap": "assets/defaultAssets/Skybox/skybox.hdr",
     "Root Objects": [
         {
             "ActiveState": true,
@@ -71,6 +72,5 @@
                 "z": 1.0
             }
         }
-    ],
-    "Skybox": "assets/defaultAssets/Skybox/skybox.hdr"
+    ]
 }
