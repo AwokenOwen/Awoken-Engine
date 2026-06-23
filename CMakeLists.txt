@@ -47,6 +47,12 @@ add_library(Awoken_Engine STATIC
         Source/Components/Component.cpp
         Source/Components/CameraComponent.cpp
         Source/Components/ModelRendererComponent.cpp
+        Source/Components/LightComponent.cpp
+        include/LightComponent.h
+        include/AudioManager.h
+        include/AudioSource.h
+        Source/Components/AudioSource.cpp
+        Source/Managers/AudioManager.cpp
 )
 
 target_include_directories(Awoken_Engine PUBLIC
@@ -129,9 +135,6 @@ else()
             libfreetype.a
             libglfw3LINUX.a
             libopenal.so
-            GL
-            dl
-            pthread
     )
 endif()
 

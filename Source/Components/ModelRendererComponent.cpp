@@ -122,7 +122,7 @@ void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
         mat.setUniform("projection", proj);
 
         // Also add lighting here
-
+        Resource.loadLights(mat);
         break;
     case DEFAULT_SPRITE:
         mat.setUniform("model", model);

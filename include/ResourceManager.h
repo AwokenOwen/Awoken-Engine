@@ -16,6 +16,49 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+#include "AL/al.h"
+#include "AL/alc.h"
+
+class LightComponent;
+
+struct SoundData {
+    friend class ResourceManager;
+    std::uint8_t m_channels{};
+    std::int32_t m_sampleRate{};
+    std::uint8_t m_bitsPerSample{};
+    int m_data_size{};
+    ALenum m_format{};
+
+    char* m_data{};
+
+    SoundData(const std::uint8_t channels, const std::int32_t sampleRate, const std::uint8_t bitsPerSample, const int dataSize) {
+        m_channels = channels;
+        m_sampleRate = sampleRate;
+        m_bitsPerSample = bitsPerSample;
+        m_data_size = dataSize;
+
+        if(m_channels == 1 && m_bitsPerSample == 8)
+            m_format = AL_FORMAT_MONO8;
+        else if(m_channels  == 1 && m_bitsPerSample == 16)
+            m_format = AL_FORMAT_MONO16;
+        else if(m_channels  == 2 && m_bitsPerSample == 8)
+            m_format = AL_FORMAT_STEREO8;
+        else if(m_channels  == 2 && m_bitsPerSample == 16)
+            m_format = AL_FORMAT_STEREO16;
+
+        m_data = new char[m_data_size];
+    }
+
+    SoundData() = default;
+
+    ~SoundData() {
+        delete[] m_data;
+    }
+
+private:
+    int listeners{1};
+};
+
 enum TextureType
 {
     PNG = 0,
@@ -145,10 +188,10 @@ struct Scene {
     std::vector<Object*> m_rootObjects{};
 
     void setReflectiveMap(const std::string& name);
-
 private:
     std::string m_name{};
     std::string m_reflectionMapName{"assets/defaultAssets/Skybox/skybox.hdr"};
+    std::vector<LightComponent*> m_lightComponents{};
 
     static Scene* fromJson(const nlohmann::json& j);
 
@@ -161,6 +204,7 @@ private:
 #define Resource ResourceManager::getInstance()
 class ResourceManager : public Manager {
     friend class GameManager;
+    friend class WorldManager;
 public:
     /**
      * @brief Getter for the singleton instance
@@ -270,6 +314,13 @@ public:
     void makeIrradiancePrefilterMap(unsigned int cubeMap);
     void updateIrradiancePrefilterMap(unsigned int cubeMap);
 
+    void loadLights(Material mat);
+    void registerLight(LightComponent* light);
+
+    void postSceneRegistration(Scene* scene);
+
+    void loadSound(const std::string& path);
+    SoundData getSound(const std::string& path);
 private:
     /**
      * @brief Starts the Resource Manager
@@ -306,9 +357,17 @@ private:
      */
     void processMesh(const aiMesh* mesh, const std::string &path);
 
+    void loadUniformMap();
+
     void makePostprocessingScreen();
 
     void makeBRDFMap();
+
+    FrameBuffer makeShadowMap(LightComponent* light);
+
+    void activateShadowMap(LightComponent* light);
+
+    std::int32_t convert_to_int(const char *buffer, std::size_t len);
 
     std::map<std::string, std::string> m_sceneMap{};
     std::map<std::string, Scene*> m_loadedScenes{};
@@ -324,4 +383,8 @@ private:
     CameraComponent* m_mainCamera{};
 
     std::map<std::string, FrameBuffer> m_framebuffers{};
+
+    std::vector<std::function<void(Scene*)>> m_postRegistration{};
+
+    std::map<std::string, SoundData> m_loadedSounds{};
 };

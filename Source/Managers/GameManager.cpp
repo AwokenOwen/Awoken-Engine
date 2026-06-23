@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 
+#include "AudioManager.h"
 #include "InputManager.h"
 #include "LogManager.h"
 #include "ResourceManager.h"
@@ -15,7 +16,7 @@
 
 int GameManager::initialize() {
     // Other Manager Initializations
-    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 || Resource.initialize() == 1/* || other manager inits == 1 */) {
+    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 || Resource.initialize() == 1 || Audio.initialize() == 1/* || other manager inits == 1 */) {
         exit(-1);
     }
 

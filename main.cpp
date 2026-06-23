@@ -5,6 +5,7 @@
 
 #include "GameManager.h"
 #include "ModelRendererComponent.h"
+#include "LightComponent.h"
 #include "CameraComponent.h"
 #include "Object.h"
 #include "ResourceManager.h"
@@ -15,27 +16,41 @@ int main(int argc, char* argv[])
     // Make a name
     // All the objects with their components turned into JSON
 
-    /*auto scene = new Scene("testScene");
+    auto scene = new Scene("testScene");
+
+    auto dir = new Object();
+    dir->addComponent<LightComponent>();
 
     auto cube = new Object();
     cube->addComponent<ModelRendererComponent>();
 
-    cube->setLocalPosition(Vector3(0, -200, 0));
-    cube->setLocalScale(Vector3(40000, 1, 40000));
+    cube->setLocalPosition(Vector3(0, 0, -1000));
+    cube->setLocalScale(Vector3(100, 100, 100));
+    cube->setLocalRotation(Quaternion(Vector3(45, 45, 0)));
+
+    auto floor = new Object();
+    floor->addComponent<ModelRendererComponent>();
+
+    floor->setLocalPosition(Vector3(0, -200, 0));
+    floor->setLocalScale(Vector3(10000, 1, 10000));
 
     auto camera = new Object();
     camera->addComponent<CameraComponent>();
 
     camera->setLocalPosition(Vector3(0, 0, 0));
 
+    scene->m_rootObjects.push_back(dir);
     scene->m_rootObjects.push_back(cube);
+    scene->m_rootObjects.push_back(floor);
     scene->m_rootObjects.push_back(camera);
     std::ofstream f("assets/defaultAssets/Scenes/testScene.scene");
     f << scene->toJson().dump(4)  << std::endl;
 
+    delete dir;
     delete cube;
+    delete floor;
     delete scene;
-    delete camera;*/
+    delete camera;
 
     // Then Alter gameInit.json to load the scene
     // Primary is the first scene that will be loaded at start

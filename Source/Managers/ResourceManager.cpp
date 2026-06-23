@@ -12,6 +12,7 @@
 #include "LogManager.h"
 #include "LinearMath.h"
 #include "CameraComponent.h"
+#include "LightComponent.h"
 #include "ModelRendererComponent.h"
 #include "WindowManager.h"
 
@@ -83,6 +84,7 @@ Scene * Scene::fromJson(const nlohmann::json &j) {
     Resource.loadHDR(scene->m_reflectionMapName);
     Resource.makeIrradiancePrefilterMap(Resource.getTexture(scene->m_reflectionMapName).m_textureID);
 
+    Resource.postSceneRegistration(scene);
     return scene;
 }
 
@@ -670,7 +672,7 @@ void ResourceManager::activateFramebuffer(const std::string& name) const {
 
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_id);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -917,6 +919,285 @@ void ResourceManager::updateIrradiancePrefilterMap(unsigned int cubeMap)
     Window.resetViewport();
 }
 
+void ResourceManager::loadLights(Material mat)
+{
+    int lightNumber = 0;
+    bool dir = false;
+    for (const auto& scene : m_loadedScenes | std::views::values)
+    {
+        for (const auto& light : scene->m_lightComponents)
+        {
+            if (light->m_type == DIR)
+            {
+                if (dir)
+                {
+                    Log.logWarning("One directional light is already loaded... replacing");
+                }
+                glUseProgram(mat.m_shaderProgram);
+                mat.setUniform("dirLightDir", light->m_direction);
+                mat.setUniform("dirLightColor", light->m_color);
+                mat.setUniform("dirLightPow", light->m_power);
+                dir = true;
+                continue;
+            }
+            glUseProgram(mat.m_shaderProgram);
+            mat.setUniform("lightPositions[" + std::to_string(lightNumber) + "]", light->getParent()->getWorldPosition());
+            mat.setUniform("lightColors[" + std::to_string(lightNumber) + "]", light->m_color);
+            mat.setUniform("lightDirections[" + std::to_string(lightNumber) + "]", light->m_direction);
+            mat.setUniform("lightPowers[" + std::to_string(lightNumber) + "]", light->m_power);
+            mat.setUniform("lightRadius[" + std::to_string(lightNumber) + "]", light->m_power);
+            lightNumber++;
+        }
+    }
+}
+
+void ResourceManager::registerLight(LightComponent* light)
+{
+    auto func = [light](Scene* scene)
+    {
+        scene->m_lightComponents.push_back(light);
+    };
+
+    m_postRegistration.emplace_back(func);
+    light->setShadowMap(makeShadowMap(light));
+}
+
+FrameBuffer ResourceManager::makeShadowMap(LightComponent* light)
+{
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                 SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    FrameBuffer shadowMap{};
+    shadowMap.m_id = depthMapFBO;
+    shadowMap.m_colorBuffer = depthMap;
+
+    return shadowMap;
+}
+
+void ResourceManager::activateShadowMap(LightComponent* light)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, light->getShadowBuffer());
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+}
+
+std::int32_t ResourceManager::convert_to_int(const char* buffer, const std::size_t len)
+{
+    std::int32_t a = 0;
+    if(std::endian::native == std::endian::little)
+        std::memcpy(&a, buffer, len);
+    else
+        for(std::size_t i = 0; i < len; ++i)
+            reinterpret_cast<char*>(&a)[3 - i] = buffer[i];
+    return a;
+}
+
+void ResourceManager::postSceneRegistration(Scene* scene)
+{
+    for (const auto& func : m_postRegistration)
+    {
+        func(scene);
+    }
+    m_postRegistration.clear();
+}
+
+void ResourceManager::loadSound(const std::string& path)
+{
+    if (m_loadedSounds.contains(path))
+    {
+        m_loadedSounds.at(path).listeners++;
+        return;
+    }
+
+    std::ifstream file(path, std::ios::binary);
+    if (!file) {
+        Log.logError("Unable to open the file");
+        return;
+    }
+
+    char buffer[4];
+    // the RIFF
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read RIFF");
+        return;
+    }
+    if(std::strncmp(buffer, "RIFF", 4) != 0)
+    {
+        Log.logError("file is not a valid WAVE file (header doesn't begin with RIFF)");
+        return;
+    }
+
+    // the size of the file
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read size of file");
+        return;
+    }
+
+    // the WAVE
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read WAVE");
+        return;
+    }
+    if(std::strncmp(buffer, "WAVE", 4) != 0)
+    {
+        Log.logError("File is not a valid WAVE file (header doesn't contain WAVE)");
+        return;
+    }
+
+    // "fmt/0"
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read fmt");
+        return;
+    }
+
+    // this is always 16, the size of the fmt data chunk
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read the 16");
+        return;
+    }
+
+    // PCM should be 1?
+    if(!file.read(buffer, 2))
+    {
+        Log.logError("Could not read PCM");
+        return;
+    }
+
+    // the number of channels
+    if(!file.read(buffer, 2))
+    {
+        Log.logError("Could not read number of channels");
+        return;
+    }
+    int channels = convert_to_int(buffer, 2);
+
+    // sample rate
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read sample rate");
+        return;
+    }
+    int sampleRate = convert_to_int(buffer, 4);
+
+    // (sampleRate * bitsPerSample * channels) / 8
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read (sampleRate * bitsPerSample * channels) / 8");
+        return;
+    }
+
+    // ?? dafaq
+    if(!file.read(buffer, 2))
+    {
+        Log.logError("Could not read dafaq");
+        return;
+    }
+
+    // bitsPerSample
+    if(!file.read(buffer, 2))
+    {
+        Log.logError("Could not read bits per sample");
+        return;
+    }
+    int bitsPerSample = convert_to_int(buffer, 2);
+
+    // data or list chunk header
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read data or list chunk header");
+        return;
+    }
+    if(std::strncmp(buffer, "LIST", 4) == 0) {
+        if(!file.read(buffer, 4)) {
+            Log.logError("Could not read size of list chunk header size");
+            return;
+        }
+
+        int32_t listSize = convert_to_int(buffer, 4);
+
+        char listChunk[listSize];
+        if(!file.read(listChunk, listSize)) {
+            Log.logError("Could not read list chunk");
+            return;
+        }
+        if(!file.read(buffer, 4))
+        {
+            Log.logError("Could not read data chunk header");
+            return;
+        }
+        if(std::strncmp(buffer, "data", 4) != 0)
+        {
+            Log.logError("File is not a valid WAVE file (doesn't have 'data' tag)");
+            return;
+        }
+    }else {
+        if(std::strncmp(buffer, "data", 4) != 0)
+        {
+            Log.logError("File is not a valid WAVE file (doesn't have 'data' tag)");
+            return;
+        }
+    }
+    // size of data
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read data size");
+        return;
+    }
+    int size = convert_to_int(buffer, 4);
+
+    /* cannot be at the end of file */
+    if(file.eof())
+    {
+        Log.logError("Reached EOF too early");
+        return;
+    }
+    if(file.fail())
+    {
+        Log.logError("Fail state set on the file");
+        return;
+    }
+
+	auto soundData = SoundData(channels, sampleRate, bitsPerSample, size);
+
+    file.read(soundData.m_data, size);
+
+	m_loadedSounds.insert({path, soundData});
+
+	file.close();
+}
+
+SoundData ResourceManager::getSound(const std::string& path)
+{
+    if (!m_loadedSounds.contains(path))
+    {
+        Log.logError("Could not get %s from loaded sounds because it doesn't exist", path.c_str());
+    }
+    return m_loadedSounds.at(path);
+}
+
 int ResourceManager::initialize() {
     std::ifstream f("gameInit.json");
     nlohmann::json j = nlohmann::json::parse(f);
@@ -932,67 +1213,9 @@ int ResourceManager::initialize() {
     // Register all components to be read and added from JSON files
     registerComponent<CameraComponent>("Camera");
     registerComponent<ModelRendererComponent>("ModelRenderer");
+    registerComponent<LightComponent>("Light");
 
-    m_uniformMap.insert({"Int", [](const unsigned int shaderProgram, const nlohmann::json& j)
-    {
-        const auto name = j["Name"].get<std::string>();
-        const auto value = j["Value"].get<int>();
-
-        glUseProgram(shaderProgram);
-        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniform1i(uniform, value);
-    }});
-
-    m_uniformMap.insert({"Float", [](const unsigned int shaderProgram, const nlohmann::json& j)
-    {
-        const auto name = j["Name"].get<std::string>();
-        const auto value = j["Value"].get<float>();
-
-        glUseProgram(shaderProgram);
-        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniform1f(uniform, value);
-    }});
-
-    m_uniformMap.insert({"Vector2", [](const unsigned int shaderProgram, const nlohmann::json& j)
-    {
-        const auto name = j["Name"].get<std::string>();
-        const auto value = Vector2::fromJson(j["Value"]);
-
-        glUseProgram(shaderProgram);
-        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniform2f(uniform, value.x, value.y);
-    }});
-
-    m_uniformMap.insert({"Vector3", [](const unsigned int shaderProgram, const nlohmann::json& j)
-    {
-        const auto name = j["Name"].get<std::string>();
-        const auto value = Vector3::fromJson(j["Value"]);
-
-        glUseProgram(shaderProgram);
-        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniform3f(uniform, value.x, value.y, value.z);
-    }});
-
-    m_uniformMap.insert({"Vector4", [](const unsigned int shaderProgram, const nlohmann::json& j)
-    {
-        const auto name = j["Name"].get<std::string>();
-        const auto value = Vector4::fromJson(j["Value"]);
-
-        glUseProgram(shaderProgram);
-        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniform4f(uniform, value.x, value.y, value.z, value.w);
-    }});
-
-    m_uniformMap.insert({"Matrix4", [](const unsigned int shaderProgram, const nlohmann::json& j)
-    {
-        const auto name = j["Name"].get<std::string>();
-        auto value = Matrix4::fromJson(j["Value"]);
-
-        glUseProgram(shaderProgram);
-        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniformMatrix4fv(uniform, 1, GL_FALSE, value.toFloatArray());
-    }});
-
+    loadUniformMap();
     makePostprocessingScreen();
     makeBRDFMap();
 
@@ -1099,6 +1322,69 @@ void ResourceManager::processMesh(const aiMesh* mesh, const std::string &path)
     map_mesh.m_indices = indices;
 
     m_loadedModels.at(path).m_meshes.push_back(map_mesh);
+}
+
+void ResourceManager::loadUniformMap()
+{
+    m_uniformMap.insert({"Int", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = j["Value"].get<int>();
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform1i(uniform, value);
+    }});
+
+    m_uniformMap.insert({"Float", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = j["Value"].get<float>();
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform1f(uniform, value);
+    }});
+
+    m_uniformMap.insert({"Vector2", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = Vector2::fromJson(j["Value"]);
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform2f(uniform, value.x, value.y);
+    }});
+
+    m_uniformMap.insert({"Vector3", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = Vector3::fromJson(j["Value"]);
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform3f(uniform, value.x, value.y, value.z);
+    }});
+
+    m_uniformMap.insert({"Vector4", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        const auto value = Vector4::fromJson(j["Value"]);
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniform4f(uniform, value.x, value.y, value.z, value.w);
+    }});
+
+    m_uniformMap.insert({"Matrix4", [](const unsigned int shaderProgram, const nlohmann::json& j)
+    {
+        const auto name = j["Name"].get<std::string>();
+        auto value = Matrix4::fromJson(j["Value"]);
+
+        glUseProgram(shaderProgram);
+        const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
+        glUniformMatrix4fv(uniform, 1, GL_FALSE, value.toFloatArray());
+    }});
 }
 
 void ResourceManager::makePostprocessingScreen()
