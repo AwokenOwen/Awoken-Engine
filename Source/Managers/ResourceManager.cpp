@@ -8,6 +8,7 @@
 #include <iostream>
 #include <utility>
 
+#include "AudioSourceComponent.h"
 #include "Object.h"
 #include "LogManager.h"
 #include "LinearMath.h"
@@ -1023,7 +1024,7 @@ void ResourceManager::loadSound(const std::string& path)
 {
     if (m_loadedSounds.contains(path))
     {
-        m_loadedSounds.at(path).listeners++;
+        m_loadedSounds.at(path)->listeners++;
         return;
     }
 
@@ -1180,16 +1181,18 @@ void ResourceManager::loadSound(const std::string& path)
         return;
     }
 
-	auto soundData = SoundData(channels, sampleRate, bitsPerSample, size);
+	auto soundData = new SoundData(channels, sampleRate, bitsPerSample, size);
 
-    file.read(soundData.m_data, size);
+    soundData->m_data = new char[size];
+
+    file.read(soundData->m_data, size);
 
 	m_loadedSounds.insert({path, soundData});
 
 	file.close();
 }
 
-SoundData ResourceManager::getSound(const std::string& path)
+SoundData* ResourceManager::getSound(const std::string& path)
 {
     if (!m_loadedSounds.contains(path))
     {
@@ -1214,6 +1217,7 @@ int ResourceManager::initialize() {
     registerComponent<CameraComponent>("Camera");
     registerComponent<ModelRendererComponent>("ModelRenderer");
     registerComponent<LightComponent>("Light");
+    registerComponent<AudioSourceComponent>("AudioSource");
 
     loadUniformMap();
     makePostprocessingScreen();

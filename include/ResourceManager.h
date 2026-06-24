@@ -320,7 +320,7 @@ public:
     void postSceneRegistration(Scene* scene);
 
     void loadSound(const std::string& path);
-    SoundData getSound(const std::string& path);
+    SoundData* getSound(const std::string& path);
 private:
     /**
      * @brief Starts the Resource Manager
@@ -386,5 +386,5 @@ private:
 
     std::vector<std::function<void(Scene*)>> m_postRegistration{};
 
-    std::map<std::string, SoundData> m_loadedSounds{};
+    std::map<std::string, SoundData*> m_loadedSounds{};
 };

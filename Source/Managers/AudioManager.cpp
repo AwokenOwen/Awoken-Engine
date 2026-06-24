@@ -70,7 +70,7 @@ void AudioManager::playSource(const int index) const
 {
     SourceData sourceData = sources[index];
 
-    alBufferData(sourceData.buffer, sourceData.sound.m_format, sourceData.sound.m_data, sourceData.sound.m_data_size, sourceData.sound.m_sampleRate);
+    alBufferData(sourceData.buffer, sourceData.sound->m_format, sourceData.sound->m_data, sourceData.sound->m_data_size, sourceData.sound->m_sampleRate);
 
     alGenSources(1, &sourceData.source);
     alSourcei(sourceData.source, AL_BUFFER, sourceData.buffer);
@@ -79,7 +79,7 @@ void AudioManager::playSource(const int index) const
 }
 
 int AudioManager::registerSource(Object* sourceObject) {
-    sources.push_back(SourceData(sourceObject));
+    sources.emplace_back(sourceObject);
 
     return sources.size() - 1;
 }
@@ -111,20 +111,20 @@ void AudioManager::update_stream(const SourceData source)
         std::memset(data, 0, dataSize);
 
         std::size_t dataSizeToCopy = BUFFER_SIZE;
-        if(cursor + BUFFER_SIZE > source.sound.m_data_size)
-            dataSizeToCopy = source.sound.m_data_size - cursor;
+        if(cursor + BUFFER_SIZE > source.sound->m_data_size)
+            dataSizeToCopy = source.sound->m_data_size - cursor;
 
-        std::memcpy(&data[0], &source.sound.m_data[cursor], dataSizeToCopy);
+        std::memcpy(&data[0], &source.sound->m_data[cursor], dataSizeToCopy);
         cursor += dataSizeToCopy;
 
         if(dataSizeToCopy < BUFFER_SIZE)
         {
             cursor = 0;
-            std::memcpy(&data[dataSizeToCopy], &source.sound.m_data[cursor], BUFFER_SIZE - dataSizeToCopy);
+            std::memcpy(&data[dataSizeToCopy], &source.sound->m_data[cursor], BUFFER_SIZE - dataSizeToCopy);
             cursor = BUFFER_SIZE - dataSizeToCopy;
         }
 
-        alBufferData(buffer, source.sound.m_format, data, BUFFER_SIZE, source.sound.m_sampleRate);
+        alBufferData(buffer, source.sound->m_format, data, BUFFER_SIZE, source.sound->m_sampleRate);
         alSourceQueueBuffers(source.source, 1, &buffer);
         delete[] data;
     }

@@ -25,7 +25,7 @@ struct SourceData {
     ALuint source{};
     ALuint buffer{};
     ALint state{};
-    SoundData sound{};
+    SoundData* sound{};
     Object* p_sourceObject{};
 
     explicit SourceData(Object* sourceObject)
@@ -33,6 +33,7 @@ struct SourceData {
         alGenSources(1, &source);
         alGenBuffers(NUM_BUFFERS, &buffer);
         state = AL_STOPPED;
+        sound = nullptr;
         p_sourceObject = sourceObject;
     }
 };

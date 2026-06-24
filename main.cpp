@@ -3,6 +3,7 @@
 //
 #include <fstream>
 
+#include "AudioSourceComponent.h"
 #include "GameManager.h"
 #include "ModelRendererComponent.h"
 #include "LightComponent.h"
@@ -23,6 +24,7 @@ int main(int argc, char* argv[])
 
     auto cube = new Object();
     cube->addComponent<ModelRendererComponent>();
+    cube->addComponent<AudioSourceComponent>();
 
     cube->setLocalPosition(Vector3(0, 0, -1000));
     cube->setLocalScale(Vector3(100, 100, 100));

@@ -94,7 +94,7 @@ vec3 CreateMaterial(vec3 _albedo, vec3 _normal, float _metallic, float _roughnes
 
     vec3 ambient = (kD * diffuse + specular) * ao;
 
-    vec3 color = N;
+    vec3 color = ambient + Lo;
 
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0/2.2));
