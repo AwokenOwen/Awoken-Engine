@@ -1144,7 +1144,7 @@ bool ResourceManager::load_wav_file_header(std::ifstream& file, std::uint8_t& ch
 }
 
 bool ResourceManager::load_wav(const std::string& filename, std::uint8_t& channels, std::int32_t& sampleRate,
-    std::uint8_t& bitsPerSample, std::vector<char> data)
+    std::uint8_t& bitsPerSample, std::vector<char>& data)
 {
     std::ifstream in(filename, std::ios::binary);
     if(!in.is_open())
@@ -1159,16 +1159,12 @@ bool ResourceManager::load_wav(const std::string& filename, std::uint8_t& channe
         return false;
     }
 
-    char* buffer = new char[size];
+    std::streampos pos = in.tellg();
+    Log.log("File position after header: %lld", static_cast<long long>(pos));
 
-    in.read(buffer, size);
+    data.resize(size);
 
-    for (int i = 0; i < size; i++)
-    {
-        data.push_back(static_cast<char>(buffer[i]));
-    }
-
-    delete[] buffer;
+    in.read(data.data(), size);
 
     return true;
 }

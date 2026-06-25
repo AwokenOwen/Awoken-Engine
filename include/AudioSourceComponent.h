@@ -23,7 +23,7 @@ private:
     void fromJson(nlohmann::json j) override;
     void destroy() override;
 
-    std::string path{"assets/defaultAssets/Sounds/Rivals_Test.wav"};
+    std::string path{"assets/defaultAssets/Sounds/melee-sound-mono.wav"};
     Sound m_sound{};
     ALuint m_source{};
 

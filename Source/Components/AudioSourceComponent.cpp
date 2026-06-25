@@ -10,7 +10,7 @@ void AudioSourceComponent::play() {
     alSourcef(m_source, AL_GAIN, 1.0f);
     alSource3f(m_source, AL_POSITION, 0, 0,0);
     alSource3f(m_source, AL_VELOCITY, 0, 0,0);
-    alSourcei(m_source, AL_LOOPING, AL_FALSE);
+    alSourcei(m_source, AL_LOOPING, AL_TRUE);
     alSourcei(m_source, AL_BUFFER, m_sound.m_ID);
 
     alSourcePlay(m_source);
@@ -25,10 +25,7 @@ void AudioSourceComponent::start()
 
 void AudioSourceComponent::update()
 {
-    if (m_state == AL_PLAYING)
-    {
-        alGetSourcei(m_source, AL_SOURCE_STATE, &m_state);
-    }
+
 }
 
 void AudioSourceComponent::enable()
