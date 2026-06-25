@@ -5,6 +5,7 @@
 
 #pragma once
 #include "Component.h"
+#include "ResourceManager.h"
 
 class AudioSourceComponent : public Component{
     friend class ResourceManager;
@@ -20,7 +21,11 @@ private:
     void disable() override;
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;
+    void destroy() override;
 
-    int m_sourceId{};
-    std::string path{"assets/defaultAssets/Sounds/Rivals.wav"};
+    std::string path{"assets/defaultAssets/Sounds/Rivals_Test.wav"};
+    Sound m_sound{};
+    ALuint m_source{};
+
+    ALint m_state{};
 };

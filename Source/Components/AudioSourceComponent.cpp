@@ -1,12 +1,21 @@
 #include "AudioSourceComponent.h"
 #include "AudioManager.h"
+#include "ResourceManager.h"
 
 AudioSourceComponent::AudioSourceComponent(Object *parent) : Component(parent)
 {
 }
 
 void AudioSourceComponent::play() {
-    Audio.playSource(m_sourceId);
+    alSourcef(m_source, AL_GAIN, 1.0f);
+    alSource3f(m_source, AL_POSITION, 0, 0,0);
+    alSource3f(m_source, AL_VELOCITY, 0, 0,0);
+    alSourcei(m_source, AL_LOOPING, AL_FALSE);
+    alSourcei(m_source, AL_BUFFER, m_sound.m_ID);
+
+    alSourcePlay(m_source);
+
+    m_state = AL_PLAYING;
 }
 
 void AudioSourceComponent::start()
@@ -16,6 +25,10 @@ void AudioSourceComponent::start()
 
 void AudioSourceComponent::update()
 {
+    if (m_state == AL_PLAYING)
+    {
+        alGetSourcei(m_source, AL_SOURCE_STATE, &m_state);
+    }
 }
 
 void AudioSourceComponent::enable()
@@ -39,10 +52,16 @@ nlohmann::json AudioSourceComponent::toJson()
 
 void AudioSourceComponent::fromJson(nlohmann::json j)
 {
-    m_sourceId = Audio.registerSource(getParent());
-
     path = j["Sound"].get<std::string>();
 
     Resource.loadSound(path);
-    Audio.setSource(m_sourceId, path);
+    m_sound = Resource.getSound(path);
+
+    alGenBuffers(1, &m_source);
+}
+
+void AudioSourceComponent::destroy()
+{
+    alDeleteBuffers(1, &m_source);
+    delete this;
 }

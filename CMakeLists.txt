@@ -49,10 +49,10 @@ add_library(Awoken_Engine STATIC
         Source/Components/ModelRendererComponent.cpp
         Source/Components/LightComponent.cpp
         include/LightComponent.h
-        include/AudioSourceComponent.h
         include/AudioManager.h
-        Source/Components/AudioSourceComponent.cpp
         Source/Managers/AudioManager.cpp
+        include/AudioSourceComponent.h
+        Source/Components/AudioSourceComponent.cpp
 )
 
 target_include_directories(Awoken_Engine PUBLIC

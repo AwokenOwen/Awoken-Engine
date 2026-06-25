@@ -17,44 +17,13 @@
 #include <assimp/scene.h>
 
 #include "AL/al.h"
-#include "AL/alc.h"
 
 class LightComponent;
 
-struct SoundData {
+struct Sound
+{
     friend class ResourceManager;
-    std::uint8_t m_channels{};
-    std::int32_t m_sampleRate{};
-    std::uint8_t m_bitsPerSample{};
-    int m_data_size{};
-    ALenum m_format{};
-
-    char* m_data{};
-
-    SoundData(const std::uint8_t channels, const std::int32_t sampleRate, const std::uint8_t bitsPerSample, const int dataSize) {
-        m_channels = channels;
-        m_sampleRate = sampleRate;
-        m_bitsPerSample = bitsPerSample;
-        m_data_size = dataSize;
-
-        if(m_channels == 1 && m_bitsPerSample == 8)
-            m_format = AL_FORMAT_MONO8;
-        else if(m_channels  == 1 && m_bitsPerSample == 16)
-            m_format = AL_FORMAT_MONO16;
-        else if(m_channels  == 2 && m_bitsPerSample == 8)
-            m_format = AL_FORMAT_STEREO8;
-        else if(m_channels  == 2 && m_bitsPerSample == 16)
-            m_format = AL_FORMAT_STEREO16;
-
-        m_data = new char[m_data_size];
-    }
-
-    SoundData() = default;
-
-    ~SoundData() {
-        delete[] m_data;
-    }
-
+    ALuint m_ID{0};
 private:
     int listeners{1};
 };
@@ -309,7 +278,7 @@ public:
 
     FrameBuffer makeFramebuffer(const std::string& name, int width = -1, int height = -1);
     void activateFramebuffer(const std::string& name = "") const;
-    void resizeFrameBuffer(std::string name, int width, int height);
+    void resizeFrameBuffer(const std::string& name, int width, int height);
 
     void makeIrradiancePrefilterMap(unsigned int cubeMap);
     void updateIrradiancePrefilterMap(unsigned int cubeMap);
@@ -319,8 +288,9 @@ public:
 
     void postSceneRegistration(Scene* scene);
 
-    void loadSound(const std::string& path);
-    SoundData* getSound(const std::string& path);
+    void loadSound(std::string& path);
+    Sound getSound(const std::string& path) const;
+
 private:
     /**
      * @brief Starts the Resource Manager
@@ -368,6 +338,8 @@ private:
     void activateShadowMap(LightComponent* light);
 
     std::int32_t convert_to_int(const char *buffer, std::size_t len);
+    bool load_wav_file_header(std::ifstream& file, std::uint8_t& channels, std::int32_t& sampleRate, std::uint8_t& bitsPerSample, ALsizei& size);
+    bool load_wav(const std::string& filename, std::uint8_t& channels, std::int32_t& sampleRate, std::uint8_t& bitsPerSample, std::vector<char>);
 
     std::map<std::string, std::string> m_sceneMap{};
     std::map<std::string, Scene*> m_loadedScenes{};
@@ -386,5 +358,5 @@ private:
 
     std::vector<std::function<void(Scene*)>> m_postRegistration{};
 
-    std::map<std::string, SoundData*> m_loadedSounds{};
+    std::map<std::string, Sound> m_loadedSounds{};
 };

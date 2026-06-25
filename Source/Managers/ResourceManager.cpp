@@ -677,7 +677,7 @@ void ResourceManager::activateFramebuffer(const std::string& name) const {
     glEnable(GL_DEPTH_TEST);
 }
 
-void ResourceManager::resizeFrameBuffer(const std::string name, int width, int height)
+void ResourceManager::resizeFrameBuffer(const std::string& name, const int width, const int height)
 {
     if (!m_framebuffers.contains(name))
     {
@@ -1011,6 +1011,168 @@ std::int32_t ResourceManager::convert_to_int(const char* buffer, const std::size
     return a;
 }
 
+bool ResourceManager::load_wav_file_header(std::ifstream& file, std::uint8_t& channels, std::int32_t& sampleRate,
+    std::uint8_t& bitsPerSample, ALsizei& size)
+{
+    char buffer[4];
+    if(!file.is_open())
+        return false;
+
+    // the RIFF
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read RIFF");
+        return false;
+    }
+    if(std::strncmp(buffer, "RIFF", 4) != 0)
+    {
+        Log.logError("File is not a valid WAVE file (header doesn't begin with RIFF)");
+        return false;
+    }
+
+    // the size of the file
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read size of file");
+        return false;
+    }
+
+    // the WAVE
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read WAVE");
+        return false;
+    }
+    if(std::strncmp(buffer, "WAVE", 4) != 0)
+    {
+        Log.logError("File is not a valid WAVE file (header doesn't contain WAVE)");
+        return false;
+    }
+
+    // "fmt/0"
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read fmt/0");
+        return false;
+    }
+
+    // this is always 16, the size of the fmt data chunk
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read the 16");
+        return false;
+    }
+
+    // PCM should be 1?
+    if(!file.read(buffer, 2))
+    {
+        Log.logError("Could not read PCM");
+        return false;
+    }
+
+    // the number of channels
+    if(!file.read(buffer, 2))
+    {
+        Log.logError("Could not read number of channels");
+        return false;
+    }
+    channels = convert_to_int(buffer, 2);
+
+    // sample rate
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read sample rate");
+        return false;
+    }
+    sampleRate = convert_to_int(buffer, 4);
+
+    // (sampleRate * bitsPerSample * channels) / 8
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read (sampleRate * bitsPerSample * channels) / 8");
+        return false;
+    }
+
+    // ?? dafaq
+    if(!file.read(buffer, 2))
+    {
+        Log.logError("Could not read dafaq");
+        return false;
+    }
+
+    // bitsPerSample
+    if(!file.read(buffer, 2))
+    {
+        Log.logError("Could not read bits per sample");
+        return false;
+    }
+    bitsPerSample = convert_to_int(buffer, 2);
+
+    // data chunk header "data"
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read data chunk header");
+        return false;
+    }
+    if(std::strncmp(buffer, "data", 4) != 0)
+    {
+        Log.logError("File is not a valid WAVE file (doesn't have 'data' tag)");
+        return false;
+    }
+
+    // size of data
+    if(!file.read(buffer, 4))
+    {
+        Log.logError("Could not read data size");
+        return false;
+    }
+    size = convert_to_int(buffer, 4);
+
+    /* cannot be at the end of file */
+    if(file.eof())
+    {
+        Log.logError("reached EOF on the file");
+        return false;
+    }
+    if(file.fail())
+    {
+        Log.logError("Fail state set on the file");
+        return false;
+    }
+
+    return true;
+}
+
+bool ResourceManager::load_wav(const std::string& filename, std::uint8_t& channels, std::int32_t& sampleRate,
+    std::uint8_t& bitsPerSample, std::vector<char> data)
+{
+    std::ifstream in(filename, std::ios::binary);
+    if(!in.is_open())
+    {
+        Log.logError("Could not open %s for reading", filename.c_str());
+        return false;
+    }
+    int size;
+    if(!load_wav_file_header(in, channels, sampleRate, bitsPerSample, size))
+    {
+        Log.logError("Could not load wav header of %s", filename.c_str());
+        return false;
+    }
+
+    char* buffer = new char[size];
+
+    in.read(buffer, size);
+
+    for (int i = 0; i < size; i++)
+    {
+        data.push_back(static_cast<char>(buffer[i]));
+    }
+
+    delete[] buffer;
+
+    return true;
+}
+
 void ResourceManager::postSceneRegistration(Scene* scene)
 {
     for (const auto& func : m_postRegistration)
@@ -1020,183 +1182,57 @@ void ResourceManager::postSceneRegistration(Scene* scene)
     m_postRegistration.clear();
 }
 
-void ResourceManager::loadSound(const std::string& path)
+void ResourceManager::loadSound(std::string& path)
 {
     if (m_loadedSounds.contains(path))
     {
-        m_loadedSounds.at(path)->listeners++;
+        m_loadedSounds.at(path).listeners++;
         return;
     }
 
-    std::ifstream file(path, std::ios::binary);
-    if (!file) {
-        Log.logError("Unable to open the file");
-        return;
-    }
-
-    char buffer[4];
-    // the RIFF
-    if(!file.read(buffer, 4))
+    std::uint8_t channels;
+    std::int32_t sampleRate;
+    std::uint8_t bitsPerSample;
+    std::vector<char> soundData{};
+    if (!load_wav(path, channels, sampleRate, bitsPerSample, soundData))
     {
-        Log.logError("Could not read RIFF");
+        Log.logError("Could not load WAV file, %s", path.c_str());
         return;
     }
-    if(std::strncmp(buffer, "RIFF", 4) != 0)
+
+    ALuint buffer;
+    alGenBuffers(1, &buffer);
+
+    ALenum format;
+    if(channels == 1 && bitsPerSample == 8)
+        format = AL_FORMAT_MONO8;
+    else if(channels == 1 && bitsPerSample == 16)
+        format = AL_FORMAT_MONO16;
+    else if(channels == 2 && bitsPerSample == 8)
+        format = AL_FORMAT_STEREO8;
+    else if(channels == 2 && bitsPerSample == 16)
+        format = AL_FORMAT_STEREO16;
+    else
     {
-        Log.logError("file is not a valid WAVE file (header doesn't begin with RIFF)");
+        Log.logError("unrecognised wave format");
         return;
     }
 
-    // the size of the file
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read size of file");
-        return;
-    }
+    alBufferData(buffer, format, soundData.data(), soundData.size(), sampleRate);
+    soundData.clear();
 
-    // the WAVE
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read WAVE");
-        return;
-    }
-    if(std::strncmp(buffer, "WAVE", 4) != 0)
-    {
-        Log.logError("File is not a valid WAVE file (header doesn't contain WAVE)");
-        return;
-    }
+    auto s = Sound{};
+    s.m_ID = buffer;
 
-    // "fmt/0"
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read fmt");
-        return;
-    }
-
-    // this is always 16, the size of the fmt data chunk
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read the 16");
-        return;
-    }
-
-    // PCM should be 1?
-    if(!file.read(buffer, 2))
-    {
-        Log.logError("Could not read PCM");
-        return;
-    }
-
-    // the number of channels
-    if(!file.read(buffer, 2))
-    {
-        Log.logError("Could not read number of channels");
-        return;
-    }
-    int channels = convert_to_int(buffer, 2);
-
-    // sample rate
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read sample rate");
-        return;
-    }
-    int sampleRate = convert_to_int(buffer, 4);
-
-    // (sampleRate * bitsPerSample * channels) / 8
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read (sampleRate * bitsPerSample * channels) / 8");
-        return;
-    }
-
-    // ?? dafaq
-    if(!file.read(buffer, 2))
-    {
-        Log.logError("Could not read dafaq");
-        return;
-    }
-
-    // bitsPerSample
-    if(!file.read(buffer, 2))
-    {
-        Log.logError("Could not read bits per sample");
-        return;
-    }
-    int bitsPerSample = convert_to_int(buffer, 2);
-
-    // data or list chunk header
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read data or list chunk header");
-        return;
-    }
-    if(std::strncmp(buffer, "LIST", 4) == 0) {
-        if(!file.read(buffer, 4)) {
-            Log.logError("Could not read size of list chunk header size");
-            return;
-        }
-
-        int32_t listSize = convert_to_int(buffer, 4);
-
-        char listChunk[listSize];
-        if(!file.read(listChunk, listSize)) {
-            Log.logError("Could not read list chunk");
-            return;
-        }
-        if(!file.read(buffer, 4))
-        {
-            Log.logError("Could not read data chunk header");
-            return;
-        }
-        if(std::strncmp(buffer, "data", 4) != 0)
-        {
-            Log.logError("File is not a valid WAVE file (doesn't have 'data' tag)");
-            return;
-        }
-    }else {
-        if(std::strncmp(buffer, "data", 4) != 0)
-        {
-            Log.logError("File is not a valid WAVE file (doesn't have 'data' tag)");
-            return;
-        }
-    }
-    // size of data
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read data size");
-        return;
-    }
-    int size = convert_to_int(buffer, 4);
-
-    /* cannot be at the end of file */
-    if(file.eof())
-    {
-        Log.logError("Reached EOF too early");
-        return;
-    }
-    if(file.fail())
-    {
-        Log.logError("Fail state set on the file");
-        return;
-    }
-
-	auto soundData = new SoundData(channels, sampleRate, bitsPerSample, size);
-
-    soundData->m_data = new char[size];
-
-    file.read(soundData->m_data, size);
-
-	m_loadedSounds.insert({path, soundData});
-
-	file.close();
+    m_loadedSounds.insert({path, s});
 }
 
-SoundData* ResourceManager::getSound(const std::string& path)
+Sound ResourceManager::getSound(const std::string& path) const
 {
     if (!m_loadedSounds.contains(path))
     {
-        Log.logError("Could not get %s from loaded sounds because it doesn't exist", path.c_str());
+        Log.logError("%s doesn't exist in loaded sounds", path.c_str());
+        return Sound{};
     }
     return m_loadedSounds.at(path);
 }
