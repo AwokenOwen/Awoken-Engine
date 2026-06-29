@@ -6,8 +6,8 @@
 #include "Renderer.h"
 #include "Object.h"
 #include <iostream>
-#include <nlohmann/json_fwd.hpp>
 #include "ResourceManager.h"
+#include "WindowManager.h"
 
 WorldManager & WorldManager::getInstance() {
     // Make singleton
@@ -47,22 +47,40 @@ void WorldManager::destroyObject(Object *object) {
 
 void WorldManager::registerRenderer(Renderer *renderer) {
     // Based on transparency register renderer to event
-    renderer->getTransparency() ? m_transparentDrawEvent.add(renderer, &Renderer::draw) : m_opaqueDrawEvent.add(renderer, &Renderer::draw);
+    if (renderer->getTransparency())
+    {
+        m_transparentDrawEvent.add(renderer, &Renderer::draw);
+    }else
+    {
+        m_opaqueDrawEvent.add(renderer, &Renderer::draw);
+    }
     m_loadEvent.add(renderer, &Renderer::load);
 }
 
 void WorldManager::updateTransparency(Renderer *renderer) {
-    // Remove from old event
-    renderer->getTransparency() ? m_opaqueDrawEvent.remove<>(renderer, &Renderer::draw) : m_transparentDrawEvent.remove<>(renderer, &Renderer::draw);
-    // Register to new event
-    renderer->getTransparency() ? m_transparentDrawEvent.add(renderer, &Renderer::draw) : m_opaqueDrawEvent.add(renderer, &Renderer::draw);
+    // Remove from old event and register for new
+    if (renderer->getTransparency())
+    {
+        m_opaqueDrawEvent.remove<>(renderer, &Renderer::draw);
+        m_transparentDrawEvent.add(renderer, &Renderer::draw);
+    }else
+    {
+        m_transparentDrawEvent.remove<>(renderer, &Renderer::draw);
+        m_opaqueDrawEvent.add(renderer, &Renderer::draw);
+    }
 }
 
 void WorldManager::setActiveRenderer(Renderer *renderer, const bool active) {
     if (active) {
         registerRenderer(renderer);
     }else {
-       renderer->getTransparency() ? m_transparentDrawEvent.remove(renderer, &Renderer::draw) :  m_opaqueDrawEvent.remove(renderer, &Renderer::draw);
+       if (renderer->getTransparency())
+       {
+           m_transparentDrawEvent.remove(renderer, &Renderer::draw);
+       }else
+       {
+           m_opaqueDrawEvent.remove(renderer, &Renderer::draw);
+       }
     }
 }
 

@@ -20,10 +20,15 @@
 
 class LightComponent;
 
+constexpr std::size_t NUM_BUFFERS = 4;
+constexpr std::size_t BUFFER_SIZE = 65536; // 32kb of data in each buffer
 struct Sound
 {
     friend class ResourceManager;
-    ALuint m_ID{0};
+    ALuint m_ID[NUM_BUFFERS];
+    ALenum m_format{};
+    std::int32_t m_sampleRate{};
+    std::vector<char> m_soundData{};
 private:
     int listeners{1};
 };

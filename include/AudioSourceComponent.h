@@ -23,9 +23,12 @@ private:
     void fromJson(nlohmann::json j) override;
     void destroy() override;
 
-    std::string path{"assets/defaultAssets/Sounds/melee-sound-mono.wav"};
+    void update_stream(std::size_t& cursor);
+
+    std::string path{};
     Sound m_sound{};
     ALuint m_source{};
 
     ALint m_state{};
+    std::size_t m_cursor{BUFFER_SIZE * NUM_BUFFERS};
 };

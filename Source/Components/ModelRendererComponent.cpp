@@ -5,6 +5,7 @@
 #include "ModelRendererComponent.h"
 
 #include "CameraComponent.h"
+#include "LightComponent.h"
 #include "LogManager.h"
 #include "Object.h"
 
@@ -83,6 +84,7 @@ void ModelRendererComponent::load()
         Resource.loadMaterial(m);
         m_materials.emplace_back(Resource.getMaterial(m));
     }
+    m_shadowMapMaterial = Resource.getMaterial("assets/defaultAssets/Materials/shadowMap.json");
 }
 
 void ModelRendererComponent::unload()

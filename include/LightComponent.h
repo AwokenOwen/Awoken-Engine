@@ -26,7 +26,9 @@ public:
 
     void setShadowMap(FrameBuffer shadowMap);
     [[nodiscard]] unsigned int getShadowMap() const;
-    unsigned int getShadowBuffer() const;
+    [[nodiscard]] unsigned int getShadowBuffer() const;
+
+    [[nodiscard]] std::vector<Matrix4> getViewMatrix() const;
 private:
     LightType m_type{DIR};
 

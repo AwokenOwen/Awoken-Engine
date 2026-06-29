@@ -7,7 +7,6 @@
 #include <chrono>
 #include <thread>
 
-#include "AudioManager.h"
 #include "InputManager.h"
 #include "LogManager.h"
 #include "ResourceManager.h"
@@ -16,8 +15,28 @@
 
 int GameManager::initialize() {
     // Other Manager Initializations
-    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 || Resource.initialize() == 1 ||  Audio.initialize() == 1/* || other manager inits == 1 */) {
+    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 || Resource.initialize() == 1/* || other manager inits == 1 */) {
         exit(-1);
+    }
+
+    // Init Audio
+    m_device = alcOpenDevice(nullptr);
+    if (!m_device)
+    {
+        Log.logError("Could not find a default audio device.");
+        return 1;
+    }
+    m_context = alcCreateContext(m_device, nullptr);
+    if (!m_context)
+    {
+        Log.logError("Could not create a audio context.");
+        return 1;
+    }
+    alcMakeContextCurrent(m_context);
+    if (alcGetError(m_device) != ALC_NO_ERROR )
+    {
+        Log.logError("Could not make context the current context.");
+        return 1;
     }
 
     // Log Done
@@ -33,8 +52,11 @@ void GameManager::terminate() {
     World.terminate();
     Input.terminate();
     Resource.terminate();
-    Audio.terminate();
     // other manager terminate
+
+    alcCloseDevice(m_device);
+    alcMakeContextCurrent(nullptr);
+    alcDestroyContext(m_context);
 
     // Log Done
     Log.log("All Managers terminated. Closing Engine");

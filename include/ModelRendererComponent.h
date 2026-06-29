@@ -39,4 +39,6 @@ private:
 
     Model m_model{};
     std::vector<Material> m_materials{};
+
+    Material m_shadowMapMaterial{};
 };

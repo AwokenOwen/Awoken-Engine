@@ -994,8 +994,9 @@ FrameBuffer ResourceManager::makeShadowMap(LightComponent* light)
 
 void ResourceManager::activateShadowMap(LightComponent* light)
 {
+    glViewport(0, 0, 1024, 1024);
     glBindFramebuffer(GL_FRAMEBUFFER, light->getShadowBuffer());
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 }
@@ -1108,39 +1109,54 @@ bool ResourceManager::load_wav_file_header(std::ifstream& file, std::uint8_t& ch
     }
     bitsPerSample = convert_to_int(buffer, 2);
 
-    // data chunk header "data"
-    if(!file.read(buffer, 4))
+    while(!file.eof())
     {
-        Log.logError("Could not read data chunk header");
-        return false;
-    }
-    if(std::strncmp(buffer, "data", 4) != 0)
-    {
-        Log.logError("File is not a valid WAVE file (doesn't have 'data' tag)");
-        return false;
-    }
+        if(!file.read(buffer, 4))
+        {
+            Log.logError("Could not read chunk header");
+        }
 
-    // size of data
-    if(!file.read(buffer, 4))
-    {
-        Log.logError("Could not read data size");
-        return false;
-    }
-    size = convert_to_int(buffer, 4);
+        if (std::strncmp(buffer, "data", 4) != 0)
+        {
+            if(!file.read(buffer, 4))
+            {
+                std::cerr << "ERROR: could not read data size" << std::endl;
+                return false;
+            }
+            int chunkSize = convert_to_int(buffer, 4);
+            if(chunkSize % 2 != 0)
+                chunkSize++;
 
-    /* cannot be at the end of file */
-    if(file.eof())
-    {
-        Log.logError("reached EOF on the file");
-        return false;
-    }
-    if(file.fail())
-    {
-        Log.logError("Fail state set on the file");
-        return false;
-    }
+            if(!file.seekg(chunkSize, std::ios::cur))
+            {
+                Log.logError("Could not seek past chunk");
+                return false;
+            }
+        }
 
-    return true;
+        if(!file.read(buffer, 4))
+        {
+            std::cerr << "ERROR: could not read data size" << std::endl;
+            return false;
+        }
+        size = convert_to_int(buffer, 4);
+
+        /* cannot be at the end of file */
+        if(file.eof())
+        {
+            std::cerr << "ERROR: reached EOF on the file" << std::endl;
+            return false;
+        }
+        if(file.fail())
+        {
+            std::cerr << "ERROR: fail state set on the file" << std::endl;
+            return false;
+        }
+
+        return true;
+    }
+    Log.logError("File is not a valid WAVE file (doesn't have 'data' tag)");
+    return false;
 }
 
 bool ResourceManager::load_wav(const std::string& filename, std::uint8_t& channels, std::int32_t& sampleRate,
@@ -1158,9 +1174,6 @@ bool ResourceManager::load_wav(const std::string& filename, std::uint8_t& channe
         Log.logError("Could not load wav header of %s", filename.c_str());
         return false;
     }
-
-    std::streampos pos = in.tellg();
-    Log.log("File position after header: %lld", static_cast<long long>(pos));
 
     data.resize(size);
 
@@ -1196,8 +1209,8 @@ void ResourceManager::loadSound(std::string& path)
         return;
     }
 
-    ALuint buffer;
-    alGenBuffers(1, &buffer);
+    ALuint buffers[NUM_BUFFERS];
+    alGenBuffers(NUM_BUFFERS, &buffers[0]);
 
     ALenum format;
     if(channels == 1 && bitsPerSample == 8)
@@ -1214,11 +1227,16 @@ void ResourceManager::loadSound(std::string& path)
         return;
     }
 
-    alBufferData(buffer, format, soundData.data(), soundData.size(), sampleRate);
-    soundData.clear();
+    for(std::size_t i = 0; i < NUM_BUFFERS; ++i)
+    {
+        alBufferData(buffers[i], format, &soundData[i * BUFFER_SIZE], BUFFER_SIZE, sampleRate);
+    }
 
     auto s = Sound{};
-    s.m_ID = buffer;
+    memcpy(s.m_ID, buffers, sizeof(buffers));
+    s.m_format = format;
+    s.m_soundData = soundData;
+    s.m_sampleRate = sampleRate;
 
     m_loadedSounds.insert({path, s});
 }
@@ -1254,6 +1272,7 @@ int ResourceManager::initialize() {
     loadUniformMap();
     makePostprocessingScreen();
     makeBRDFMap();
+    loadMaterial("assets/defaultAssets/Materials/shadowMap.json");
 
     Log.log("Resource Manager initialized");
     return 0;

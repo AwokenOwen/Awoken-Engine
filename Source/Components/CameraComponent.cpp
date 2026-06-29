@@ -108,7 +108,8 @@ void CameraComponent::draw()
     if (m_currentBackgroundType == BackgroundType::SKYBOX)
     {
         glDisable(GL_CULL_FACE);
-        m_skyboxMaterial.setUniform("view", getViewMatrix());
+        auto view = Matrix3(getViewMatrix());
+        m_skyboxMaterial.setUniform("view", Matrix4(view));
         m_skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
         m_skyboxMaterial.load();
 

@@ -14,6 +14,7 @@
  */
 #define World WorldManager::getInstance()
 
+class LightComponent;
 struct Scene;
 class Renderer;
 class Object;
@@ -92,6 +93,7 @@ public:
 
     EVENT_ACCESSORS(m_updateEvent)
     EVENT_ACCESSORS(m_destroyEvent)
+    EVENT_ACCESSORS(m_drawShadowMap)
 
 private:
     /**
@@ -133,6 +135,8 @@ private:
 
     Event<> m_transparentDrawEvent{};
     Event<> m_opaqueDrawEvent{};
+
+    Event<LightComponent*> m_drawShadowMap{};
 
     Event<> m_loadEvent{};
     Event<> m_unloadEvent{};

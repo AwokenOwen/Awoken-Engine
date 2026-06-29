@@ -6,6 +6,7 @@
 #include <string>
 
 #include "Manager.h"
+#include "AL/alc.h"
 
 /**
  * @brief Singleton Macro
@@ -70,4 +71,7 @@ private:
      * @brief Maximum FPS the game loop will run at
      */
     double m_framerateFactor{};
+
+    ALCdevice* m_device{};
+    ALCcontext* m_context{};
 };

@@ -4,6 +4,7 @@
 
 #include "LightComponent.h"
 
+#include "Object.h"
 #include "ResourceManager.h"
 
 void LightComponent::setShadowMap(FrameBuffer shadowMap)
@@ -19,6 +20,17 @@ unsigned int LightComponent::getShadowMap() const
 unsigned int LightComponent::getShadowBuffer() const
 {
     return m_shadowMap.m_id;
+}
+
+std::vector<Matrix4> LightComponent::getViewMatrix() const
+{
+    auto v = std::vector<Matrix4>();
+    v.push_back(Matrix4::lookAt(-1.0f * m_direction, Vector3(), Vector3::up()));
+    if (m_type != DIR)
+    {
+        Log.logError("Function should have stopped at the draw shadow map function...");
+    }
+    return v;
 }
 
 void LightComponent::start()
