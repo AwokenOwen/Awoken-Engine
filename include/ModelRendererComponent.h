@@ -26,13 +26,10 @@ private:
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;
     void draw() override;
+    void drawToShadowMap(LightComponent* light) override;
 
-public:
-    void load() override;
-    void unload() override;
-
-private:
     void defaultDynamicUniformLoader(Material mat) const;
+    void destroy() override;
 
     std::string m_modelName{"assets/defaultAssets/Models/cube.fbx"};
     std::vector<std::string> m_materialNames{"assets/defaultAssets/Materials/default.json"};

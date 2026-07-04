@@ -15,27 +15,14 @@ Matrix4 CameraComponent::getViewMatrix() const {
     if (getParent() == nullptr) return Matrix4{};
 
     const Vector3 pos     = getParent()->getWorldPosition();
-    const Vector3 forward = getParent()->getWorldForward();
+    const Vector3 forward = getParent()->getWorldForward().normalize();
     const Vector3 up      = getParent()->getWorldUp();
-    const Vector3 f       = (forward).normalize();
-    const Vector3 r       = Vector3::cross(f, up).normalize();
-    const Vector3 u       = Vector3::cross(r, f);
 
-    return {
-         r.x,  r.y,  r.z, -Vector3::dot(r, pos),
-         u.x,  u.y,  u.z, -Vector3::dot(u, pos),
-        -f.x, -f.y, -f.z,  Vector3::dot(f, pos),
-         0,    0,    0,    1
-    };
+    return Matrix4::lookAt(pos, pos + forward, up);
 }
 
 Matrix4 CameraComponent::getPerspectiveMatrix()const {
-    return {
-        cot(m_fov / 2.0f) / Window.getAspectRatio(), 0, 0, 0,
-        0, cot(m_fov / 2.0f), 0, 0,
-        0, 0, (m_near + m_far) / (m_near - m_far), (2 * m_near * m_far) / (m_near - m_far),
-        0, 0, -1, 0
-    };
+    return Matrix4::makePerspectiveMatrix(m_fov, Window.getAspectRatio(), m_near, m_far);
 }
 
 Matrix4 CameraComponent::getOrthographicMatrix() const
@@ -44,12 +31,8 @@ Matrix4 CameraComponent::getOrthographicMatrix() const
     float left = -Window.getViewportWidth() / 2.0f;
     float top = Window.getViewportHeight() / 2.0f;
     float bottom = -Window.getViewportHeight() / 2.0f;
-    return {
-        2.0f / (right - left),  0.0f,                   0.0f,                  -(right + left) / (right - left),
-        0.0f,                   2.0f / (top - bottom),  0.0f,                  -(top + bottom) / (top - bottom),
-        0.0f,                   0.0f,                  -2.0f / (m_far - m_near),-(m_far + m_near)   / (m_far - m_near),
-        0.0f,                   0.0f,                   0.0f,                   1.0f
-    };
+
+    return Matrix4::makeOrthographicMatrix(left, right, bottom, top, m_near, m_far);
 }
 
 Matrix4 CameraComponent::getProjectionMatrix() const
@@ -61,70 +44,31 @@ Matrix4 CameraComponent::getProjectionMatrix() const
     return getOrthographicMatrix();
 }
 
-Matrix4 CameraComponent::makePerspectiveMatrix(float fov, float aspect, float near, float far)
-{
-    return {
-        cot(fov / 2.0f) / aspect, 0, 0, 0,
-        0, cot(fov / 2.0f), 0, 0,
-        0, 0, (near + far) / (near - far), (2 * near * far) / (near - far),
-        0, 0, -1, 0
-    };
-}
-
-Matrix4 CameraComponent::makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far)
-{
-    return {
-        2.0f / (right - left),  0.0f,                   0.0f,                  -(right + left) / (right - left),
-        0.0f,                   2.0f / (top - bottom),  0.0f,                  -(top + bottom) / (top - bottom),
-        0.0f,                   0.0f,                  -2.0f / (far - near),   -(far + near)   / (far - near),
-        0.0f,                   0.0f,                   0.0f,                   1.0f
-    };
-}
-
-void CameraComponent::load()
-{
-    Resource.loadTexture(m_skyboxTextureName);
-    m_skyboxTexture = Resource.getTexture(m_skyboxTextureName);
-
-    Resource.loadModel(m_skyboxModelName);
-    m_skyboxModel = Resource.getModel(m_skyboxModelName);
-
-    Resource.loadMaterial(m_skyboxMaterialName);
-    m_skyboxMaterial = Resource.getMaterial(m_skyboxMaterialName);
-}
-
-void CameraComponent::unload()
-{
-
-}
-
-void CameraComponent::setBackgroundType(BackgroundType type)
-{
-    m_currentBackgroundType = type;
-}
-
 void CameraComponent::draw()
 {
-    if (m_currentBackgroundType == BackgroundType::SKYBOX)
-    {
-        glDisable(GL_CULL_FACE);
-        auto view = Matrix3(getViewMatrix());
-        m_skyboxMaterial.setUniform("view", Matrix4(view));
-        m_skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
-        m_skyboxMaterial.load();
+    glDisable(GL_CULL_FACE);
+    auto view = Matrix3(getViewMatrix());
+    m_skyboxMaterial.setUniform("view", Matrix4(view));
+    m_skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
+    m_skyboxMaterial.load();
 
-        m_skyboxMaterial.setUniform<int>("skybox", 1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxTexture.m_textureID);
+    m_skyboxMaterial.setUniform<int>("skybox", 1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxTexture.m_textureID);
 
-        glBindVertexArray(m_skyboxModel.m_meshes[0].VAO());
-        glDrawElements(GL_TRIANGLES, m_skyboxModel.m_meshes[0].indexCount(), GL_UNSIGNED_INT, nullptr);
-        glBindVertexArray(0);
-    }else
-    {
-        glClearColor(m_backgroundColor.x, m_backgroundColor.y, m_backgroundColor.z, 1.0);
-    }
+    glBindVertexArray(m_skyboxModel.m_meshes[0].VAO());
+    glDrawElements(GL_TRIANGLES, m_skyboxModel.m_meshes[0].indexCount(), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(0);
+}
 
+void CameraComponent::drawToShadowMap(LightComponent* light)
+{
+
+}
+
+void CameraComponent::destroy()
+{
+    delete this;
 }
 
 void CameraComponent::start()
@@ -134,7 +78,7 @@ void CameraComponent::start()
 
 void CameraComponent::update()
 {
-
+    addToDraw();
 }
 
 void CameraComponent::enable()
@@ -164,8 +108,6 @@ nlohmann::json CameraComponent::toJson()
 
     j["Main"] = m_main;
 
-    j["BackgroundColor"] = m_backgroundColor.toJson();
-
     j["SkyboxTexture"] = m_skyboxTextureName;
 
     j["SkyboxModel"] = m_skyboxModelName;
@@ -189,8 +131,6 @@ void CameraComponent::fromJson(nlohmann::json j)
         Resource.setMainCamera(this);
     }
 
-    m_backgroundColor = Vector3::fromJson(j["BackgroundColor"]);
-
     m_skyboxTextureName = j["SkyboxTexture"].get<std::string>();
 
     m_skyboxModelName = j["SkyboxModel"].get<std::string>();
@@ -199,5 +139,12 @@ void CameraComponent::fromJson(nlohmann::json j)
 
     m_perspective = j["Perspective"].get<bool>();
 
-    registerRenderer(false);
+    Resource.loadTexture(m_skyboxTextureName);
+    m_skyboxTexture = Resource.getTexture(m_skyboxTextureName);
+
+    Resource.loadModel(m_skyboxModelName);
+    m_skyboxModel = Resource.getModel(m_skyboxModelName);
+
+    Resource.loadMaterial(m_skyboxMaterialName);
+    m_skyboxMaterial = Resource.getMaterial(m_skyboxMaterialName);
 }

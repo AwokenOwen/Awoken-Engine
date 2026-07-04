@@ -58,9 +58,7 @@ private:
     /**
      * @brief Called when the parent objected is destroyed
      */
-    virtual void destroy() {
-        delete this;
-    }
+    virtual void destroy() = 0;
 
     /**
      * @brief Converts all necessary properties into JSON for storing

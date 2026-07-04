@@ -18,6 +18,8 @@
 
 #include "AL/al.h"
 
+constexpr unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
 class LightComponent;
 
 constexpr std::size_t NUM_BUFFERS = 4;
@@ -108,6 +110,13 @@ struct Vertex
     Vector2 m_uvs{};
 };
 
+struct BoundingBox
+{
+    Vector3 min{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+    Vector3 max{std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()};
+
+    BoundingBox operator*(const Matrix4& modelMatrix);
+};
 struct Mesh
 {
     friend class ResourceManager;
@@ -136,12 +145,14 @@ private:
 struct Model
 {
     friend class ResourceManager;
+    friend class ModelRendererComponent;
     std::vector<Mesh> m_meshes{};
     [[nodiscard]] int meshCount() const
     {
         return static_cast<int>(m_meshes.size());
     }
 private:
+    BoundingBox m_boundingBox{};
     int listeners{1};
 };
 
@@ -289,12 +300,9 @@ public:
     void updateIrradiancePrefilterMap(unsigned int cubeMap);
 
     void loadLights(Material mat);
-    void registerLight(LightComponent* light);
-
-    void postSceneRegistration(Scene* scene);
 
     void loadSound(std::string& path);
-    Sound getSound(const std::string& path) const;
+    [[nodiscard]] Sound getSound(const std::string& path) const;
 
 private:
     /**
@@ -338,9 +346,7 @@ private:
 
     void makeBRDFMap();
 
-    FrameBuffer makeShadowMap(LightComponent* light);
-
-    void activateShadowMap(LightComponent* light);
+    void makeShadowMap(LightComponent* light);
 
     std::int32_t convert_to_int(const char *buffer, std::size_t len);
     bool load_wav_file_header(std::ifstream& file, std::uint8_t& channels, std::int32_t& sampleRate, std::uint8_t& bitsPerSample, ALsizei& size);
@@ -360,8 +366,6 @@ private:
     CameraComponent* m_mainCamera{};
 
     std::map<std::string, FrameBuffer> m_framebuffers{};
-
-    std::vector<std::function<void(Scene*)>> m_postRegistration{};
 
     std::map<std::string, Sound> m_loadedSounds{};
 };

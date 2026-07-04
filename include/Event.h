@@ -3,7 +3,11 @@
 
 #pragma once
 #include <functional>
-#include <vector>
+#include <map>
+#include <ranges>
+#include <cstdint>
+
+#include "LogManager.h"
 
 /**
  * @brief A macro for adding and remove from specific events. Adding this wrapper in the public space allows events to be private but publicly added and removed from
@@ -13,23 +17,14 @@
  */
 #define EVENT_ACCESSORS(EventName, ...)                                          \
 	template<typename T>                                                         \
-	void addTo_##EventName(T* object, void(T::* func)(__VA_ARGS__)) {              \
+	void add##EventName(T* object, void(T::* func)(__VA_ARGS__)) {              \
 		EventName.add(object, func);                                             \
 	}                                                                            \
 	template<typename T>                                                         \
-	void removeFrom_##EventName(T* object, void(T::* func)(__VA_ARGS__)) {           \
+	void remove##EventName(T* object, void(T::* func)(__VA_ARGS__)) {           \
 		EventName.remove(object, func);                                          \
 	}
 
-template<typename... R>
-struct Listener {
-	int m_hash{};
-	std::function<void(R...)> m_function{};
-
-	bool operator==(Listener& other) {
-		return m_hash == other.m_hash;
-	}
-};
 
 /**
  * @brief Event class for all events needed
@@ -77,7 +72,10 @@ private:
 	/**
 	 * @brief Vector of lambda functions ready to be called on callEvent()
 	 */
-	std::vector<Listener<R...>> m_functions{};
+	//std::vector<Listener<R...>> m_functions{};
+	static unsigned int hash(uint64_t h1, uint64_t h2);
+
+	std::map<uint64_t, std::function<void(R...)>> m_functions{};
 };
 
 template<typename ... R>
@@ -88,23 +86,26 @@ void Event<R...>::add(T *object, void(T::*func)(R...)) {
         (object->*func)(args...);
     };
 
-	int hash = *reinterpret_cast<int*>(object);
-	hash *= *reinterpret_cast<int*>(&func);
+	int key = hash(reinterpret_cast<uint64_t>(object), reinterpret_cast<uint64_t>(&func));
 
-    Listener<R...> listener{hash, lambda};
+	if (m_functions.contains(key))
+	{
+		Log.logError("Bruh this don't work");
+	}
 
-    m_functions.emplace_back(listener);
+    m_functions.insert({key, lambda});
 }
 
 template<typename ... R>
 template<typename T>
 void Event<R...>::remove(T *object, void(T::*func)(R...)) {
-	int hash = *reinterpret_cast<int*>(object);
-	hash *= *reinterpret_cast<int*>(&func);
+	int key = hash(reinterpret_cast<uint64_t>(object), reinterpret_cast<uint64_t>(&func));
 
-    std::erase_if(m_functions, [hash](const Listener<R...>& listener) {
-        return listener.m_hash == hash;
-    });
+	if (!m_functions.contains(key))
+	{
+		return;
+	}
+	m_functions.erase(key);
 }
 
 template<typename ... R>
@@ -114,7 +115,15 @@ void Event<R...>::clearEvent() {
 
 template<typename ... R>
 void Event<R...>::callEvent(R... args) {
-	for (auto f : m_functions) {
-		f.m_function(args...);
+	for (const auto& it : std::views::values(m_functions))
+	{
+		it(args...);
 	}
+}
+
+template <typename ... R>
+unsigned int Event<R...>::hash(uint64_t h1, uint64_t h2)
+{
+	h1 ^= h2 + 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2);
+	return h1;
 }

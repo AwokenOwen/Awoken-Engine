@@ -21,8 +21,12 @@ void ModelRendererComponent::start() {
     
 }
 
-void ModelRendererComponent::update() {
+void ModelRendererComponent::update()
+{
+    // decide whether to draw
+    m_model.m_boundingBox = m_model.m_boundingBox * getParent()->getWorldMatrix();
 
+    addToDraw();
 }
 
 void ModelRendererComponent::enable()
@@ -52,9 +56,19 @@ void ModelRendererComponent::fromJson(nlohmann::json j)
 {
     m_modelName = j["Model"].get<std::string>();
 
-    registerRenderer(j["Transparency"].get<bool>());
+    setTransparency(j["Transparency"].get<bool>());
 
     m_materialNames = j["Materials"].get<std::vector<std::string>>();
+
+    Resource.loadModel(m_modelName);
+    m_model = Resource.getModel(m_modelName);
+
+    for (const auto& m : m_materialNames)
+    {
+        Resource.loadMaterial(m);
+        m_materials.emplace_back(Resource.getMaterial(m));
+    }
+    m_shadowMapMaterial = Resource.getMaterial("assets/defaultAssets/Materials/shadowMap.json");
 }
 
 void ModelRendererComponent::draw()
@@ -74,29 +88,21 @@ void ModelRendererComponent::draw()
     }
 }
 
-void ModelRendererComponent::load()
+void ModelRendererComponent::drawToShadowMap(LightComponent* light)
 {
-    Resource.loadModel(m_modelName);
-    m_model = Resource.getModel(m_modelName);
+    m_shadowMapMaterial.load();
+    const auto model = getParent()->getWorldMatrix();
+    const auto lightSpaceMatrix = light->getLightSpaceMatrix()[0];
 
-    for (const auto& m : m_materialNames)
+    m_shadowMapMaterial.setUniform("model", model);
+    m_shadowMapMaterial.setUniform("lightSpaceMatrix", lightSpaceMatrix);
+
+    for (int i = 0; i < m_model.meshCount(); ++i)
     {
-        Resource.loadMaterial(m);
-        m_materials.emplace_back(Resource.getMaterial(m));
+        glBindVertexArray(m_model.m_meshes[i].VAO());
+        glDrawElements(GL_TRIANGLES, m_model.m_meshes[i].indexCount(), GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
     }
-    m_shadowMapMaterial = Resource.getMaterial("assets/defaultAssets/Materials/shadowMap.json");
-}
-
-void ModelRendererComponent::unload()
-{
-    Resource.unloadModel(m_modelName);
-    m_model = {};
-
-    for (const auto& m : m_materialNames)
-    {
-        Resource.unloadMaterial(m);
-    }
-    m_materials.clear();
 }
 
 void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
@@ -132,4 +138,18 @@ void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
         mat.setUniform("projection", orthographic);
         break;
     }
+}
+
+void ModelRendererComponent::destroy()
+{
+    Resource.unloadModel(m_modelName);
+    m_model = {};
+
+    for (const auto& m : m_materialNames)
+    {
+        Resource.unloadMaterial(m);
+    }
+    m_materials.clear();
+
+    delete this;
 }

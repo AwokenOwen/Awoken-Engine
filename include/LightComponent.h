@@ -24,16 +24,14 @@ public:
         return m_type;
     };
 
-    void setShadowMap(FrameBuffer shadowMap);
-    [[nodiscard]] unsigned int getShadowMap() const;
-    [[nodiscard]] unsigned int getShadowBuffer() const;
+    [[nodiscard]] std::vector<Matrix4> getLightSpaceMatrix() const;
+    void activateShadowMap() const;
 
-    [[nodiscard]] std::vector<Matrix4> getViewMatrix() const;
 private:
     LightType m_type{DIR};
 
     // For all lights
-    Vector3 m_direction{0.0f, -0.707, -0.707};
+    Vector3 m_direction{0.0f, -1.0f, 0.0f};
     Vector3 m_color{1.0f, 1.0f, 1.0f};
     float m_power{1.0f};
 
@@ -48,4 +46,5 @@ private:
     void disable() override;
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;
+    void destroy() override;
 };

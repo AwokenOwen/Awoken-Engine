@@ -6,6 +6,8 @@
 #include "Renderer.h"
 #include "Object.h"
 #include <iostream>
+
+#include "LightComponent.h"
 #include "ResourceManager.h"
 #include "WindowManager.h"
 
@@ -38,52 +40,6 @@ Object* WorldManager::instantiateObject(Object* parent)
     return a;
 }
 
-void WorldManager::destroyObject(Object *object) {
-    // Register to the to be added event
-    m_destroyEvent.add(object, &Object::destroy);
-    // Add to the to be destroyed list
-    m_tobeDestroyed.push_back(object);
-}
-
-void WorldManager::registerRenderer(Renderer *renderer) {
-    // Based on transparency register renderer to event
-    if (renderer->getTransparency())
-    {
-        m_transparentDrawEvent.add(renderer, &Renderer::draw);
-    }else
-    {
-        m_opaqueDrawEvent.add(renderer, &Renderer::draw);
-    }
-    m_loadEvent.add(renderer, &Renderer::load);
-}
-
-void WorldManager::updateTransparency(Renderer *renderer) {
-    // Remove from old event and register for new
-    if (renderer->getTransparency())
-    {
-        m_opaqueDrawEvent.remove<>(renderer, &Renderer::draw);
-        m_transparentDrawEvent.add(renderer, &Renderer::draw);
-    }else
-    {
-        m_transparentDrawEvent.remove<>(renderer, &Renderer::draw);
-        m_opaqueDrawEvent.add(renderer, &Renderer::draw);
-    }
-}
-
-void WorldManager::setActiveRenderer(Renderer *renderer, const bool active) {
-    if (active) {
-        registerRenderer(renderer);
-    }else {
-       if (renderer->getTransparency())
-       {
-           m_transparentDrawEvent.remove(renderer, &Renderer::draw);
-       }else
-       {
-           m_opaqueDrawEvent.remove(renderer, &Renderer::draw);
-       }
-    }
-}
-
 Scene * WorldManager::getActiveScene() const {
     return m_activeScene;
 }
@@ -98,16 +54,6 @@ void WorldManager::setActiveScene(const std::string &name) {
 
 void WorldManager::setBaseScene(const std::string& name) {
     m_baseScene = name;
-}
-
-void WorldManager::setObjectActiveState(Object *object, const bool active) {
-    if (active) {
-        m_enableEvent.add(object, &Object::enable);
-        m_updateEvent.add(object, &Object::update);
-    }else {
-        m_disableEvent.add(object, &Object::disable);
-        m_updateEvent.remove(object, &Object::update);
-    }
 }
 
 int WorldManager::initialize() {
@@ -138,36 +84,45 @@ void WorldManager::update() {
     // Add all to be objects into the scene
     for (const auto object: m_tobeAdded) {
         // Add object to update event
-        m_updateEvent.add(object, &Object::update);
+        UpdateEvent.add(object, &Object::update);
     }
     // clear to be added so no repeats
     m_tobeAdded.clear();
 
-    m_loadEvent.callEvent();
-    m_loadEvent.clearEvent();
+    LoadEvent.callEvent();
+    LoadEvent.clearEvent();
 
-    m_unloadEvent.callEvent();
-    m_unloadEvent.clearEvent();
+    UnloadEvent.callEvent();
+    UnloadEvent.clearEvent();
 
     // Call all objects update functions
-    m_updateEvent.callEvent();
+    UpdateEvent.callEvent();
+
+    for (const auto light: m_activeScene->m_lightComponents)
+    {
+        light->activateShadowMap();
+        ShadowMapDrawEvent.callEvent(light);
+    }
+    Window.resetViewport();
 
     // Draw all drawers to the screen/framebuffer, transparent first then opaque
     Resource.activateFramebuffer("post");
-    m_transparentDrawEvent.callEvent();
-    m_opaqueDrawEvent.callEvent();
+    TransparentDrawEvent.callEvent();
+    OpaqueDrawEvent.callEvent();
+    TransparentDrawEvent.clearEvent();
+    OpaqueDrawEvent.clearEvent();
     Resource.activateFramebuffer();
 
     drawPostprocess();
 
     // Call the destroy event
-    m_destroyEvent.callEvent();
+    DestroyEvent.callEvent();
     // Clear the destroy event so no repeats
-    m_destroyEvent.clearEvent();
+    DestroyEvent.clearEvent();
 
     // Remove all to be objects from the scene
     for (const auto object: m_tobeDestroyed) {
-        m_updateEvent.remove(object, &Object::update);
+        UpdateEvent.remove(object, &Object::update);
 
         Log.log("Destroying object %s", object->m_name.c_str());
 

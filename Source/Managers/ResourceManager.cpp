@@ -71,21 +71,31 @@ void Material::load()
     }
 }
 
+BoundingBox BoundingBox::operator*(const Matrix4& modelMatrix)
+{
+    auto _min = Vector4(min);
+    auto _max = Vector4(max);
+
+    min = Vector3(modelMatrix * _min);
+    max = Vector3(modelMatrix * _max);
+
+    return *this;
+}
+
 std::string Scene::getName() const {
     return m_name;
 }
 
 Scene * Scene::fromJson(const nlohmann::json &j) {
     auto *scene = new Scene(j["Name"].get<std::string>());
-    for (const std::vector<nlohmann::json> objects = j["Root Objects"]; const auto& o : objects) {
-        scene->m_rootObjects.emplace_back(Object::fromJson(o));
-    }
 
     scene->m_reflectionMapName = j["ReflectionMap"].get<std::string>();
     Resource.loadHDR(scene->m_reflectionMapName);
     Resource.makeIrradiancePrefilterMap(Resource.getTexture(scene->m_reflectionMapName).m_textureID);
 
-    Resource.postSceneRegistration(scene);
+    for (const std::vector<nlohmann::json> objects = j["Root Objects"]; const auto& o : objects) {
+        scene->m_rootObjects.emplace_back(Object::fromJson(o));
+    }
     return scene;
 }
 
@@ -383,7 +393,7 @@ void ResourceManager::loadHDR(const std::string& path)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    auto captureProjection = CameraComponent::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
+    auto captureProjection = Matrix4::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
     Matrix4 captureViews[] = {
         Matrix4::lookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
         Matrix4::lookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
@@ -658,7 +668,6 @@ void ResourceManager::activateFramebuffer(const std::string& name) const {
     if (name.empty())
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
         return;
@@ -672,7 +681,6 @@ void ResourceManager::activateFramebuffer(const std::string& name) const {
     const auto frameBuffer = m_framebuffers.at(name);
 
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_id);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 }
@@ -737,7 +745,7 @@ void ResourceManager::makeIrradiancePrefilterMap(unsigned int cubeMap)
     loadMaterial("assets/defaultAssets/Materials/irradiance.json");
     auto mat = getMaterial("assets/defaultAssets/Materials/irradiance.json");
 
-    auto captureProjection = CameraComponent::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
+    auto captureProjection = Matrix4::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
     Matrix4 captureViews[] = {
         Matrix4::lookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
         Matrix4::lookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
@@ -847,7 +855,7 @@ void ResourceManager::updateIrradiancePrefilterMap(unsigned int cubeMap)
     auto mesh = getModel("assets/defaultAssets/Models/cube.fbx").m_meshes[0];
     auto mat = getMaterial("assets/defaultAssets/Materials/irradiance.json");
 
-    auto captureProjection = CameraComponent::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
+    auto captureProjection = Matrix4::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
     Matrix4 captureViews[] = {
         Matrix4::lookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
         Matrix4::lookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
@@ -950,55 +958,6 @@ void ResourceManager::loadLights(Material mat)
             lightNumber++;
         }
     }
-}
-
-void ResourceManager::registerLight(LightComponent* light)
-{
-    auto func = [light](Scene* scene)
-    {
-        scene->m_lightComponents.push_back(light);
-    };
-
-    m_postRegistration.emplace_back(func);
-    light->setShadowMap(makeShadowMap(light));
-}
-
-FrameBuffer ResourceManager::makeShadowMap(LightComponent* light)
-{
-    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-
-    unsigned int depthMap;
-    glGenTextures(1, &depthMap);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                 SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    unsigned int depthMapFBO;
-    glGenFramebuffers(1, &depthMapFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    FrameBuffer shadowMap{};
-    shadowMap.m_id = depthMapFBO;
-    shadowMap.m_colorBuffer = depthMap;
-
-    return shadowMap;
-}
-
-void ResourceManager::activateShadowMap(LightComponent* light)
-{
-    glViewport(0, 0, 1024, 1024);
-    glBindFramebuffer(GL_FRAMEBUFFER, light->getShadowBuffer());
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
 }
 
 std::int32_t ResourceManager::convert_to_int(const char* buffer, const std::size_t len)
@@ -1182,15 +1141,6 @@ bool ResourceManager::load_wav(const std::string& filename, std::uint8_t& channe
     return true;
 }
 
-void ResourceManager::postSceneRegistration(Scene* scene)
-{
-    for (const auto& func : m_postRegistration)
-    {
-        func(scene);
-    }
-    m_postRegistration.clear();
-}
-
 void ResourceManager::loadSound(std::string& path)
 {
     if (m_loadedSounds.contains(path))
@@ -1251,6 +1201,35 @@ Sound ResourceManager::getSound(const std::string& path) const
     return m_loadedSounds.at(path);
 }
 
+void ResourceManager::makeShadowMap(LightComponent* light)
+{
+    if (light->getLightType() != DIR)
+    {
+        return;
+    }
+
+    unsigned int depthMap, depthMapFBO;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                 SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glGenFramebuffers(1, &depthMapFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+    light->m_shadowMap.m_colorBuffer = depthMap;
+    light->m_shadowMap.m_id = depthMapFBO;
+}
+
 int ResourceManager::initialize() {
     std::ifstream f("gameInit.json");
     nlohmann::json j = nlohmann::json::parse(f);
@@ -1307,6 +1286,8 @@ void ResourceManager::processMesh(const aiMesh* mesh, const std::string &path)
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
+    auto model = m_loadedModels.at(path);
+
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
@@ -1316,6 +1297,14 @@ void ResourceManager::processMesh(const aiMesh* mesh, const std::string &path)
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
         vertex.m_position = vector;
+
+        model.m_boundingBox.min.x = std::min(model.m_boundingBox.min.x, vector.x);
+        model.m_boundingBox.min.y = std::min(model.m_boundingBox.min.y, vector.y);
+        model.m_boundingBox.min.z = std::min(model.m_boundingBox.min.z, vector.z);
+
+        model.m_boundingBox.max.x = std::max(model.m_boundingBox.max.x, vector.x);
+        model.m_boundingBox.max.y = std::max(model.m_boundingBox.max.y, vector.y);
+        model.m_boundingBox.max.z = std::max(model.m_boundingBox.max.z, vector.z);
 
         vector.x = mesh->mNormals[i].x;
         vector.y = mesh->mNormals[i].y;
@@ -1376,7 +1365,8 @@ void ResourceManager::processMesh(const aiMesh* mesh, const std::string &path)
     map_mesh.m_EBO = EBO;
     map_mesh.m_indices = indices;
 
-    m_loadedModels.at(path).m_meshes.push_back(map_mesh);
+    model.m_meshes.push_back(map_mesh);
+    m_loadedModels.at(path) = model;
 }
 
 void ResourceManager::loadUniformMap()

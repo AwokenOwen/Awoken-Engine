@@ -42,27 +42,6 @@ public:
     Object* instantiateObject(Object* parent = nullptr);
 
     /**
-     * @brief Function used to prepare an object to be destroyed and the data freed
-     *
-     * @param object Object to be destroyed
-     */
-    void destroyObject(Object* object);
-
-    /**
-     * @brief Function used to put an object that draws to the screen into the update loop and draw to the screen
-     *
-     * @param renderer Pointer to the object that draws to the screen
-     */
-    void registerRenderer(Renderer* renderer);
-    /**
-     * @brief function used if the transparency of a renderer changes during runtime
-     *
-     * @param renderer the renderer that is getting changed
-     */
-    void updateTransparency(Renderer* renderer);
-    void setActiveRenderer(Renderer* renderer, bool active);
-
-    /**
      * @brief The getter for the current active scene
      *
      * @return The current active Scene
@@ -83,17 +62,15 @@ public:
      */
     void setBaseScene(const std::string& name);
 
-    /**
-     * @brief Function used for setting the active state of an object and added them to the correct enabled/disabled events
-     *
-     * @param object Object that the active state is changing on
-     * @param active the new active state
-     */
-    void setObjectActiveState(Object* object, bool active);
-
-    EVENT_ACCESSORS(m_updateEvent)
-    EVENT_ACCESSORS(m_destroyEvent)
-    EVENT_ACCESSORS(m_drawShadowMap)
+    EVENT_ACCESSORS(UpdateEvent)
+    EVENT_ACCESSORS(EnableEvent)
+    EVENT_ACCESSORS(DisableEvent)
+    EVENT_ACCESSORS(DestroyEvent)
+    EVENT_ACCESSORS(TransparentDrawEvent)
+    EVENT_ACCESSORS(OpaqueDrawEvent)
+    EVENT_ACCESSORS(ShadowMapDrawEvent, LightComponent*)
+    EVENT_ACCESSORS(LoadEvent)
+    EVENT_ACCESSORS(UnloadEvent)
 
 private:
     /**
@@ -128,21 +105,23 @@ private:
     std::vector<Object*> m_tobeAdded{};
     std::vector<Object*> m_tobeDestroyed{};
 
-    Event<> m_updateEvent{};
-    Event<> m_enableEvent{};
-    Event<> m_disableEvent{};
-    Event<> m_destroyEvent{};
+    Event<> UpdateEvent{};
+    Event<> EnableEvent{};
+    Event<> DisableEvent{};
+    Event<> DestroyEvent{};
 
-    Event<> m_transparentDrawEvent{};
-    Event<> m_opaqueDrawEvent{};
+    Event<> TransparentDrawEvent{};
+    Event<> OpaqueDrawEvent{};
 
-    Event<LightComponent*> m_drawShadowMap{};
+    Event<LightComponent*> ShadowMapDrawEvent{};
 
-    Event<> m_loadEvent{};
-    Event<> m_unloadEvent{};
+    Event<> LoadEvent{};
+    Event<> UnloadEvent{};
 
     std::string m_baseScene{"default"};
     std::string m_activeSceneName{};
 
     Scene* m_activeScene{nullptr};
+
+    std::vector<LightComponent*> m_lights{};
 };

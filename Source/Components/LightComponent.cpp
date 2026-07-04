@@ -4,33 +4,34 @@
 
 #include "LightComponent.h"
 
+#include "CameraComponent.h"
 #include "Object.h"
 #include "ResourceManager.h"
 
-void LightComponent::setShadowMap(FrameBuffer shadowMap)
+std::vector<Matrix4> LightComponent::getLightSpaceMatrix() const
 {
-    m_shadowMap = shadowMap;
-}
-
-unsigned int LightComponent::getShadowMap() const
-{
-    return m_shadowMap.m_colorBuffer;
-}
-
-unsigned int LightComponent::getShadowBuffer() const
-{
-    return m_shadowMap.m_id;
-}
-
-std::vector<Matrix4> LightComponent::getViewMatrix() const
-{
-    auto v = std::vector<Matrix4>();
-    v.push_back(Matrix4::lookAt(-1.0f * m_direction, Vector3(), Vector3::up()));
     if (m_type != DIR)
     {
-        Log.logError("Function should have stopped at the draw shadow map function...");
+        Log.logError("No code for point shadows made yet");
+        return {};
     }
+
+    constexpr float near_plane = 1.0f, far_plane = 10.0f;
+    const auto lightView = Matrix4::lookAt(Vector3(0, 1, 0), Vector3(0,0,0), Vector3::up());
+    const auto lightProjection = Matrix4::makeOrthographicMatrix(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+
+    const auto lightSpaceMatrix = lightProjection * lightView;
+
+    auto v = std::vector<Matrix4>();
+    v.push_back(lightSpaceMatrix);
     return v;
+}
+
+void LightComponent::activateShadowMap() const
+{
+    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMap.m_id);
+    glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void LightComponent::start()
@@ -68,6 +69,10 @@ void LightComponent::fromJson(nlohmann::json j)
     m_direction = Vector3::fromJson(j["Direction"]);
     m_color = Vector3::fromJson(j["Color"]);
     m_power = j["Power"];
+}
 
-    Resource.registerLight(this);
+void LightComponent::destroy()
+{
+    //Make sure to remove light
+    delete this;
 }

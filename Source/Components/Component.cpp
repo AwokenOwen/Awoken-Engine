@@ -8,9 +8,9 @@
 Component::Component(Object *parent) {
     p_parent = parent;
 
-    p_parent->addTo_m_startEvent(this, &Component::start);
-    p_parent->addTo_m_updateEvent(this, &Component::update);
-    p_parent->addTo_m_destroyEvent(this, &Component::destroy);
+    p_parent->addStartEvent(this, &Component::start);
+    p_parent->addUpdateEvent(this, &Component::update);
+    p_parent->addDestroyEvent(this, &Component::destroy);
 }
 
 Object * Component::getParent() const {

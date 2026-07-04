@@ -128,11 +128,11 @@ public:
     template<typename T>
     T* getComponent();
 
-    EVENT_ACCESSORS(m_startEvent)
-    EVENT_ACCESSORS(m_updateEvent)
-    EVENT_ACCESSORS(m_enableEvent)
-    EVENT_ACCESSORS(m_disableEvent)
-    EVENT_ACCESSORS(m_destroyEvent)
+    EVENT_ACCESSORS(StartEvent)
+    EVENT_ACCESSORS(UpdateEvent)
+    EVENT_ACCESSORS(EnableEvent)
+    EVENT_ACCESSORS(DisableEvent)
+    EVENT_ACCESSORS(DestroyEvent)
 
 
 protected:
@@ -170,11 +170,11 @@ private:
 
     bool m_activeState{true};
 
-    Event<> m_startEvent{};
-    Event<> m_updateEvent{};
-    Event<> m_enableEvent{};
-    Event<> m_disableEvent{};
-    Event<> m_destroyEvent{};
+    Event<> StartEvent{};
+    Event<> UpdateEvent{};
+    Event<> EnableEvent{};
+    Event<> DisableEvent{};
+    Event<> DestroyEvent{};
 
     nlohmann::json toJson();
     static Object* fromJson(const nlohmann::json& j);

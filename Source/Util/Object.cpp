@@ -100,47 +100,47 @@ bool Object::getActiveState() const {
 void Object::setActiveState(const bool active) {
     if (m_activeState == active)
         return;
+    active ? World.addUpdateEvent(this, &Object::update) : World.removeUpdateEvent(this, &Object::update);
     m_activeState = active;
-    World.setObjectActiveState(this, active);
 }
 
 void Object::setComponentActiveState(Component *component, const bool active) {
     if (active) {
-        m_enableEvent.add(component, &Component::enable);
-        m_updateEvent.add(component, &Component::update);
+        EnableEvent.add(component, &Component::enable);
+        UpdateEvent.add(component, &Component::update);
     }else {
-        m_disableEvent.add(component, &Component::disable);
-        m_updateEvent.remove(component, &Component::update);
+        DisableEvent.add(component, &Component::disable);
+        UpdateEvent.remove(component, &Component::update);
     }
 }
 
 void Object::update() {
-    m_startEvent.callEvent();
-    m_startEvent.clearEvent();
+    StartEvent.callEvent();
+    StartEvent.clearEvent();
 
-    m_updateEvent.callEvent();
+    UpdateEvent.callEvent();
 }
 
 void Object::enable() {
-    m_enableEvent.callEvent();
+    EnableEvent.callEvent();
 }
 
 void Object::disable() {
-    m_disableEvent.callEvent();
+    DisableEvent.callEvent();
 }
 
 void Object::destroy() {
-    m_destroyEvent.callEvent();
+    DestroyEvent.callEvent();
 }
 
 void Object::end() {
     for (const auto child : m_children) {
         child->end();
     }
-    m_destroyEvent.callEvent();
+    DestroyEvent.callEvent();
 
-    World.removeFrom_m_updateEvent(this, &Object::update);
-    World.removeFrom_m_updateEvent(this, &Object::destroy);
+    World.removeUpdateEvent(this, &Object::update);
+    World.removeDestroyEvent(this, &Object::destroy);
     delete this;
 }
 
@@ -208,7 +208,7 @@ Object* Object::fromJson(const nlohmann::json& j)
         a->m_children.push_back(child);
     }
 
-    World.addTo_m_updateEvent(a, &Object::update);
+    World.addUpdateEvent(a, &Object::update);
 
     return a;
 }

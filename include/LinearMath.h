@@ -259,6 +259,8 @@ public:
 
     [[nodiscard]] static Matrix4 makeModelMatrix(const Vector3 &position, const Quaternion &rotation, const Vector3 &scale);
     [[nodiscard]] static Matrix4 lookAt(const Vector3 &eye, const Vector3 &target, const Vector3 &up);
+    [[nodiscard]] static Matrix4 makePerspectiveMatrix(float fov, float aspect, float near, float far);
+    [[nodiscard]] static Matrix4 makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far);
 
     const float* toFloatArray() {
         floatArray[0]=a1; floatArray[1]=b1; floatArray[2]=c1; floatArray[3]=d1;
@@ -1653,6 +1655,26 @@ inline Matrix4 Matrix4::lookAt(const Vector3& eye, const Vector3& target, const 
        -f.x, -f.y, -f.z,  Vector3::dot(f, eye),
         0.0,  0.0,  0.0,  1.0
    };
+}
+
+inline Matrix4 Matrix4::makePerspectiveMatrix(float fov, float aspect, float near, float far)
+{
+    return {
+        cot(fov / 2.0f) / aspect, 0, 0, 0,
+        0, cot(fov / 2.0f), 0, 0,
+        0, 0, (near + far) / (near - far), (2 * near * far) / (near - far),
+        0, 0, -1, 0
+    };
+}
+
+inline Matrix4 Matrix4::makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far)
+{
+    return {
+        2.0f / (right - left),  0.0f,                   0.0f,                  -(right + left) / (right - left),
+        0.0f,                   2.0f / (top - bottom),  0.0f,                  -(top + bottom) / (top - bottom),
+        0.0f,                   0.0f,                  -2.0f / (far - near),   -(far + near)   / (far - near),
+        0.0f,                   0.0f,                   0.0f,                   1.0f
+    };
 }
 
 inline Matrix4 Matrix4::fromJson(nlohmann::json json)

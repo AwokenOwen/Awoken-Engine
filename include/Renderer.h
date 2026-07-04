@@ -12,13 +12,19 @@ public:
     virtual ~Renderer() = default;
     [[nodiscard]] bool getTransparency() const;
     void setTransparency(bool transparency);
-    void registerRenderer(bool transparency);
 
-    virtual void load() = 0;
-    virtual void unload() = 0;
+protected:
+    void addToDraw();
+    void removeFromDraw();
+    void addToShadowDraw();
+    void removeFromShadowDraw();
+
 private:
     virtual void draw() = 0;
+    virtual void drawToShadowMap(LightComponent* light) = 0;
     bool m_transparent{};
+    bool inDraw{};
+    bool inShadowDraw{};
 };
 
 inline bool Renderer::getTransparency() const {
@@ -26,14 +32,46 @@ inline bool Renderer::getTransparency() const {
 }
 
 inline void Renderer::setTransparency(const bool transparency) {
+    const bool draw = inDraw;
+    const bool shadow = inShadowDraw;
+
+    if (draw) removeFromDraw();
+    if (shadow) removeFromShadowDraw();
+
     m_transparent = transparency;
-    if (m_transparent != transparency) {
-        World.updateTransparency(this);
-    }
+
+    if (draw) addToDraw();
+    if (shadow) addToShadowDraw();
 }
 
-inline void Renderer::registerRenderer(const bool transparency)
+inline void Renderer::addToDraw()
 {
-    m_transparent = transparency;
-    World.registerRenderer(this);
+    m_transparent ? World.addTransparentDrawEvent(this, &Renderer::draw) : World.addOpaqueDrawEvent(this, &Renderer::draw);
+    inDraw = true;
+}
+
+inline void Renderer::removeFromDraw()
+{
+    m_transparent ? World.removeTransparentDrawEvent(this, &Renderer::draw) : World.removeOpaqueDrawEvent(this, &Renderer::draw);
+    inDraw = false;
+}
+
+inline void Renderer::addToShadowDraw()
+{
+    inShadowDraw = true;
+    if (m_transparent)
+    {
+        return;
+    }
+    World.addShadowMapDrawEvent(this, &Renderer::drawToShadowMap);
+}
+
+inline void Renderer::removeFromShadowDraw()
+{
+    inShadowDraw = false;
+    if (m_transparent)
+    {
+        return;
+    }
+    World.removeShadowMapDrawEvent(this, &Renderer::drawToShadowMap);
 }

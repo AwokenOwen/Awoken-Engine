@@ -13,12 +13,6 @@
 
 struct Texture;
 
-enum BackgroundType
-{
-    SOLID = 0,
-    SKYBOX = 1
-};
-
 class CameraComponent : public Component, public Renderer{
     friend class ResourceManager;
 public:
@@ -31,13 +25,6 @@ public:
     [[nodiscard]] Matrix4 getPerspectiveMatrix() const;
     [[nodiscard]] Matrix4 getOrthographicMatrix() const;
     [[nodiscard]] Matrix4 getProjectionMatrix() const;
-    [[nodiscard]] static Matrix4 makePerspectiveMatrix(float fov, float aspect, float near, float far);
-    [[nodiscard]] static Matrix4 makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far);
-
-    void load() override;
-    void unload() override;
-
-    void setBackgroundType(BackgroundType type);
 private:
     float m_fov{toRadians(90.0f)};
     float m_near{0.001f};
@@ -55,10 +42,9 @@ private:
     void disable() override;
 
     void draw() override;
+    void drawToShadowMap(LightComponent* light) override;
+    void destroy() override;
 
-    BackgroundType m_currentBackgroundType{BackgroundType::SKYBOX};
-
-    Vector3 m_backgroundColor{0.0f, 0.0f, 0.0f};
     std::string m_skyboxTextureName{"assets/defaultAssets/Skybox/skybox.hdr"};
     Texture m_skyboxTexture{};
     std::string m_skyboxModelName{"assets/defaultAssets/Models/cube.fbx"};
