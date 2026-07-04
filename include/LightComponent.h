@@ -24,8 +24,8 @@ public:
         return m_type;
     };
 
-    [[nodiscard]] std::vector<Matrix4> getLightSpaceMatrix() const;
     void activateShadowMap() const;
+    [[nodiscard]] Matrix4 getLightViewProjectionMatrix() const;
 
 private:
     LightType m_type{DIR};

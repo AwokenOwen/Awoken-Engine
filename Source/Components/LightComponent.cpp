@@ -8,30 +8,64 @@
 #include "Object.h"
 #include "ResourceManager.h"
 
-std::vector<Matrix4> LightComponent::getLightSpaceMatrix() const
-{
-    if (m_type != DIR)
-    {
-        Log.logError("No code for point shadows made yet");
-        return {};
-    }
-
-    constexpr float near_plane = 1.0f, far_plane = 10.0f;
-    const auto lightView = Matrix4::lookAt(Vector3(0, 1, 0), Vector3(0,0,0), Vector3::up());
-    const auto lightProjection = Matrix4::makeOrthographicMatrix(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-
-    const auto lightSpaceMatrix = lightProjection * lightView;
-
-    auto v = std::vector<Matrix4>();
-    v.push_back(lightSpaceMatrix);
-    return v;
-}
-
 void LightComponent::activateShadowMap() const
 {
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMap.m_id);
     glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+Matrix4 LightComponent::getLightViewProjectionMatrix() const
+{
+    Vector3 center{};
+    const auto corners = getFrustumCornersWorldSpace(Resource.getMainCamera()->getPerspectiveMatrix(), Resource.getMainCamera()->getViewMatrix());
+    for (const auto& v : corners)
+    {
+        center = center + Vector3{v};
+    }
+    center = center / static_cast<float>(corners.size());
+
+    const auto lightView = Matrix4::lookAt(center + m_direction, center, Vector3{0.0f, 1.0f, 0.0f});
+
+
+    float minX = std::numeric_limits<float>::max();
+    float maxX = std::numeric_limits<float>::lowest();
+    float minY = std::numeric_limits<float>::max();
+    float maxY = std::numeric_limits<float>::lowest();
+    float minZ = std::numeric_limits<float>::max();
+    float maxZ = std::numeric_limits<float>::lowest();
+    for (const auto& v : corners)
+    {
+        const auto trf = lightView * v;
+        minX = std::min(minX, trf.x);
+        maxX = std::max(maxX, trf.x);
+        minY = std::min(minY, trf.y);
+        maxY = std::max(maxY, trf.y);
+        minZ = std::min(minZ, trf.z);
+        maxZ = std::max(maxZ, trf.z);
+    }
+
+    constexpr float zMult = 10.0f;
+    if (minZ < 0)
+    {
+        minZ *= zMult;
+    }
+    else
+    {
+        minZ /= zMult;
+    }
+    if (maxZ < 0)
+    {
+        maxZ /= zMult;
+    }
+    else
+    {
+        maxZ *= zMult;
+    }
+
+    const auto lightProjection = Matrix4::makeOrthographicMatrix(minX, maxX, minY, maxY, minZ, maxZ);
+
+    return lightProjection * lightView;
 }
 
 void LightComponent::start()

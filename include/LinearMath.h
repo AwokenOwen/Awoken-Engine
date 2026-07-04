@@ -1707,3 +1707,30 @@ inline nlohmann::json Matrix4::toJson()
     j["d4"] = this->d4;
     return j;
 }
+
+std::vector<Vector4> getFrustumCornersWorldSpace(const Matrix4& projectionMatrix, const Matrix4& viewMatrix);
+
+inline std::vector<Vector4> getFrustumCornersWorldSpace(const Matrix4& projectionMatrix, const Matrix4& viewMatrix)
+{
+    const auto inv = (projectionMatrix * viewMatrix).inverse();
+
+    std::vector<Vector4> frustumCorners;
+    for (int x = 0; x < 2; x++)
+    {
+        for (int y = 0; y < 2; y++)
+        {
+            for (int z = 0; z < 2; z++)
+            {
+                const Vector4 pt =
+                    inv * Vector4(
+                      2.0f * x - 1.0f,
+                      2.0f * y - 1.0f,
+                      2.0f * z - 1.0f,
+                        1.0f
+                      );
+                frustumCorners.push_back(pt / pt.w);
+            }
+        }
+    }
+    return frustumCorners;
+}

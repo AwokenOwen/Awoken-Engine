@@ -27,6 +27,7 @@ void ModelRendererComponent::update()
     m_model.m_boundingBox = m_model.m_boundingBox * getParent()->getWorldMatrix();
 
     addToDraw();
+    addToShadowDraw();
 }
 
 void ModelRendererComponent::enable()
@@ -90,19 +91,7 @@ void ModelRendererComponent::draw()
 
 void ModelRendererComponent::drawToShadowMap(LightComponent* light)
 {
-    m_shadowMapMaterial.load();
-    const auto model = getParent()->getWorldMatrix();
-    const auto lightSpaceMatrix = light->getLightSpaceMatrix()[0];
 
-    m_shadowMapMaterial.setUniform("model", model);
-    m_shadowMapMaterial.setUniform("lightSpaceMatrix", lightSpaceMatrix);
-
-    for (int i = 0; i < m_model.meshCount(); ++i)
-    {
-        glBindVertexArray(m_model.m_meshes[i].VAO());
-        glDrawElements(GL_TRIANGLES, m_model.m_meshes[i].indexCount(), GL_UNSIGNED_INT, nullptr);
-        glBindVertexArray(0);
-    }
 }
 
 void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
