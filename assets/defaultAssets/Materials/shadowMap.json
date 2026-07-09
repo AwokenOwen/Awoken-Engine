@@ -1,0 +1,7 @@
+{
+  "FragmentShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/lightShadow.frag",
+  "Textures": [],
+  "Type": 0,
+  "Uniforms": [],
+  "VertexShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/lightShadow.vert"
+}
