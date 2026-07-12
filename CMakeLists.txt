@@ -54,20 +54,12 @@ add_library(Awoken_Engine STATIC
 )
 
 target_include_directories(Awoken_Engine PUBLIC
-        glad/include
         include
-        assimp/include
         freetype/include
-        glfw/include
-        json/include
-        openAL/include
 )
 
 target_link_directories(Awoken_Engine PUBLIC
-        assimp
-        freetype
-        glfw
-        openAL
+    lib
 )
 
 # MSVC-specific compiler options
@@ -93,12 +85,6 @@ if(IS_MINGW)
             libglfw3.a
             libopenal.dll.a
             opengl32
-            gdi32
-            winmm
-            ole32
-            uuid
-            imm32
-            dwmapi
     )
 elseif(IS_MSVC_BUILD)
     # MSVC expects .lib files for import libs and static libs
@@ -108,14 +94,6 @@ elseif(IS_MSVC_BUILD)
             glfw3.lib
             OpenAL32.lib
             opengl32.lib
-            gdi32.lib
-            winmm.lib
-            ole32.lib
-            uuid.lib
-            imm32.lib
-            dwmapi.lib
-            user32.lib
-            shell32.lib
     )
     # Copy required DLLs to bin alongside the executable
     add_custom_command(TARGET Awoken_Engine POST_BUILD
