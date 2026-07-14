@@ -103,6 +103,7 @@ void WorldManager::update() {
         light->activateShadowMap();
         ShadowMapDrawEvent.callEvent(light);
     }
+    ShadowMapDrawEvent.clearEvent();
     Window.resetViewport();
 
     // Draw all drawers to the screen/framebuffer, transparent first then opaque

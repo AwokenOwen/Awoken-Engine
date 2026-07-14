@@ -23,6 +23,7 @@
                 }
             ],
             "Name": "Untitled_0",
+            "ObjectType": 0,
             "Position": {
                 "x": 0.0,
                 "y": 0.0,
@@ -54,6 +55,7 @@
                 }
             ],
             "Name": "Untitled_1",
+            "ObjectType": 0,
             "Position": {
                 "x": 0.0,
                 "y": 1.0,
@@ -85,6 +87,7 @@
                 }
             ],
             "Name": "Untitled_2",
+            "ObjectType": 0,
             "Position": {
                 "x": 0.0,
                 "y": -2.0,
@@ -119,9 +122,40 @@
                 }
             ],
             "Name": "Untitled_3",
+            "ObjectType": 0,
             "Position": {
                 "x": 0.0,
                 "y": 1.0,
+                "z": 0.0
+            },
+            "Rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        },
+        {
+            "ActiveState": true,
+            "Children": [],
+            "Components": [
+                {
+                    "Font": "assets/defaultAssets/Fonts/arial.ttf",
+                    "Material": "assets/defaultAssets/Materials/unlit.json",
+                    "Text": "Hello World!",
+                    "Type": "TextRenderer"
+                }
+            ],
+            "Name": "Untitled_4",
+            "ObjectType": 1,
+            "Position": {
+                "x": 0.0,
+                "y": 0.0,
                 "z": 0.0
             },
             "Rotation": {

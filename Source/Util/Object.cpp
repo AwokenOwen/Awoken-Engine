@@ -114,6 +114,16 @@ void Object::setComponentActiveState(Component *component, const bool active) {
     }
 }
 
+void Object::setObjectType(const ObjectType type)
+{
+    m_objectType = type;
+}
+
+ObjectType Object::getObjectType() const
+{
+    return m_objectType;
+}
+
 void Object::update() {
     StartEvent.callEvent();
     StartEvent.clearEvent();

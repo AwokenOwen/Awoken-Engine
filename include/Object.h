@@ -10,6 +10,12 @@
 #include "LogManager.h"
 #include "nlohmann/json.hpp"
 
+enum ObjectType
+{
+    WorldObject,
+    ScreenObject
+};
+
 class Component;
 class Object {
     friend class WorldManager;
@@ -134,6 +140,8 @@ public:
     EVENT_ACCESSORS(DisableEvent)
     EVENT_ACCESSORS(DestroyEvent)
 
+    void setObjectType(ObjectType type);
+    [[nodiscard]] ObjectType getObjectType() const;
 
 protected:
     /**
@@ -175,6 +183,8 @@ private:
     Event<> EnableEvent{};
     Event<> DisableEvent{};
     Event<> DestroyEvent{};
+
+    ObjectType m_objectType{ObjectType::WorldObject};
 
     nlohmann::json toJson();
     static Object* fromJson(const nlohmann::json& j);

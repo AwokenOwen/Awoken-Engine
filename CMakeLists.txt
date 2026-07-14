@@ -51,11 +51,12 @@ add_library(Awoken_Engine STATIC
         include/LightComponent.h
         include/AudioSourceComponent.h
         Source/Components/AudioSourceComponent.cpp
+        Source/Components/TextRendererComponent.cpp
+        include/TextRendererComponent.h
 )
 
 target_include_directories(Awoken_Engine PUBLIC
         include
-        freetype/include
 )
 
 target_link_directories(Awoken_Engine PUBLIC
@@ -111,6 +112,7 @@ else()
             libfreetype.a
             libglfw3LINUX.a
             libopenal.so
+            -lz
     )
 endif()
 

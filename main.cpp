@@ -10,6 +10,7 @@
 #include "CameraComponent.h"
 #include "Object.h"
 #include "ResourceManager.h"
+#include "TextRendererComponent.h"
 
 int main(int argc, char* argv[])
 {
@@ -40,10 +41,15 @@ int main(int argc, char* argv[])
 
     camera->setLocalPosition(Vector3(0, 1, 0));
 
+    auto text = new Object();
+    text->setObjectType(ScreenObject);
+    text->addComponent<TextRendererComponent>();
+
     scene->m_rootObjects.push_back(dir);
     scene->m_rootObjects.push_back(cube);
     scene->m_rootObjects.push_back(floor);
     scene->m_rootObjects.push_back(camera);
+    scene->m_rootObjects.push_back(text);
     std::ofstream f("assets/defaultAssets/Scenes/testScene.scene");
     f << scene->toJson().dump(4)  << std::endl;
 
@@ -52,6 +58,7 @@ int main(int argc, char* argv[])
     delete floor;
     delete scene;
     delete camera;
+    delete text;
 
     // Then Alter gameInit.json to load the scene
     // Primary is the first scene that will be loaded at start

@@ -104,6 +104,7 @@ void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
     const auto proj = Resource.getMainCamera()->getProjectionMatrix();
     const auto orthographic = Resource.getMainCamera()->getOrthographicMatrix();
 
+
     switch (mat.getType())
     {
     case NONE:

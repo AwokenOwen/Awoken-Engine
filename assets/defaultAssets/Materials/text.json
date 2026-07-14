@@ -1,0 +1,17 @@
+{
+    "FragmentShader": "assets/defaultAssets/Shaders/text.frag",
+    "Textures": [],
+    "Type": 1,
+    "Uniforms": [
+        {
+            "Name": "color",
+            "Type": "Vector3",
+            "Value": {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 1.0
+            }
+        }
+    ],
+    "VertexShader": "assets/defaultAssets/Shaders/defaultUI.vert"
+}

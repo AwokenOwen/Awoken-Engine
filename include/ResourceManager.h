@@ -94,6 +94,8 @@ struct Material
             glUniform4f(uniform, value.x, value.y, value.z, value.w);
         else if constexpr (std::is_same_v<T, Matrix4>)
             glUniformMatrix4fv(uniform, 1, GL_FALSE, value.toFloatArray());
+        else if constexpr (std::is_same_v<T, std::vector<int>>)
+            glUniform1iv(uniform, 1, &value[0]);
     }
 private:
     unsigned int m_shaderProgram{};
@@ -153,6 +155,37 @@ struct Model
     }
 private:
     BoundingBox m_boundingBox{};
+    int listeners{1};
+};
+
+/**
+ * @brief Struct for using freetype and displaying chars to the screen
+ */
+struct Character {
+    /**
+     * @brief OpenGL texture of the character
+     */
+    int index{};
+    /**
+     * @brief Size of glyph
+     */
+    Vector2   Size{};
+    /**
+     * @brief Offset from baseline to left/top of glyph
+     */
+    Vector2   Bearing{};
+    /**
+     * Offset to advance to next glyph
+     */
+    long Advance{};
+};
+
+struct Font
+{
+    friend class ResourceManager;
+    unsigned int m_textureArray{};
+    std::map<char, Character> m_characters{};
+private:
     int listeners{1};
 };
 
@@ -303,6 +336,11 @@ public:
 
     void loadSound(std::string& path);
     [[nodiscard]] Sound getSound(const std::string& path) const;
+    void unloadSound(const std::string& path);
+
+    void loadFont(const std::string& path);
+    [[nodiscard]] Font getFont(const std::string& path) const;
+    void unloadFont(const std::string& path);
 
 private:
     /**
@@ -368,4 +406,5 @@ private:
     std::map<std::string, FrameBuffer> m_framebuffers{};
 
     std::map<std::string, Sound> m_loadedSounds{};
+    std::map<std::string, Font> m_loadedFonts{};
 };

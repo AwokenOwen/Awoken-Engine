@@ -19,6 +19,11 @@
 
 #include "assimp/postprocess.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+#include "TextRendererComponent.h"
+
 nlohmann::json Scene::toJson() const {
     nlohmann::json j;
 
@@ -1201,6 +1206,122 @@ Sound ResourceManager::getSound(const std::string& path) const
     return m_loadedSounds.at(path);
 }
 
+void ResourceManager::unloadSound(const std::string& path)
+{
+    if (!m_loadedSounds.contains(path))
+    {
+        Log.logError("Could not unload sound %s", path.c_str());
+        return;
+    }
+    m_loadedSounds.at(path).listeners--;
+    if (m_loadedSounds.at(path).listeners <= 0)
+    {
+        m_loadedSounds.erase(path);
+    }
+}
+
+void ResourceManager::unloadFont(const std::string& path)
+{
+    if (!m_loadedFonts.contains(path))
+    {
+        Log.logError("Could not unload font %s", path.c_str());
+        return;
+    }
+    if (m_loadedFonts.at(path).listeners == 0)
+    {
+        m_loadedFonts.erase(path);
+    }
+}
+
+void ResourceManager::loadFont(const std::string& path)
+{
+    if (m_loadedFonts.contains(path))
+    {
+        Log.log("%s already loaded...", path.c_str());
+        m_loadedFonts.at(path).listeners++;
+        return;
+    }
+    std::map<char, Character> characters{};
+    FT_Face face{};
+    FT_Library ft{};
+
+    if (FT_Init_FreeType(&ft))
+    {
+        Log.logError("Could not init FreeType Library");
+        return;
+    }
+
+    if (FT_New_Face(ft, path.c_str(), 0, &face))
+    {
+        Log.logError("Could not load font");
+        return;
+    }
+
+    FT_Set_Pixel_Sizes(face, 0, 48);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
+
+    unsigned int textureArray{};
+
+    glGenTextures(1, &textureArray);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, 256, 256, 128, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+
+    for (unsigned char c = 0; c < 128; c++)
+    {
+        // load character glyph
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+        {
+            Log.logError("Freetype: Failed to load Glyph");
+            continue;
+        }
+        // generate texture
+        glTexSubImage3D(
+            GL_TEXTURE_2D_ARRAY,
+            0, 0, 0, static_cast<int>(c),
+            face->glyph->bitmap.width,
+            face->glyph->bitmap.rows, 1,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            face->glyph->bitmap.buffer
+        );
+        // set texture options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // now store character for later use
+        Character character = {
+            static_cast<int>(c),
+            Vector2(static_cast<int>(face->glyph->bitmap.width), static_cast<int>(face->glyph->bitmap.rows)),
+            Vector2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+            face->glyph->advance.x
+        };
+        characters.insert({c, character});
+
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    }
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+
+    auto font = Font{};
+    font.m_textureArray = textureArray;
+    font.m_characters = characters;
+
+    m_loadedFonts.insert({path, font});
+}
+
+Font ResourceManager::getFont(const std::string& path) const
+{
+    if (!m_loadedFonts.contains(path))
+    {
+        Log.logError("%s is not a loaded font", path.c_str());
+        return Font{};
+    }
+    return m_loadedFonts.at(path);
+}
+
 void ResourceManager::makeShadowMap(LightComponent* light)
 {
     if (light->getLightType() != DIR)
@@ -1228,6 +1349,7 @@ int ResourceManager::initialize() {
     registerComponent<ModelRendererComponent>("ModelRenderer");
     registerComponent<LightComponent>("Light");
     registerComponent<AudioSourceComponent>("AudioSource");
+    registerComponent<TextRendererComponent>("TextRenderer");
 
     loadUniformMap();
     makePostprocessingScreen();
