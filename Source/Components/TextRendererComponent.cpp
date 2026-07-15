@@ -91,8 +91,8 @@ void TextRendererComponent::draw()
     transforms.resize(400);
     letterMap.resize(400);
 
-    float x = getParent()->getWorldPosition().x;
-    float y = getParent()->getWorldPosition().y;
+    float x = getParent()->getWorldPosition().x();
+    float y = getParent()->getWorldPosition().y();
 
     int workingIndex = 0;
 
@@ -103,17 +103,17 @@ void TextRendererComponent::draw()
 
         if (*c == '\n')
         {
-            y -= ch.Bearing.y;
-            x = getParent()->getWorldPosition().x;
+            y -= ch.Bearing.y();
+            x = getParent()->getWorldPosition().x();
         }else if (*c == ' ')
         {
             x += ch.Advance >> 6;
         }else
         {
-            float xpos = x + ch.Bearing.x;
-            float ypos = y - (256 - ch.Bearing.y);
+            float xpos = x + ch.Bearing.x();
+            float ypos = y - (256 - ch.Bearing.y());
 
-            //transforms[workingIndex] = Matrix4::Translate(Matrix4(), Vector3(xpos, ypos, 0.0f)) * Matrix4::Scale(Matrix4(), Vector3(256, 256, 0));
+            transforms[workingIndex] = Matrix4::Translate(Matrix4(), Vector3(xpos, ypos, 0.0f)) * Matrix4::Scale(Matrix4(), Vector3(256, 256, 0));
             letterMap[workingIndex] = ch.index;
 
             x += (ch.Advance >> 6); // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))

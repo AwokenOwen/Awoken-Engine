@@ -2,6 +2,7 @@
 // Created by AwokenOwen on 5/12/26.
 //
 #include <fstream>
+#include <iostream>
 
 #include "AudioSourceComponent.h"
 #include "GameManager.h"
@@ -39,7 +40,7 @@ int main(int argc, char* argv[])
     auto camera = new Object();
     camera->addComponent<CameraComponent>();
 
-    camera->setLocalPosition(Vector3(0, 1, 0));
+    camera->setLocalPosition(Vector3(0, 0, 0));
 
     auto text = new Object();
     text->setObjectType(ScreenObject);

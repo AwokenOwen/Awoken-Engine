@@ -87,13 +87,13 @@ struct Material
         else if constexpr (std::is_same_v<T, float>)
             glUniform1f(uniform, value);
         else if constexpr (std::is_same_v<T, Vector2>)
-            glUniform2f(uniform, value.x, value.y);
+            glUniform2f(uniform, value.x(), value.y());
         else if constexpr (std::is_same_v<T, Vector3>)
-            glUniform3f(uniform, value.x, value.y, value.z);
+            glUniform3f(uniform, value.x(), value.y(), value.z());
         else if constexpr (std::is_same_v<T, Vector4>)
-            glUniform4f(uniform, value.x, value.y, value.z, value.w);
+            glUniform4f(uniform, value.x(), value.y(), value.z(), value.w());
         else if constexpr (std::is_same_v<T, Matrix4>)
-            glUniformMatrix4fv(uniform, 1, GL_FALSE, value.toFloatArray());
+            glUniformMatrix4fv(uniform, 1, GL_FALSE, &value[0][0]);
         else if constexpr (std::is_same_v<T, std::vector<int>>)
             glUniform1iv(uniform, 1, &value[0]);
     }

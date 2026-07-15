@@ -16,13 +16,12 @@ Matrix4 CameraComponent::getViewMatrix() const {
 
     const Vector3 pos     = getParent()->getWorldPosition();
     const Vector3 forward = getParent()->getWorldForward().normalize();
-    const Vector3 up      = getParent()->getWorldUp();
 
-    return Matrix4::lookAt(pos, pos + forward, up);
+    return Matrix4::LookAt(pos, pos + forward, Vector3::up());
 }
 
 Matrix4 CameraComponent::getPerspectiveMatrix()const {
-    return Matrix4::makePerspectiveMatrix(m_fov, Window.getAspectRatio(), m_near, m_far);
+    return Matrix4::PerspectiveMatrix(m_fov, Window.getAspectRatio(), m_near, m_far);
 }
 
 Matrix4 CameraComponent::getOrthographicMatrix() const
@@ -32,7 +31,7 @@ Matrix4 CameraComponent::getOrthographicMatrix() const
     float top = Window.getViewportHeight() / 2.0f;
     float bottom = -Window.getViewportHeight() / 2.0f;
 
-    return Matrix4::makeOrthographicMatrix(left, right, bottom, top, m_near, m_far);
+    return Matrix4::OrthographicMatrix(left, right, bottom, top, m_near, m_far);
 }
 
 Matrix4 CameraComponent::getProjectionMatrix() const
@@ -46,8 +45,10 @@ Matrix4 CameraComponent::getProjectionMatrix() const
 
 void CameraComponent::draw()
 {
-    glDisable(GL_CULL_FACE);
-    auto view = Matrix3(getViewMatrix());
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
+    const auto view = Matrix3(getViewMatrix());
     m_skyboxMaterial.setUniform("view", Matrix4(view));
     m_skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
     m_skyboxMaterial.load();
@@ -59,6 +60,8 @@ void CameraComponent::draw()
     glBindVertexArray(m_skyboxModel.m_meshes[0].VAO());
     glDrawElements(GL_TRIANGLES, m_skyboxModel.m_meshes[0].indexCount(), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
+
+    glDisable(GL_CULL_FACE);
 }
 
 void CameraComponent::drawToShadowMap(LightComponent* light)

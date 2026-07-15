@@ -25,7 +25,7 @@ Matrix4 LightComponent::getLightViewProjectionMatrix() const
     }
     center = center / static_cast<float>(corners.size());
 
-    const auto lightView = Matrix4::lookAt(center + m_direction, center, Vector3{0.0f, 1.0f, 0.0f});
+    const auto lightView = Matrix4::LookAt(center + m_direction, center, Vector3{0.0f, 1.0f, 0.0f});
 
 
     float minX = std::numeric_limits<float>::max();
@@ -37,12 +37,12 @@ Matrix4 LightComponent::getLightViewProjectionMatrix() const
     for (const auto& v : corners)
     {
         const auto trf = lightView * v;
-        minX = std::min(minX, trf.x);
-        maxX = std::max(maxX, trf.x);
-        minY = std::min(minY, trf.y);
-        maxY = std::max(maxY, trf.y);
-        minZ = std::min(minZ, trf.z);
-        maxZ = std::max(maxZ, trf.z);
+        minX = std::min(minX, trf.x());
+        maxX = std::max(maxX, trf.x());
+        minY = std::min(minY, trf.y());
+        maxY = std::max(maxY, trf.y());
+        minZ = std::min(minZ, trf.z());
+        maxZ = std::max(maxZ, trf.z());
     }
 
     constexpr float zMult = 10.0f;
@@ -63,7 +63,7 @@ Matrix4 LightComponent::getLightViewProjectionMatrix() const
         maxZ *= zMult;
     }
 
-    const auto lightProjection = Matrix4::makeOrthographicMatrix(minX, maxX, minY, maxY, minZ, maxZ);
+    const auto lightProjection = Matrix4::OrthographicMatrix(minX, maxX, minY, maxY, minZ, maxZ);
 
     return lightProjection * lightView;
 }

@@ -25,134 +25,613 @@ class Vector4;
 class Vector3;
 class Vector2 {
 public:
-    Vector2();
-    explicit Vector2(int x, int y);
-    explicit Vector2(float x, float y);
+    Vector2() = default;
+    Vector2(const float x, const float y){data[0] = x; data[1] = y;}
+    explicit Vector2(const float data[2]) {this->data[0] = data[0];this->data[1] = data[1];}
+    explicit Vector2(const Vector3 &v);
+    explicit Vector2(const Vector4 &v);
 
-    float x{};
-    float y{};
+    float data[2]{};
+
+    [[nodiscard]] float x() const {return data[0];}
+    [[nodiscard]] float y() const {return data[1];}
 
     [[nodiscard]] float magnitude() const;
     void Normalize();
     [[nodiscard]] Vector2 normalize() const;
-    void translate(const Vector2 &v);
 
     static float dot(const Vector2 &a, const Vector2 &b);
-    static Vector2 lerp(Vector2 a, Vector2 b, float t);
+    static Vector2 lerp(Vector2& a, Vector2& b, float t);
 
-    static Vector2 fromJson(nlohmann::json json);
+#pragma region operators
+    float& operator[](const int index) {
+        return data[index];
+    }
+    const float& operator[](const int index) const {
+        return data[index];
+    }
+    bool operator==(const Vector2& other) const
+    {
+        bool result = true;
+        for (int i = 0; i < 2; i++)
+        {
+            if (data[i] != other.data[i])
+                result = false;
+        }
+        return result;
+    }
+    Vector2& operator=(const Vector2& other)
+    {
+        if (this == &other)
+            return *this;
+        for (int i = 0; i < 2; i++)
+        {
+            data[i] = other.data[i];
+        }
+        return *this;
+    }
+    Vector2& operator+=(const Vector2& other)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            data[i] += other.data[i];
+        }
+        return *this;
+    }
+    Vector2& operator-=(const Vector2& other)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            data[i] -= other.data[i];
+        }
+        return *this;
+    }
+    Vector2& operator*=(const Vector2& other)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            data[i] *= other.data[i];
+        }
+        return *this;
+    }
+    Vector2& operator/=(const Vector2& other)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            data[i] /= other.data[i];
+        }
+        return *this;
+    }
+    friend Vector2 operator+(Vector2 lhs, const Vector2& rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+    friend Vector2 operator-(Vector2 lhs, const Vector2& rhs)
+    {
+        lhs -= rhs;
+        return lhs;
+    }
+    friend Vector2 operator*(Vector2 lhs, const Vector2& rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Vector2 operator/(Vector2 lhs, const Vector2& rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+    Vector2& operator*=(const float other)
+    {
+        for (float & i : data)
+        {
+            i *= other;
+        }
+        return *this;
+    }
+    Vector2& operator/=(const float other)
+    {
+        for (float & i : data)
+        {
+            i /= other;
+        }
+        return *this;
+    }
+    friend Vector2 operator*(Vector2& lhs, const float rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Vector2 operator*(const float lhs, Vector2& rhs)
+    {
+        rhs *= lhs;
+        return rhs;
+    }
+    friend Vector2 operator/(Vector2& lhs, const float rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+    friend Vector2 operator/(const float lhs, Vector2& rhs)
+    {
+        rhs /= lhs;
+        return rhs;
+    }
+#pragma endregion operators
+
+    Vector2& operator=(const Vector3& other);
+    Vector2& operator=(const Vector4& other);
+
+    static Vector2 fromJson(const nlohmann::json& json);
     nlohmann::json toJson();
-
 };
-
 class Vector3 {
 public:
-    Vector3();
-    explicit Vector3(int x, int y, int z);
-    explicit Vector3(float x, float y, float z);
+    Vector3() = default;
+    Vector3(const float x, const float y, const float z){data[0] = x; data[1] = y; data[2] = z;}
+    Vector3(const Vector2 &v, float z);
+    Vector3(float x, const Vector2 &v);
+    explicit Vector3(const float data[3]) {this->data[0] = data[0];this->data[1] = data[1];this->data[2] = data[2];}
     explicit Vector3(const Vector2 &v);
-    explicit Vector3(const Vector2 &v, int z);
-    explicit Vector3(const Vector2 &v, float z);
-    explicit Vector3(int x, const Vector2 &v);
-    explicit Vector3(float x, const Vector2 &v);
     explicit Vector3(const Vector4 &v);
 
-    float x{};
-    float y{};
-    float z{};
+    float data[3]{};
+
+    [[nodiscard]] float x() const {return data[0];}
+    [[nodiscard]] float y() const {return data[1];}
+    [[nodiscard]] float z() const {return data[2];}
 
     [[nodiscard]] float magnitude() const;
     void Normalize();
     [[nodiscard]] Vector3 normalize() const;
-    void translate(const Vector3 &v);
 
     [[nodiscard]] static Vector3 cross(const Vector3 &a, const Vector3 &b);
     [[nodiscard]] static float dot(const Vector3 &a, const Vector3 &b);
-    [[nodiscard]] static Vector3 lerp(const Vector3 &a, const Vector3 &b, float t);
+    [[nodiscard]] static Vector3 lerp(Vector3 &a, Vector3 &b, float t);
     [[nodiscard]] static Vector3 forward();
     [[nodiscard]] static Vector3 right();
     [[nodiscard]] static Vector3 up();
 
+#pragma region operators
+    float& operator[](const int index) {
+        return data[index];
+    }
+    const float& operator[](const int index) const {
+        return data[index];
+    }
+    bool operator==(const Vector3& other) const
+    {
+        bool result = true;
+        for (int i = 0; i < 3; i++)
+        {
+            if (data[i] != other.data[i])
+                result = false;
+        }
+        return result;
+    }
+    Vector3& operator=(const Vector3& other)
+    {
+        if (this == &other)
+            return *this;
+        for (int i = 0; i < 3; i++)
+        {
+            data[i] = other.data[i];
+        }
+        return *this;
+    }
+    Vector3& operator+=(const Vector3& other)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            data[i] += other.data[i];
+        }
+        return *this;
+    }
+    Vector3& operator-=(const Vector3& other)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            data[i] -= other.data[i];
+        }
+        return *this;
+    }
+    Vector3& operator*=(const Vector3& other)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            data[i] *= other.data[i];
+        }
+        return *this;
+    }
+    Vector3& operator/=(const Vector3& other)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            data[i] /= other.data[i];
+        }
+        return *this;
+    }
+    friend Vector3 operator+(Vector3 lhs, const Vector3& rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+    friend Vector3 operator-(Vector3 lhs, const Vector3& rhs)
+    {
+        lhs -= rhs;
+        return lhs;
+    }
+    friend Vector3 operator*(Vector3 lhs, const Vector3& rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Vector3 operator/(Vector3 lhs, const Vector3& rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+    Vector3& operator*=(const float other)
+    {
+        for (float & i : data)
+        {
+            i *= other;
+        }
+        return *this;
+    }
+    Vector3& operator/=(const float other)
+    {
+        for (float & i : data)
+        {
+            i /= other;
+        }
+        return *this;
+    }
+    friend Vector3 operator*(Vector3& lhs, const float rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Vector3 operator*(const float lhs, Vector3& rhs)
+    {
+        rhs *= lhs;
+        return rhs;
+    }
+    friend Vector3 operator/(Vector3& lhs, const float rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+    friend Vector3 operator/(const float lhs, Vector3& rhs)
+    {
+        rhs /= lhs;
+        return rhs;
+    }
+#pragma endregion operators
+
+    Vector3& operator=(const Vector2& other);
+    Vector3& operator=(const Vector4& other);
+
     static Vector3 fromJson(nlohmann::json json);
     nlohmann::json toJson();
 };
-
 class Vector4 {
 public:
-    Vector4();
-    explicit Vector4(int x, int y, int z, int w);
-    explicit Vector4(float x, float y, float z, float w);
+    Vector4(){data[0] = data[1] = data[2] = 0.f; data[3] = 1.f;}
+    Vector4(const float x, const float y, const float z, const float w){data[0] = x; data[1] = y; data[2] = z; data[3] = w;}
+    Vector4(const Vector3 &v, float w);
+    Vector4(float x, const Vector3 &v);
+    Vector4(const Vector2 &v, float z, float w);
+    Vector4(float x, const Vector2 &v, float w);
+    Vector4(float x, float y, const Vector2 &v);
+    explicit Vector4(const float data[4]){this->data[0] = data[0];this->data[1] = data[1];this->data[2] = data[2];this->data[3] = data[3];}
     explicit Vector4(const Vector3 &v);
-    explicit Vector4(const Vector3 &v, int w);
-    explicit Vector4(const Vector3 &v, float w);
-    explicit Vector4(int x, const Vector3 &v);
-    explicit Vector4(float x, const Vector3 &v);
     explicit Vector4(const Vector2 &v);
-    explicit Vector4(const Vector2 &v, int z, int w);
-    explicit Vector4(const Vector2 &v, float z, float w);
-    explicit Vector4(int x, const Vector2 &v, int w);
-    explicit Vector4(float x, const Vector2 &v, float w);
-    explicit Vector4(int x, int y, const Vector2 &v);
-    explicit Vector4(float x, float y, const Vector2 &v);
 
-    float x{};
-    float y{};
-    float z{};
-    float w{};
+    float data[4]{};
+
+    [[nodiscard]] float x() const {return data[0];}
+    [[nodiscard]] float y() const {return data[1];}
+    [[nodiscard]] float z() const {return data[2];}
+    [[nodiscard]] float w() const {return data[3];}
 
     [[nodiscard]] float magnitude() const;
     void Normalize();
     [[nodiscard]] Vector4 normalize() const;
 
     static float dot(const Vector4 &a, const Vector4 &b);
-    static Vector4 lerp(const Vector4 &a, const Vector4 &b, float t);
+    static Vector4 lerp(Vector4 &a, Vector4 &b, float t);
+
+#pragma region operators
+    float& operator[](const int index) {
+        return data[index];
+    }
+    const float& operator[](const int index) const {
+        return data[index];
+    }
+    bool operator==(const Vector4& other) const
+    {
+        bool result = true;
+        for (int i = 0; i < 4; i++)
+        {
+            if (data[i] != other.data[i])
+                result = false;
+        }
+        return result;
+    }
+    Vector4& operator=(const Vector4& other)
+    {
+        if (this == &other)
+            return *this;
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] = other.data[i];
+        }
+        return *this;
+    }
+    Vector4& operator+=(const Vector4& other)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] += other.data[i];
+        }
+        return *this;
+    }
+    Vector4& operator-=(const Vector4& other)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] -= other.data[i];
+        }
+        return *this;
+    }
+    Vector4& operator*=(const Vector4& other)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] *= other.data[i];
+        }
+        return *this;
+    }
+    Vector4& operator/=(const Vector4& other)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] /= other.data[i];
+        }
+        return *this;
+    }
+    friend Vector4 operator+(Vector4 lhs, const Vector4& rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+    friend Vector4 operator-(Vector4 lhs, const Vector4& rhs)
+    {
+        lhs -= rhs;
+        return lhs;
+    }
+    friend Vector4 operator*(Vector4 lhs, const Vector4& rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Vector4 operator/(Vector4 lhs, const Vector4& rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+    Vector4& operator*=(const float other)
+    {
+        for (float & i : data)
+        {
+            i *= other;
+        }
+        return *this;
+    }
+    Vector4& operator/=(const float other)
+    {
+        for (float & i : data)
+        {
+            i /= other;
+        }
+        return *this;
+    }
+    friend Vector4 operator*(Vector4& lhs, const float rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Vector4 operator*(const float lhs, Vector4& rhs)
+    {
+        rhs *= lhs;
+        return rhs;
+    }
+    friend Vector4 operator/(Vector4& lhs, const float rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+    friend Vector4 operator/(const float lhs, Vector4& rhs)
+    {
+        rhs /= lhs;
+        return rhs;
+    }
+#pragma endregion operators
+
+    Vector4& operator=(const Vector2& other);
+    Vector4& operator=(const Vector3& other);
 
     static Vector4 fromJson(nlohmann::json json);
-    nlohmann::json toJson();
+    [[nodiscard]] nlohmann::json toJson() const;
 };
-
 class Quaternion {
 public:
-    Quaternion();
-    explicit Quaternion(int x, int y, int z, int w);
-    explicit Quaternion(float x, float y, float z, float w);
-    explicit Quaternion(const Vector3 &axis, float angle);
+    Quaternion(){data[0] = data[1] = data[2] = 0.f; data[3] = 1.f;}
+    Quaternion(const float x, const float y, const float z, const float w){data[0] = x; data[1] = y; data[2] = z; data[3] = w;}
+    Quaternion(Vector3 &axis, float angle);
     explicit Quaternion(const Vector3 &EulerAngles);
     explicit Quaternion(const Matrix4 &m);
 
-    float x{};
-    float y{};
-    float z{};
-    float w{};
+    float data[4]{};
+
+    [[nodiscard]] float x() const {return data[0];}
+    [[nodiscard]] float y() const {return data[1];}
+    [[nodiscard]] float z() const {return data[2];}
+    [[nodiscard]] float w() const {return data[3];}
 
     [[nodiscard]] float magnitude() const;
     void Normalize();
     [[nodiscard]] Quaternion normalize() const;
     [[nodiscard]] Vector3 eulerAngles() const;
     [[nodiscard]] Matrix4 toMatrix() const;
-    void rotate(const Vector3 &euler);
 
     static float dot(const Quaternion &a, const Quaternion &b);
-    static Quaternion slerp(const Quaternion &a, const Quaternion &b, float t);
+    static Quaternion slerp(Quaternion &a, Quaternion &b, float t);
+
+    #pragma region operators
+    float& operator[](const int index) {
+        return data[index];
+    }
+    const float& operator[](const int index) const {
+        return data[index];
+    }
+    bool operator==(const Quaternion& other) const
+    {
+        bool result = true;
+        for (int i = 0; i < 4; i++)
+        {
+            if (data[i] != other.data[i])
+                result = false;
+        }
+        return result;
+    }
+    Quaternion& operator=(const Quaternion& other)
+    {
+        if (this == &other)
+            return *this;
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] = other.data[i];
+        }
+        return *this;
+    }
+    Quaternion& operator+=(const Quaternion& other)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] += other.data[i];
+        }
+        return *this;
+    }
+    Quaternion& operator-=(const Quaternion& other)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] -= other.data[i];
+        }
+        return *this;
+    }
+    Quaternion& operator*=(const Quaternion& other)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] *= other.data[i];
+        }
+        return *this;
+    }
+    Quaternion& operator/=(const Quaternion& other)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] /= other.data[i];
+        }
+        return *this;
+    }
+    friend Quaternion operator+(Quaternion lhs, const Quaternion& rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+    friend Quaternion operator-(Quaternion lhs, const Quaternion& rhs)
+    {
+        lhs -= rhs;
+        return lhs;
+    }
+    friend Quaternion operator*(Quaternion lhs, const Quaternion& rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Quaternion operator/(Quaternion lhs, const Quaternion& rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+    Quaternion& operator*=(const float other)
+    {
+        for (float & i : data)
+        {
+            i *= other;
+        }
+        return *this;
+    }
+    Quaternion& operator/=(const float other)
+    {
+        for (float & i : data)
+        {
+            i /= other;
+        }
+        return *this;
+    }
+    friend Quaternion operator*(Quaternion& lhs, const float rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Quaternion operator*(const float lhs, Quaternion& rhs)
+    {
+        rhs *= lhs;
+        return rhs;
+    }
+    friend Quaternion operator/(Quaternion& lhs, const float rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+    friend Quaternion operator/(const float lhs, Quaternion& rhs)
+    {
+        rhs /= lhs;
+        return rhs;
+    }
+#pragma endregion operators
 
     static Quaternion fromJson(nlohmann::json json);
-    nlohmann::json toJson();
+    [[nodiscard]] nlohmann::json toJson() const;
 };
-
 class Matrix2 {
 public:
-    Matrix2();
-    Matrix2(
-        float a1, float a2,
-        float b1, float b2
-    );
+    Matrix2()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                if (i == j)
+                {
+                    this->data[i][j] = 1.f;
+                    continue;
+                }
+                this->data[i][j] = 0.f;
+            }
+        }
+    }
+    explicit Matrix2(Vector2 data[2])
+    {
+        this->data[0] = data[0];
+        this->data[1] = data[1];
+    }
     explicit Matrix2(const Matrix3 &a);
     explicit Matrix2(const Matrix4 &a);
 
-    float a1{};
-    float a2{};
-    float b1{};
-    float b2{};
+    Vector2 data[2]{};
 
     void Transpose();
     [[nodiscard]] Matrix2 transpose() const;
@@ -160,41 +639,99 @@ public:
     void Inverse();
     [[nodiscard]] Matrix2 inverse() const;
 
-    float* toFloatArray() {
-        floatArray[0] = a1;
-        floatArray[1] = b1;
-        floatArray[2] = a2;
-        floatArray[3] = b2;
+#pragma region operators
 
-        return floatArray;
-    };
+    Vector2& operator[](const int index) {
+        return data[index];
+    }
 
-    static Matrix2 fromJson(nlohmann::json json);
+    const Vector2& operator[](const int index) const {
+        return data[index];
+    }
+
+    bool operator==(const Matrix2& other) const
+    {
+        bool result = true;
+        for (int i = 0; i < 2; i++)
+        {
+            if (data[i] != other.data[i])
+                result = false;
+        }
+        return result;
+    }
+
+    Matrix2& operator=(const Matrix2& other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+        for (int i = 0; i < 2; i++)
+        {
+            data[i] = other.data[i];
+        }
+        return *this;
+    }
+
+    Matrix2& operator*=(const Matrix2& other)
+    {
+        Matrix2 result;
+
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                for (int k = 0; k < 2; k++)
+                {
+                    result[i][j] += data[i][k] * other.data[k][j];
+                }
+            }
+        }
+
+        *this = result;
+        return *this;
+    }
+    friend Matrix2 operator*(Matrix2 lhs, const Matrix2& rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+
+#pragma endregion operators
+
+    Matrix2& operator=(const Matrix3& other);
+    Matrix2& operator=(const Matrix4& other);
+
+    static Matrix2 fromJson(const nlohmann::json& json);
     nlohmann::json toJson();
-
-private:
-    float floatArray[4] {};
 };
-
 class Matrix3 {
 public:
-    Matrix3();
-    Matrix3(
-        float a1, float a2, float a3,
-        float b1, float b2, float b3,
-        float c1, float c2, float c3
-    );
+    Matrix3()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (i == j)
+                {
+                    this->data[i][j] = 1.f;
+                    continue;
+                }
+                this->data[i][j] = 0.f;
+            }
+        }
+    }
+    explicit Matrix3(Vector3 data[3])
+    {
+        this->data[0] = data[0];
+        this->data[1] = data[1];
+        this->data[2] = data[2];
+    }
+    explicit Matrix3(const Matrix2 &a);
     explicit Matrix3(const Matrix4 &a);
 
-    float a1{};
-    float a2{};
-    float a3{};
-    float b1{};
-    float b2{};
-    float b3{};
-    float c1{};
-    float c2{};
-    float c3{};
+    Vector3 data[3]{};
 
     void Transpose();
     [[nodiscard]] Matrix3 transpose() const;
@@ -202,54 +739,101 @@ public:
     void Inverse();
     [[nodiscard]] Matrix3 inverse() const;
 
-    float* toFloatArray() {
-        floatArray[0] = a1;
-        floatArray[1] = b1;
-        floatArray[2] = c1;
-        floatArray[3] = a2;
-        floatArray[4] = b2;
-        floatArray[5] = c2;
-        floatArray[6] = a3;
-        floatArray[7] = b3;
-        floatArray[8] = c3;
+#pragma region operators
 
-        return floatArray;
-    };
+    Vector3& operator[](const int index) {
+        return data[index];
+    }
+
+    const Vector3& operator[](const int index) const {
+        return data[index];
+    }
+
+    bool operator==(const Matrix3& other) const
+    {
+        bool result = true;
+        for (int i = 0; i < 3; i++)
+        {
+            if (data[i] != other.data[i])
+                result = false;
+        }
+        return result;
+    }
+
+    Matrix3& operator=(const Matrix3& other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            data[i] = other.data[i];
+        }
+        return *this;
+    }
+
+    Matrix3& operator*=(const Matrix3& other)
+    {
+        Matrix3 result;
+
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    result[i][j] += data[i][k] * other.data[k][j];
+                }
+            }
+        }
+
+        *this = result;
+        return *this;
+    }
+    friend Matrix3 operator*(Matrix3 lhs, const Matrix3& rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+
+#pragma endregion operators
+
+    Matrix3& operator=(const Matrix2& other);
+    Matrix3& operator=(const Matrix4& other);
 
     static Matrix3 fromJson(nlohmann::json json);
     nlohmann::json toJson();
-
-private:
-    float floatArray[9] {};
 };
-
 class Matrix4 {
 public:
-    Matrix4();
-    Matrix4(
-        float a1, float a2, float a3, float a4,
-        float b1, float b2, float b3, float b4,
-        float c1, float c2, float c3, float c4,
-        float d1, float d2, float d3, float d4
-    );
+    Matrix4()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                if (i == j)
+                {
+                    this->data[i][j] = 1.f;
+                    continue;
+                }
+                this->data[i][j] = 0.f;
+            }
+        }
+    }
+
+    explicit Matrix4(Vector4 data[4])
+    {
+        this->data[0] = data[0];
+        this->data[1] = data[1];
+        this->data[2] = data[2];
+        this->data[3] = data[3];
+    }
+    explicit Matrix4(const Matrix2 &a);
     explicit Matrix4(const Matrix3 &a);
 
-    float a1{};
-    float a2{};
-    float a3{};
-    float a4{};
-    float b1{};
-    float b2{};
-    float b3{};
-    float b4{};
-    float c1{};
-    float c2{};
-    float c3{};
-    float c4{};
-    float d1{};
-    float d2{};
-    float d3{};
-    float d4{};
+    Vector4 data[4]{};
 
     void Transpose();
     [[nodiscard]] Matrix4 transpose() const;
@@ -257,1456 +841,1425 @@ public:
     void Inverse();
     [[nodiscard]] Matrix4 inverse() const;
 
-    [[nodiscard]] static Matrix4 makeModelMatrix(const Vector3 &position, const Quaternion &rotation, const Vector3 &scale);
-    [[nodiscard]] static Matrix4 lookAt(const Vector3 &eye, const Vector3 &target, const Vector3 &up);
-    [[nodiscard]] static Matrix4 makePerspectiveMatrix(float fov, float aspect, float near, float far);
-    [[nodiscard]] static Matrix4 makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far);
+    [[nodiscard]] static Matrix4 Translate(const Matrix4& org, const Vector3& translation);
+    [[nodiscard]] static Matrix4 Rotate(const Matrix4& org, Vector3 axis, float angle);
+    [[nodiscard]] static Matrix4 Rotate(const Matrix4& org, const Quaternion& rotation);
+    [[nodiscard]] static Matrix4 Scale(const Matrix4& org, const Vector3& scale);
+    [[nodiscard]] static Matrix4 ModelMatrix(const Vector3 &position, const Quaternion &rotation, const Vector3 &scale);
+    [[nodiscard]] static Matrix4 LookAt(const Vector3 &eye, const Vector3 &target, const Vector3 &up);
+    [[nodiscard]] static Matrix4 PerspectiveMatrix(float fov, float aspect, float near, float far);
+    [[nodiscard]] static Matrix4 OrthographicMatrix(float left, float right, float bottom, float top, float near, float far);
 
-    const float* toFloatArray() {
-        floatArray[0]=a1; floatArray[1]=b1; floatArray[2]=c1; floatArray[3]=d1;
-        floatArray[4]=a2; floatArray[5]=b2; floatArray[6]=c2; floatArray[7]=d2;
-        floatArray[8]=a3; floatArray[9]=b3; floatArray[10]=c3; floatArray[11]=d3;
-        floatArray[12]=a4; floatArray[13]=b4; floatArray[14]=c4; floatArray[15]=d4;
-        return floatArray;
+#pragma region operators
+
+    Vector4& operator[](const int index) {
+        return data[index];
     }
+
+    const Vector4& operator[](const int index) const {
+        return data[index];
+    }
+
+    bool operator==(const Matrix4& other) const
+    {
+        bool result = true;
+        for (int i = 0; i < 4; i++)
+        {
+            if (data[i] != other.data[i])
+                result = false;
+        }
+        return result;
+    }
+
+    Matrix4& operator=(const Matrix4& other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            data[i] = other.data[i];
+        }
+        return *this;
+    }
+
+    Matrix4& operator*=(const Matrix4& other)
+    {
+        Vector4 result[4];
+        for (int col = 0; col < 4; col++)
+            for (int row = 0; row < 4; row++)
+            {
+                float sum = 0.f;
+                for (int k = 0; k < 4; k++)
+                    sum += data[k][row] * other.data[col][k];
+                result[col][row] = sum;
+            }
+        *this = Matrix4(result);
+        return *this;
+    }
+    friend Matrix4 operator*(Matrix4 lhs, const Matrix4& rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    Vector4 operator*(const Vector4& v) const
+    {
+        Vector4 result(0.f, 0.f, 0.f, 0.f);
+        for (int col = 0; col < 4; col++)
+            for (int row = 0; row < 4; row++)
+                result[row] += data[col][row] * v[col];
+        return result;
+    }
+#pragma endregion operators
+
+    Matrix4& operator=(const Matrix2& other);
+    Matrix4& operator=(const Matrix3& other);
 
     static Matrix4 fromJson(nlohmann::json json);
-    nlohmann::json toJson();
-
-private:
-    float floatArray[16] {};
+    [[nodiscard]] nlohmann::json toJson() const;
 };
 
-inline float det2(const Matrix2 &a) {
-    return a.a1 * a.b2 - a.a2 * a.b1;
-}
+#pragma region det
 
-inline float det3(const Matrix3 &a) {
-    return (
-          a.a1 * a.b2 * a.c3
-        + a.a2 * a.b3 * a.c1
-        + a.a3 * a.b1 * a.c2
-        - a.a3 * a.b2 * a.c1
-        - a.a2 * a.b1 * a.c3
-        - a.a1 * a.b3 * a.c2
-    );
-}
-
-inline float det4(const Matrix4 &a) {
-
-    const Matrix3 m0 = {
-        a.b2, a.b3, a.b4,
-        a.c2, a.c3, a.c4,
-        a.d2, a.d3, a.d4,
-    };
-
-    const Matrix3 m1 = {
-        a.b1, a.b3, a.b4,
-        a.c1, a.c3, a.c4,
-        a.d1, a.d3, a.d4
-    };
-
-    const Matrix3 m2 = {
-        a.b1, a.b2, a.b4,
-        a.c1, a.c2, a.c4,
-        a.d1, a.d2, a.d4
-    };
-
-    const Matrix3 m3 = {
-        a.b1, a.b2, a.b3,
-        a.c1, a.c2, a.c3,
-        a.d1, a.d2, a.d3
-    };
-
-    return a.a1 * det3(m0) - a.a2 * det3(m1) + a.a3 * det3(m2) - a.a4 * det3(m3);
-}
-
-#pragma region operations
-inline  Vector2 operator+(const Vector2 a, const Vector2 b) {
-    return Vector2(a.x + b.x, a.y + b.y);
-}
-inline Vector2 operator-(const Vector2 a, const Vector2 b) {
-    return Vector2(a.x - b.x, a.y - b.y);
-}
-inline Vector2 operator*(const Vector2 a, const Vector2 b) {
-    return Vector2(a.x * b.x, a.y * b.y);
-}
-inline Vector2 operator*(const int a, const Vector2 b) {
-    return Vector2(a * b.x, a * b.y);
-}
-inline Vector2 operator*(const float a, const Vector2 b) {
-    return Vector2(a * b.x, a * b.y);
-}
-inline Vector2 operator*(const Vector2 a, const int b) {
-    return Vector2(b * a.x, b * a.y);
-}
-inline Vector2 operator*(const Vector2 a, const float b) {
-    return Vector2(b * a.x, b * a.y);
-}
-inline Vector2 operator/(const Vector2 a, const Vector2 b) {
-    return Vector2(a.x / b.x, a.y / b.y);
-}
-inline Vector2 operator/(const int a, const Vector2 b) {
-    return Vector2(a / b.x, a / b.y);
-}
-inline Vector2 operator/(const float a, const Vector2 b) {
-    return Vector2(a / b.x, a / b.y);
-}
-inline Vector2 operator/(const Vector2 a, const int b) {
-    return Vector2(a.x / b, a.y / b);
-}
-inline Vector2 operator/(const Vector2 a, const float b) {
-    return Vector2(a.x / b, a.y / b);
-}
-inline Vector2 operator*(const Matrix2 &a, const Vector2 b) {
-    return Vector2(
-        a.a1 * b.x + a.a2 * b.y,
-        a.b1 * b.x + a.b2 * b.y
-    );
-}
-
-inline  Vector3 operator+(const Vector3 &a, const Vector3 &b) {
-    return Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
-}
-inline Vector3 operator-(const Vector3 &a, const Vector3 &b) {
-    return Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
-}
-inline Vector3 operator*(const Vector3 &a, const Vector3 &b) {
-    return Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
-}
-inline Vector3 operator*(const int a, const Vector3 &b) {
-    return Vector3(a * b.x, a * b.y, a * b.z);
-}
-inline Vector3 operator*(const float a, const Vector3 &b) {
-    return Vector3(a * b.x, a * b.y, a * b.z);
-}
-inline Vector3 operator*(const Vector3 &a, const int b) {
-    return Vector3(b * a.x, b * a.y, b * a.z);
-}
-inline Vector3 operator*(const Vector3 &a, const float b) {
-    return Vector3(b * a.x, b * a.y, b * a.z);
-}
-inline Vector3 operator/(const Vector3 &a, const Vector3 &b) {
-    return Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
-}
-inline Vector3 operator/(const int a, const Vector3 &b) {
-    return Vector3(a / b.x, a / b.y, a / b.z);
-}
-inline Vector3 operator/(const float a, const Vector3 &b) {
-    return Vector3(a / b.x, a / b.y, a / b.z);
-}
-inline Vector3 operator/(const Vector3 &a, const int b) {
-    return Vector3(a.x / b, a.y / b, a.z / b);
-}
-inline Vector3 operator/(const Vector3 &a, const float b) {
-    return Vector3(a.x / b, a.y / b, a.z / b);
-}
-inline Vector3 operator*(const Matrix3 &a, const Vector3 &b) {
-    return Vector3(
-        a.a1 * b.x + a.a2 * b.y + a.a3 * b.z,
-        a.b1 * b.x + a.b2 * b.y + a.b3 * b.z,
-        a.c1 * b.x + a.c2 * b.y + a.c3 * b.z
-    );
-}
-
-inline  Vector4 operator+(const Vector4 &a, const Vector4 &b) {
-    return Vector4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
-}
-inline Vector4 operator-(const Vector4 &a, const Vector4 &b) {
-    return Vector4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);
-}
-inline Vector4 operator*(const Vector4 &a, const Vector4 &b) {
-    return Vector4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
-}
-inline Vector4 operator*(const int a, const Vector4 &b) {
-    return Vector4(a * b.x, a * b.y, a * b.z, a * b.w);
-}
-inline Vector4 operator*(const float a, const Vector4 &b) {
-    return Vector4(a * b.x, a * b.y, a * b.z, a * b.w);
-}
-inline Vector4 operator*(const Vector4 &a, const int b) {
-    return Vector4(b * a.x, b * a.y, b * a.z, b * a.w);
-}
-inline Vector4 operator*(const Vector4 &a, const float b) {
-    return Vector4(b * a.x, b * a.y, b * a.z, b * a.w);
-}
-inline Vector4 operator/(const Vector4 &a, const Vector4 &b) {
-    return Vector4(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);
-}
-inline Vector4 operator/(const int a, const Vector4 &b) {
-    return Vector4(a / b.x, a / b.y, a / b.z, a / b.w);
-}
-inline Vector4 operator/(const float a, const Vector4 &b) {
-    return Vector4(a / b.x, a / b.y, a / b.z, a / b.w);
-}
-inline Vector4 operator/(const Vector4 &a, const int b) {
-    return Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
-}
-inline Vector4 operator/(const Vector4 &a, const float b) {
-    return Vector4(a.x / b, a.y / b, a.z / b, a.w / b);
-}
-inline Vector4 operator*(const Matrix4 &a, const Vector4 &b) {
-    return Vector4(
-        a.a1 * b.x + a.a2 * b.y + a.a3 * b.z + a.a4 * b.w,
-        a.b1 * b.x + a.b2 * b.y + a.b3 * b.z + a.b4 * b.w,
-        a.c1 * b.x + a.c2 * b.y + a.c3 * b.z + a.c4 * b.w,
-        a.d1 * b.x + a.d2 * b.y + a.d3 * b.z + a.d4 * b.w
-    );
-}
-
-inline  Quaternion operator+(const Quaternion &a, const Quaternion &b) {
-    return Quaternion(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
-}
-inline Quaternion operator-(const Quaternion &a, const Quaternion &b) {
-    return Quaternion(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);
-}
-inline Quaternion operator*(const int a, const Quaternion &b) {
-    return Quaternion(a * b.x, a * b.y, a * b.z, a * b.w);
-}
-inline Quaternion operator*(const float a, const Quaternion &b) {
-    return Quaternion(a * b.x, a * b.y, a * b.z, a * b.w);
-}
-inline Quaternion operator*(const Quaternion &a, const int b) {
-    return Quaternion(b * a.x, b * a.y, b * a.z, b * a.w);
-}
-inline Quaternion operator*(const Quaternion &a, const float b) {
-    return Quaternion(b * a.x, b * a.y, b * a.z, b * a.w);
-}
-inline Quaternion operator/(const int a, const Quaternion &b) {
-    return Quaternion(a / b.x, a / b.y, a / b.z, a / b.w);
-}
-inline Quaternion operator/(const float a, const Quaternion &b) {
-    return Quaternion(a / b.x, a / b.y, a / b.z, a / b.w);
-}
-inline Quaternion operator/(const Quaternion &a, const int b) {
-    return Quaternion(a.x / b, a.y / b, a.z / b, a.w / b);
-}
-inline Quaternion operator/(const Quaternion &a, const float b) {
-    return Quaternion(a.x / b, a.y / b, a.z / b, a.w / b);
-}
-
-inline Matrix2 operator+(const Matrix2 &a, const Matrix2 &b) {
-    return {
-        a.a1 + b.a1, a.a2 + b.a2,
-        a.b1 + b.b1, a.b2 + b.b2
-    };
-}
-inline Matrix2 operator-(const Matrix2 &a, const Matrix2 &b) {
-    return {
-        a.a1 - b.a1, a.a2 - b.a2,
-        a.b1 - b.b1, a.b2 - b.b2
-    };
-}
-inline Matrix2 operator*(const Matrix2 &a, const Matrix2 &b) {
-    return {
-        a.a1 * b.a1 + a.a2 * b.b1, a.a1 * b.a2 + a.a2 * b.b2,
-        a.b1 * b.a1 + a.b2 * b.b1, a.b1 * b.a2 + a.b2 * b.b2
-    };
-}
-inline Matrix2 operator*(const Matrix2 &a, const int b) {
-    return {
-        a.a1 * b, a.a2 * b,
-        a.b1 * b, a.a2 * b
-    };
-}
-inline Matrix2 operator*(const Matrix2 &a, const float b) {
-    return {
-        a.a1 * b, a.a2 * b,
-        a.b1 * b, a.a2 * b
-    };
-}
-inline Matrix2 operator*(const int a, const Matrix2 &b) {
-    return {
-        a * b.a1, a * b.a2,
-        a * b.b1, a * b.b2,
-    };
-}
-inline Matrix2 operator*(const float a, const Matrix2 &b) {
-    return {
-        a * b.a1, a * b.a2,
-        a * b.b1, a * b.b2,
-    };
-}
-
-inline Matrix3 operator+(const Matrix3 &a, const Matrix3 &b) {
-    return {
-        a.a1 + b.a1, a.a2 + b.a2, a.a3 + b.a3,
-        a.b1 + b.b1, a.b2 + b.b2, a.b3 + b.b3,
-        a.c1 + a.c1, a.c2 + a.c2, a.c3 + b.c3
-    };
-}
-inline Matrix3 operator-(const Matrix3 &a, const Matrix3 &b) {
-    return {
-        a.a1 - b.a1, a.a2 - b.a2, a.a3 - b.a3,
-        a.b1 - b.b1, a.b2 - b.b2, a.b3 - b.b3,
-        a.c1 - b.c1, a.c2 - b.c2, a.c3 - b.c3
-    };
-}
-inline Matrix3 operator*(const Matrix3 &a, const Matrix3 &b) {
-    return {
-        (a.a1 * b.a1) + (a.a2 * b.b1) + (a.a3 * b.c1), (a.a1 * b.a2) + (a.a2 * b.b2) + (a.a3 * b.c2), (a.a1 * b.a3) + (a.a2 * b.b3) + (a.a3 * b.c3),
-        (a.b1 * b.a1) + (a.b2 * b.b1) + (a.b3 * b.c1), (a.b1 * b.a2) + (a.b2 * b.b2) + (a.b3 * b.c2), (a.b1 * b.a3) + (a.b2 * b.b3) + (a.b3 * b.c3),
-        (a.c1 * b.a1) + (a.c2 * b.b1) + (a.c3 * b.c1), (a.c1 * b.a2) + (a.c2 * b.b2) + (a.c3 * b.c2), (a.c1 * b.a3) + (a.c2 * b.b3) + (a.c3 * b.c3)
-    };
-}
-inline Matrix3 operator*(const int &a, const Matrix3 &b) {
-    return {
-        a * b.a1, a * b.a2, a * b.a3,
-        a * b.b1, a * b.b2, a * b.b3,
-        a * b.c1, a * b.c2, a * b.c3
-    };
-}
-inline Matrix3 operator*(const float &a, const Matrix3 &b) {
-    return {
-        a * b.a1, a * b.a2, a * b.a3,
-        a * b.b1, a * b.b2, a * b.b3,
-        a * b.c1, a * b.c2, a * b.c3
-    };
-}
-inline Matrix3 operator*(const Matrix3 &a, const int &b) {
-    return {
-        b * a.a1, b * a.a2, b * a.a3,
-        b * a.b1, b * a.b2, b * a.b3,
-        b * a.c1, b * a.c2, b * a.c3
-    };
-}
-inline Matrix3 operator*(const Matrix3 &a, const float &b) {
-    return {
-        b * a.a1, b * a.a2, b * a.a3,
-        b * a.b1, b * a.b2, b * a.b3,
-        b * a.c1, b * a.c2, b * a.c3
-    };
-}
-
-inline Matrix4 operator+(const Matrix4 &a, const Matrix4 &b) {
-    return {
-        a.a1 + b.a1, a.a2 + b.a2, a.a3 + b.a3, a.a4 + b.a4,
-        a.b1 + b.b1, a.b2 + b.b2, a.b3 + b.b3, a.b4 + b.b4,
-        a.c1 + a.c1, a.c2 + a.c2, a.c3 + b.c3, a.c4 + b.c4,
-        a.d1 + a.d1, a.d2 + a.d2, a.d3 + b.d3, a.d4 + b.d4
-    };
-}
-inline Matrix4 operator-(const Matrix4 &a, const Matrix4 &b) {
-    return {
-        a.a1 - b.a1, a.a2 - b.a2, a.a3 - b.a3, a.a4 - b.a4,
-        a.b1 - b.b1, a.b2 - b.b2, a.b3 - b.b3, a.b4 - b.b4,
-        a.c1 - b.c1, a.c2 - b.c2, a.c3 - b.c3, a.c4 - b.c4,
-        a.d1 - b.d1, a.d2 - b.d2, a.d3 - b.d3, a.d4 - b.d4
-    };
-}
-inline Matrix4 operator*(const Matrix4 &a, const Matrix4 &b) {
-    return {
-        (a.a1 * b.a1) + (a.a2 * b.b1) + (a.a3 * b.c1) + (a.a4 * b.d1),
-        (a.a1 * b.a2) + (a.a2 * b.b2) + (a.a3 * b.c2) + (a.a4 * b.d2),
-        (a.a1 * b.a3) + (a.a2 * b.b3) + (a.a3 * b.c3) + (a.a4 * b.d3),
-        (a.a1 * b.a4) + (a.a2 * b.b4) + (a.a3 * b.c4) + (a.a4 * b.d4),
-        (a.b1 * b.a1) + (a.b2 * b.b1) + (a.b3 * b.c1) + (a.b4 * b.d1),
-        (a.b1 * b.a2) + (a.b2 * b.b2) + (a.b3 * b.c2) + (a.b4 * b.d2),
-        (a.b1 * b.a3) + (a.b2 * b.b3) + (a.b3 * b.c3) + (a.b4 * b.d3),
-        (a.b1 * b.a4) + (a.b2 * b.b4) + (a.b3 * b.c4) + (a.b4 * b.d4),
-        (a.c1 * b.a1) + (a.c2 * b.b1) + (a.c3 * b.c1) + (a.c4 * b.d1),
-        (a.c1 * b.a2) + (a.c2 * b.b2) + (a.c3 * b.c2) + (a.c4 * b.d2),
-        (a.c1 * b.a3) + (a.c2 * b.b3) + (a.c3 * b.c3) + (a.c4 * b.d3),
-        (a.c1 * b.a4) + (a.c2 * b.b4) + (a.c3 * b.c4) + (a.c4 * b.d4),
-        (a.d1 * b.a1) + (a.d2 * b.b1) + (a.d3 * b.c1) + (a.d4 * b.d1),
-        (a.d1 * b.a2) + (a.d2 * b.b2) + (a.d3 * b.c2) + (a.d4 * b.d2),
-        (a.d1 * b.a3) + (a.d2 * b.b3) + (a.d3 * b.c3) + (a.d4 * b.d3),
-        (a.d1 * b.a4) + (a.d2 * b.b4) + (a.d3 * b.c4) + (a.d4 * b.d4),
-    };
-}
-inline Matrix4 operator*(const int a, const Matrix4 &b) {
-    return {
-        a * b.a1, a * b.a2, a * b.a3, a * b.a4,
-        a * b.b1, a * b.b2, a * b.b3, a * b.b4,
-        a * b.c1, a * b.c2, a * b.c3, a * b.c4,
-        a * b.d1, a * b.d2, a * b.d3, a * b.d4,
-    };
-}
-inline Matrix4 operator*(const float a, const Matrix4 &b) {
-    return {
-        a * b.a1, a * b.a2, a * b.a3, a * b.a4,
-        a * b.b1, a * b.b2, a * b.b3, a * b.b4,
-        a * b.c1, a * b.c2, a * b.c3, a * b.c4,
-        a * b.d1, a * b.d2, a * b.d3, a * b.d4,
-    };
-}
-inline Matrix4 operator*(const Matrix4 &a, const int b) {
-    return {
-        b * a.a1, b * a.a2, b * a.a3, b * a.a4,
-        b * a.b1, b * a.b2, b * a.b3, b * a.b4,
-        b * a.c1, b * a.c2, b * a.c3, b * a.c4,
-        b * a.d1, b * a.d2, b * a.d3, b * a.d4
-    };
-}
-inline Matrix4 operator*(const Matrix4 &a, const float b) {
-    return {
-        b * a.a1, b * a.a2, b * a.a3, b * a.a4,
-        b * a.b1, b * a.b2, b * a.b3, b * a.b4,
-        b * a.c1, b * a.c2, b * a.c3, b * a.c4,
-        b * a.d1, b * a.d2, b * a.d3, b * a.d4
-    };
-}
-#pragma endregion
-
-inline Vector2::Vector2() {
-    x = 0.0;
-    y = 0.0;
-}
-
-inline Vector2::Vector2(const int x, const int y) {
-    this->x = static_cast<float>(x);
-    this->y = static_cast<float>(y);
-}
-
-inline Vector2::Vector2(const float x, const float y) {
-    this->x = static_cast<float>(x);
-    this->y = static_cast<float>(y);
-}
-
-
-inline float Vector2::magnitude() const {
-    return ::sqrt(x * x + y * y);
-}
-
-inline void Vector2::Normalize() {
-    const float magnitude = this->magnitude();
-    if (magnitude == 0)
-        return;
-    x /= magnitude;
-    y /= magnitude;
-}
-
-inline Vector2 Vector2::normalize() const {
-    const float magnitude = this->magnitude();
-    if (magnitude == 0) {
-        return {};
-    }
-    return Vector2(this->x / magnitude, this->y / magnitude);
-}
-
-inline void Vector2::translate(const Vector2 &v) {
-    *this = *this + v;
-}
-
-inline float Vector2::dot(const Vector2 &a, const Vector2 &b) {
-    return a.x * b.x + a.y * b.y;
-}
-
-inline Vector2 Vector2::lerp(const Vector2 a, const Vector2 b, const float t) {
-    return  a * (1 - t) + (t) * b;
-}
-
-inline Vector2 Vector2::fromJson(nlohmann::json json)
+inline float det2(Matrix2 a)
 {
-    return Vector2(json["x"].get<float>(), json["y"].get<float>());
+    return a[0][0] * a[1][1] - a[0][1] * a[1][0];
+}
+
+inline float det3(Matrix3 a)
+{
+    const auto d =
+        a[0][0]*a[1][1]*a[2][2]
+      + a[0][1]*a[1][2]*a[2][0]
+      + a[0][2]*a[2][1]*a[1][0]
+      - a[2][0]*a[1][1]*a[0][2]
+      - a[1][0]*a[0][1]*a[2][2]
+      - a[0][0]*a[1][2]*a[2][1];
+    return d;
+}
+
+inline float det4(Matrix4 a)
+{
+    Vector3 v0[3] = {
+        Vector3(a[1][1], a[1][2], a[1][3]),
+        Vector3(a[2][1], a[2][2], a[2][3]),
+        Vector3(a[3][1], a[3][2], a[3][3])
+    };
+    const Matrix3 m0(v0);
+    Vector3 v1[3] = {
+        Vector3(a[1][0], a[1][2], a[1][3]),
+        Vector3(a[2][0], a[2][2], a[2][3]),
+        Vector3(a[3][0], a[3][2], a[3][3])
+    };
+    const Matrix3 m1(v1);
+    Vector3 v2[3] = {
+        Vector3(a[1][0], a[1][1], a[1][3]),
+        Vector3(a[2][0], a[2][1], a[2][3]),
+        Vector3(a[3][0], a[3][1], a[3][3])
+    };
+    const Matrix3 m2(v2);
+    Vector3 v3[3] = {
+        Vector3(a[1][0], a[1][1], a[1][2]),
+        Vector3(a[2][0], a[2][1], a[2][2]),
+        Vector3(a[3][0], a[3][1], a[3][2])
+    };
+    const Matrix3 m3(v3);
+    return a[0][0]*det3(m0) - a[0][1]*det3(m1)
+        + a[0][2]*det3(m2) - a[0][3]*det3(m3);
+}
+#pragma endregion det
+
+#pragma region Vector2
+
+inline Vector2::Vector2(const Vector3& v)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+}
+
+inline Vector2::Vector2(const Vector4& v)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+}
+
+inline float Vector2::magnitude() const
+{
+    return std::sqrt(data[0] * data[0] + data[1] * data[1]);
+}
+
+inline void Vector2::Normalize()
+{
+    *this /= magnitude();
+}
+
+inline Vector2 Vector2::normalize() const
+{
+    auto result = *this;
+    result.Normalize();
+
+    return result;
+}
+
+inline float Vector2::dot(const Vector2& a, const Vector2& b)
+{
+    return a.x() * b.x() + a.y() * b.y();
+}
+
+inline Vector2 Vector2::lerp(Vector2& a, Vector2& b, const float t)
+{
+    return (1 - t) * a + t * b;
+}
+
+inline Vector2& Vector2::operator=(const Vector3& other)
+{
+    data[0] = other.x();
+    data[1] = other.y();
+    return *this;
+}
+
+inline Vector2& Vector2::operator=(const Vector4& other)
+{
+    data[0] = other.x();
+    data[1] = other.y();
+    return *this;
+}
+
+inline Vector2 Vector2::fromJson(const nlohmann::json& json)
+{
+    Vector2 result;
+    result.data[0] = json["x"].get<float>();
+    result.data[1] = json["y"].get<float>();
+
+    return result;
 }
 
 inline nlohmann::json Vector2::toJson()
 {
-    nlohmann::json j;
+    nlohmann::json result;
+    result["x"] = data[0];
+    result["y"] = data[1];
 
-    j["x"] = this->x;
-    j["y"] = this->y;
-    return j;
+    return result;
 }
 
-inline Vector3::Vector3() {
-    this->x = 0;
-    this->y = 0;
-    this->z = 0;
+#pragma endregion Vector2
+
+#pragma region Vector3
+
+inline Vector3::Vector3(const Vector2& v)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+    data[2] = 0.f;
 }
 
-inline Vector3::Vector3(const int x, const int y, const int z) {
-    this->x = static_cast<float>(x);
-    this->y = static_cast<float>(y);
-    this->z = static_cast<float>(z);
+inline Vector3::Vector3(const Vector2& v, const float z)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+    data[2] = z;
 }
 
-inline Vector3::Vector3(const float x, const float y, const float z) {
-    this->x = static_cast<float>(x);
-    this->y = static_cast<float>(y);
-    this->z = static_cast<float>(z);
+inline Vector3::Vector3(const float x, const Vector2& v)
+{
+    data[0] = x;
+    data[1] = v.x();
+    data[2] = v.y();
 }
 
-inline Vector3::Vector3(const Vector2 &v) {
-    x = v.x;
-    y = v.y;
-    z = 0.0;
+inline Vector3::Vector3(const Vector4& v)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+    data[2] = v.z();
 }
 
-inline Vector3::Vector3(const Vector2 &v, int z) {
-    x = v.x;
-    y = v.y;
-    this->z = static_cast<float>(z);
+inline float Vector3::magnitude() const
+{
+    return std::sqrt(data[0] * data[0] + data[1] * data[1] + data[2] * data[2]);
 }
 
-inline Vector3::Vector3(const Vector2 &v, float z) {
-    x = v.x;
-    y = v.y;
-    this->z = z;
+inline void Vector3::Normalize()
+{
+    *this /= magnitude();
 }
 
-inline Vector3::Vector3(int x, const Vector2 &v) {
-    this->x = static_cast<float>(x);
-    y = v.x;
-    z = v.y;
+inline Vector3 Vector3::normalize() const
+{
+    Vector3 result = *this;
+    result.Normalize();
+
+    return result;
 }
 
-inline Vector3::Vector3(float x, const Vector2 &v) {
-    this->x = x;
-    y = v.x;
-    z = v.y;
+inline Vector3 Vector3::cross(const Vector3& a, const Vector3& b)
+{
+    Vector3 result;
+    result.data[0] = a.y() * b.z() - a.z() * b.y();
+    result.data[1] = a.z() * b.x() - a.x() * b.z();
+    result.data[2] = a.x() * b.y() - a.y() * b.x();
+
+    return result;
 }
 
-inline Vector3::Vector3(const Vector4 &v) {
-    this->x = v.x;
-    this->y = v.y;
-    this->z = v.z;
+inline float Vector3::dot(const Vector3& a, const Vector3& b)
+{
+    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
 }
 
-inline float Vector3::magnitude() const {
-    return ::sqrt(x * x + y * y + z * z);
+inline Vector3 Vector3::lerp(Vector3& a, Vector3& b, float t)
+{
+    return (1.0f - t) * a + t * b;
 }
 
-inline void Vector3::Normalize() {
-    const float magnitude = this->magnitude();
-    if (magnitude == 0)
-        return;
-    this->x /= magnitude;
-    this->y /= magnitude;
-    this->z /= magnitude;
+inline Vector3 Vector3::forward()
+{
+    return {0, 0, -1};
 }
 
-inline Vector3 Vector3::cross(const Vector3 &a, const Vector3 &b) {
-    return Vector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+inline Vector3 Vector3::right()
+{
+    return {1, 0, 0};
 }
 
-inline float Vector3::dot(const Vector3 &a, const Vector3 &b) {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
+inline Vector3 Vector3::up()
+{
+    return {0, 1, 0};
 }
 
-inline Vector3 Vector3::normalize() const {
-    const float magnitude = this->magnitude();
-    if (magnitude == 0) {
-        return {};
-    }
-    return Vector3(this->x / magnitude, this->y / magnitude, this->z / magnitude);
+inline Vector3& Vector3::operator=(const Vector2& other)
+{
+    data[0] = other.x();
+    data[1] = other.y();
+    data[2] = 0.f;
+    return *this;
 }
 
-inline Vector3 Vector3::lerp(const Vector3 &a, const Vector3 &b, const float t) {
-    return  a * (1 - t) + (t) * b;
-}
-
-inline Vector3 Vector3::forward() {
-    return Vector3(0, 0, -1);
-}
-
-inline Vector3 Vector3::right() {
-    return Vector3(1, 0, 0);
-}
-
-inline Vector3 Vector3::up() {
-    return Vector3(0, 1, 0);
+inline Vector3& Vector3::operator=(const Vector4& other)
+{
+    data[0] = other.x();
+    data[1] = other.y();
+    data[2] = other.z();
+    return *this;
 }
 
 inline Vector3 Vector3::fromJson(nlohmann::json json)
 {
-    return Vector3(json["x"].get<float>(), json["y"].get<float>(), json["z"].get<float>());
+    Vector3 result;
+    result.data[0] = json["x"].get<float>();
+    result.data[1] = json["y"].get<float>();
+    result.data[2] = json["z"].get<float>();
+    return result;
 }
 
 inline nlohmann::json Vector3::toJson()
 {
     nlohmann::json j;
-
-    j["x"] = this->x;
-    j["y"] = this->y;
-    j["z"] = this->z;
+    j["x"] = data[0];
+    j["y"] = data[1];
+    j["z"] = data[2];
     return j;
 }
 
-inline void Vector3::translate(const Vector3 &v) {
-    *this = *this + v;
+#pragma endregion Vector3
+
+#pragma region Vector4
+
+inline Vector4::Vector4(const Vector3& v)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+    data[2] = v.z();
+    data[3] = 1.f;
 }
 
-inline Vector4::Vector4() {
-    x = 0.0;
-    y = 0.0;
-    z = 0.0;
-    w = 1.0;
+inline Vector4::Vector4(const Vector3& v, const float w)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+    data[2] = v.z();
+    data[3] = w;
 }
 
-inline Vector4::Vector4(int x, int y, int z, int w) {
-    this->x = static_cast<float>(x);
-    this->y = static_cast<float>(y);
-    this->z = static_cast<float>(z);
-    this->w = static_cast<float>(w);
+inline Vector4::Vector4(const float x, const Vector3& v)
+{
+    data[0] = x;
+    data[1] = v.x();
+    data[2] = v.y();
+    data[3] = v.z();
 }
 
-inline Vector4::Vector4(float x, float y, float z, float w) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->w = w;
+inline Vector4::Vector4(const Vector2& v)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+    data[2] = 0.f;
+    data[3] = 1.f;
 }
 
-inline Vector4::Vector4(const Vector3 &v) {
-    x = v.x;
-    y = v.y;
-    z = v.z;
-    w = 1.0;
+inline Vector4::Vector4(const Vector2& v, const float z, const float w)
+{
+    data[0] = v.x();
+    data[1] = v.y();
+    data[2] = z;
+    data[3] = w;
 }
 
-inline Vector4::Vector4(const Vector3 &v, int w) {
-    x = v.x;
-    y = v.y;
-    z = v.z;
-    this->w = static_cast<float>(w);
+inline Vector4::Vector4(const float x, const Vector2& v, const float w)
+{
+    data[0] = x;
+    data[1] = v.x();
+    data[2] = v.y();
+    data[3] = w;
 }
 
-inline Vector4::Vector4(const Vector3 &v, float w) {
-    x = v.x;
-    y = v.y;
-    z = v.z;
-    this->w = w;
+inline Vector4::Vector4(const float x, const float y, const Vector2& v)
+{
+    data[0] = x;
+    data[1] = y;
+    data[2] = v.x();
+    data[3] = v.y();
 }
 
-inline Vector4::Vector4(int x, const Vector3 &v) {
-    this->x = static_cast<float>(x);
-    y = v.x;
-    z = v.y;
-    w = v.z;
+inline float Vector4::magnitude() const
+{
+    return std::sqrt(x() * x() + y() * y() + z() * z() + w() * w());
 }
 
-inline Vector4::Vector4(float x, const Vector3 &v) {
-    this->x = x;
-    y = v.x;
-    z = v.y;
-    w = v.z;
+inline void Vector4::Normalize()
+{
+    *this /= magnitude();
 }
 
-inline Vector4::Vector4(const Vector2 &v) {
-    x = v.x;
-    y = v.y;
-    z = 0.0;
-    w = 1.0;
+inline Vector4 Vector4::normalize() const
+{
+    Vector4 result = *this;
+    result.Normalize();
+    return result;
 }
 
-inline Vector4::Vector4(const Vector2 &v, int z, int w) {
-    x = v.x;
-    y = v.y;
-    this->z = static_cast<float>(z);;
-    this->w = static_cast<float>(w);;
+inline float Vector4::dot(const Vector4& a, const Vector4& b)
+{
+    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z() + a.w() * b.w();
 }
 
-inline Vector4::Vector4(const Vector2 &v, float z, float w) {
-    x = v.x;
-    y = v.y;
-    this->z = z;
-    this->w = w;
+inline Vector4 Vector4::lerp(Vector4& a, Vector4& b, const float t)
+{
+    return (1.0f - t) * a + t * b;
 }
 
-inline Vector4::Vector4(int x, const Vector2 &v, int w) {
-    this->x = static_cast<float>(x);
-    y = v.x;
-    z = v.y;
-    this->w = static_cast<float>(w);
+inline Vector4& Vector4::operator=(const Vector2& other)
+{
+    data[0] = other.x();
+    data[1] = other.y();
+    data[2] = 0.f;
+    data[3] = 1.f;
+    return *this;
 }
 
-inline Vector4::Vector4(float x, const Vector2 &v, float w) {
-    this->x = x;
-    y = v.x;
-    z = v.y;
-    this->w = w;
-}
-
-inline Vector4::Vector4(int x, int y, const Vector2 &v) {
-    this->x = static_cast<float>(x);
-    this->y = static_cast<float>(y);
-    this->z = v.x;
-    this->w = v.y;
-}
-
-inline Vector4::Vector4(float x, float y, const Vector2 &v) {
-    this->x = x;
-    this->y = y;
-    this->z = v.x;
-    this->w = v.y;
-}
-
-inline float Vector4::magnitude() const {
-    return std::sqrt(x*x + y*y + z*z + w*w);
-}
-
-inline void Vector4::Normalize() {
-    *this = *this / magnitude();
-}
-
-inline Vector4 Vector4::normalize() const {
-    return *this / magnitude();
-}
-
-inline float Vector4::dot(const Vector4 &a, const Vector4 &b) {
-    return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;
-}
-
-inline Vector4 Vector4::lerp(const Vector4 &a, const Vector4 &b, float t) {
-    return (1-t)*a + t*b;
+inline Vector4& Vector4::operator=(const Vector3& other)
+{
+    data[0] = other.x();
+    data[1] = other.y();
+    data[2] = other.z();
+    data[3] = 1.f;
+    return *this;
 }
 
 inline Vector4 Vector4::fromJson(nlohmann::json json)
 {
-    return Vector4(json["x"].get<float>(), json["y"].get<float>(), json["z"].get<float>(), json["w"].get<float>());
+    Vector4 result;
+    result.data[0] = json["x"].get<float>();
+    result.data[1] = json["y"].get<float>();
+    result.data[2] = json["z"].get<float>();
+    result.data[3] = json["w"].get<float>();
+    return result;
 }
 
-inline nlohmann::json Vector4::toJson()
+inline nlohmann::json Vector4::toJson() const
 {
     nlohmann::json j;
-
-    j["x"] = x;
-    j["y"] = y;
-    j["z"] = z;
-    j["w"] = w;
+    j["x"] = data[0];
+    j["y"] = data[1];
+    j["z"] = data[2];
+    j["w"] = data[3];
     return j;
 }
 
-inline Quaternion::Quaternion() {
-    x = 0.0;
-    y = 0.0;
-    z = 0.0;
-    w = 1.0;
+#pragma endregion Vector4
+
+#pragma region Quaternion
+
+inline Quaternion::Quaternion(Vector3& axis, const float angle)
+{
+    axis.Normalize();
+    const auto s = std::sin(angle / 2);
+
+    data[0] = axis.x() * s;
+    data[1] = axis.y() * s;
+    data[2] = axis.z() * s;
+    data[3] = std::cos(angle / 2);
 }
 
-inline Quaternion::Quaternion(int x, int y, int z, int w) {
-    this->x = static_cast<float>(x);
-    this->y = static_cast<float>(y);
-    this->z = static_cast<float>(z);
-    this->w = static_cast<float>(w);
-}
+inline Quaternion::Quaternion(const Vector3& EulerAngles)
+{
+    const auto rs = std::sin(toRadians(EulerAngles.x()) / 2);
+    const auto rc = std::cos(toRadians(EulerAngles.x()) / 2);
+    const auto ps = std::sin(toRadians(EulerAngles.y()) / 2);
+    const auto pc = std::cos(toRadians(EulerAngles.y()) / 2);
+    const auto ys = std::sin(toRadians(EulerAngles.z()) / 2);
+    const auto yc = std::cos(toRadians(EulerAngles.z()) / 2);
 
-inline Quaternion::Quaternion(float x, float y, float z, float w) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
-    this->w = w;
-}
-
-inline Quaternion::Quaternion(const Vector3 &axis, float angle) {
-    Vector3 u = axis.normalize();
-    u = u * std::sin(angle / 2.0f);
-    const float _w = cos(angle / 2.0f);
-
-    x = u.x;
-    y = u.y;
-    z = u.z;
-    this->w = _w;
-}
-
-inline Quaternion::Quaternion(const Vector3 &EulerAngles) {
-    float phi = (PI / 180.0f) * EulerAngles.x;
-    float theta = (PI / 180.0f) * EulerAngles.y;
-    float psi = (PI / 180.0f) * EulerAngles.z;
-
-    psi = psi / 2.0f;
-    theta = theta / 2.0f;
-    phi = phi / 2.0f;
-
-    float sin_psi = sin(psi);
-    float cos_psi = cos(psi);
-    float sin_theta = sin(theta);
-    float cos_theta = cos(theta);
-    float sin_phi = sin(phi);
-    float cos_phi = cos(phi);
-
-    x = sin_phi*cos_theta*cos_psi - cos_phi*sin_theta*sin_psi;
-    y = cos_phi*sin_theta*cos_psi + sin_phi*cos_theta*sin_psi;
-    z = cos_phi*cos_theta*sin_psi - sin_phi*sin_theta*cos_psi;
-    w = cos_phi*cos_theta*cos_psi + sin_phi*sin_theta*sin_psi;
+    data[0] = yc * pc * rs - ys * ps * rc;
+    data[1] = yc * ps * rc + ys * pc * rs;
+    data[2] = ys * pc * rc - yc * ps * rs;
+    data[3] = yc * pc * rc + ys * ps * rs;
 }
 
 inline Quaternion::Quaternion(const Matrix4 &m) {
-    const float _w = std::sqrt(1.0f + m.a1 + m.b2 + m.c3) / 2.0f;
-    const float _x = (m.c2 - m.b3) / (4.0f * _w);
-    const float _y = (m.a3 - m.c1) / (4.0f * _w);
-    const float _z = (m.b1 - m.a2) / (4.0f * _w);
-    x = _x;
-    y = _y;
-    z = _z;
-    w = _w;
+
+    auto tw = 1 + m[0][0] + m[1][1] + m[2][2];
+    auto tx = 1 + m[0][0] - m[1][1] - m[2][2];
+    auto ty = 1 - m[0][0] + m[1][1] - m[2][2];
+    auto tz = 1 - m[0][0] - m[1][1] + m[2][2];
+
+    auto max = std::numeric_limits<float>::min();
+    if (tw > max)
+        max = tw;
+    if (ty > max)
+        max = ty;
+    if (tx > max)
+        max = tx;
+    if (tz > max)
+        max = tz;
+
+    float _w{};
+    float _x{};
+    float _y{};
+    float _z{};
+
+    if (tw == max)
+    {
+        _w = std::sqrt(tw) / 2.0f;
+        _x = (m[2][1] - m[1][2]) / (4.0f * _w);
+        _y = (m[0][2] - m[2][0]) / (4.0f * _w);
+        _z = (m[1][0] - m[0][1]) / (4.0f * _w);
+    }else if (tx == max)
+    {
+        _x = std::sqrt(tx) / 2.0f;
+        _w = (m[2][1] - m[1][2]) / (4.0f * _x);
+        _y = (m[0][1] + m[1][0]) / (4.0f * _x);
+        _z = (m[0][2] + m[2][0]) / (4.0f * _x);
+    }else if (ty == max)
+    {
+        _y = std::sqrt(ty) / 2.0f;
+        _w = (m[0][2] - m[2][0]) / (4.0f * _y);
+        _x = (m[0][1] + m[1][0]) / (4.0f * _y);
+        _z = (m[1][2] + m[2][1]) / (4.0f * _y);
+    }else
+    {
+        _z = std::sqrt(tz) / 2.0f;
+        _w = (m[0][2] - m[2][0]) / (4.0f * _z);
+        _x = (m[0][1] + m[1][0]) / (4.0f * _z);
+        _y = (m[1][2] + m[2][1]) / (4.0f * _z);
+    }
+
+    data[0] = _x;
+    data[1] = _y;
+    data[2] = _z;
+    data[3] = _w;
 }
 
-inline void Quaternion::Normalize() {
-    const float n = 1.0f/sqrt(x * x + y * y + z * z + w * w);
-
-    x *= n;
-    y *= n;
-    z *= n;
-    w *= n;
+inline float Quaternion::magnitude() const
+{
+    return std::sqrt(x() * x() + y() * y() + z() * z() + w() * w());
 }
 
-inline float Quaternion::magnitude() const {
-    return std::sqrt(x * x + y * y + z * z + w * w);
+inline void Quaternion::Normalize()
+{
+    const auto mag = magnitude();
+    for (float & i : data)
+    {
+        i /= mag;
+    }
 }
 
-inline Vector3 Quaternion::eulerAngles() const {
-    return Vector3(
-      std::atan2(2 * (w * y + z * x), 1 - 2 * (y * y + z * z)),
-      std::asin(2 * (w * y - z * x)),
-      std::atan2(2 * (w * z + x * y), 1 - 2 * (x * x + y * y))
-    );
+inline Quaternion Quaternion::normalize() const
+{
+    Quaternion result = *this;
+    result.Normalize();
+    return result;
 }
 
-inline Matrix4 Quaternion::toMatrix() const {
-    Quaternion q = this->normalize();
-
+inline Vector3 Quaternion::eulerAngles() const
+{
     return {
-        1.0f - 2.0f*q.y*q.y - 2.0f*q.z*q.z,     2.0f*q.x*q.y - 2.0f*q.z*q.w,        2.0f*q.x*q.z + 2.0f*q.y*q.w,        0.0f,
-        2.0f*q.x*q.y + 2.0f*q.z*q.w,            1.0f - 2.0f*q.x*q.x - 2.0f*q.z*q.z, 2.0f*q.y*q.z - 2.0f*q.x*q.w,        0.0f,
-        2.0f*q.x*q.z - 2.0f*q.y*q.w,            2.0f*q.y*q.z + 2.0f*q.x*q.w,        1.0f - 2.0f*q.x*q.x - 2.0f*q.y*q.y, 0.0f,
-        0.0f,                                   0.0f,                               0.0f,                               1.0f
+        std::atan2(2 * (w()*x() + y()*z()),1 - 2 * (x() * x() + y() * y())),
+        std::asin(2 * (w()*y() + x()*z())),
+        std::atan2(2 * (w()*z() + y()*x()),1 - 2 * (y() * y() + z() * z()))
     };
 }
 
-inline void Quaternion::rotate(const Vector3 &euler) {
-    *this = Quaternion(this->eulerAngles() + euler);
+inline Matrix4 Quaternion::toMatrix() const
+{
+    Vector4 m[4] = {
+        Vector4(1.0f - 2.0f*y()*y() - 2.0f*z()*z(),2.0f*x()*y() - 2.0f*z()*w(),2.0f*x()*z() + 2.0f*y()*w(), 0.f),
+        Vector4(2.0f*x()*y() + 2.0f*z()*w(),            1.0f - 2.0f*x()*x() - 2.0f*z()*z(), 2.0f*y()*z() - 2.0f*x()*w(), 0.f),
+        Vector4(2.0f*x()*z() - 2.0f*y()*w(),            2.0f*y()*z() + 2.0f*x()*w(),        1.0f - 2.0f*x()*x() - 2.0f*y()*y(), 0.f),
+        Vector4(0.f,0.f,0.f,1.f)
+    };
+
+    return Matrix4(m);
 }
 
-inline Quaternion Quaternion::normalize() const {
-    const float n = 1.0f/sqrt(x * x + y * y + z * z + w * w);
-
-    const float _x = x * n;
-    const float _y = y * n;
-    const float _z = z * n;
-    const float _w = w * n;
-
-    return Quaternion(_x, _y, _z, _w);
+inline float Quaternion::dot(const Quaternion& a, const Quaternion& b)
+{
+    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z() + a.w() * b.w();
 }
 
-inline float Quaternion::dot(const Quaternion &a, const Quaternion &b) {
-    return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
-}
-
-inline Quaternion Quaternion::slerp(const Quaternion &a, const Quaternion &b, const float t) {
-    const float angle = ::acos(abs(dot(a, b)));
+inline Quaternion Quaternion::slerp(Quaternion& a, Quaternion& b, const float t)
+{
+    const float angle = std::acos(std::abs(dot(a, b)));
 
     if (angle == 0)
         return a;
 
-    const float sin_t = ::sin(t * angle);
-    const float sin_one_minus_t = ::sin((1.0f-t) * angle);
-    const float sin_angle = ::sin(angle);
+    const float sin_t = std::sin(t * angle);
+    const float sin_one_minus_t = std::sin((1.0f-t) * angle);
+    const float sin_angle = std::sin(angle);
 
-    return ((a * sin_one_minus_t) + b * sin_t) / sin_angle;
+    auto q = a * sin_one_minus_t + b * sin_t;
+    return q / sin_angle;
 }
 
 inline Quaternion Quaternion::fromJson(nlohmann::json json)
 {
-    return Quaternion(json["x"].get<float>(), json["y"].get<float>(), json["z"].get<float>(), json["w"].get<float>());
+    Quaternion result;
+    result.data[0] = json["x"].get<float>();
+    result.data[1] = json["y"].get<float>();
+    result.data[2] = json["z"].get<float>();
+    result.data[3] = json["w"].get<float>();
+    return result;
 }
 
-inline nlohmann::json Quaternion::toJson()
+inline nlohmann::json Quaternion::toJson() const
 {
-    nlohmann::json j;
-
-    j["x"] = this->x;
-    j["y"] = this->y;
-    j["z"] = this->z;
-    j["w"] = this->w;
-    return j;
+    nlohmann::json result;
+    result["x"] = x();
+    result["y"] = y();
+    result["z"] = z();
+    result["w"] = w();
+    return result;
 }
+#pragma endregion Quaternion
 
-inline Matrix2::Matrix2() {
-    a1 = 1.0; a2 = 0.0;
-    b1 = 0.0; b2 = 1.0;
-}
+#pragma region Matrix2
 
-inline Matrix2::Matrix2(float a1, float a2, float b1, float b2) {
-    this->a1 = a1; this->a2 = a2;
-    this->b1 = b1; this->b2 = b2;
-}
-
-inline Matrix2::Matrix2(const Matrix3 &a) {
-    a1 = a.a1; a2 = a.a2;
-    b1 = a.b1; b2 = a.b2;
-}
-
-inline Matrix2::Matrix2(const Matrix4 &a) {
-    a1 = a.a1; a2 = a.a2;
-    b1 = a.b1; b2 = a.b2;
-}
-
-inline void Matrix2::Transpose() {
-    float _a1 = a1; float _a2 = b1;
-    float _b1 = a2; float _b2 = b2;
-
-    a1 = _a1; a2 = _a2;
-    b1 = _b1; b2 = _b2;
-}
-
-inline Matrix2 Matrix2::transpose() const {
-    float _a1 = a1; float _a2 = b1;
-    float _b1 = a2; float _b2 = b2;
-
-    return {
-        _a1, _a2,
-        _b1, _b2
-    };
-}
-
-inline void Matrix2::Inverse() {
-    float d = det2(*this);
-    *this = {
-        b2 / d, -a2 / d,
-        -b1 / d, a1 / d,
-    };
-}
-
-inline Matrix2 Matrix2::inverse() const {
-    float d = det2(*this);
-
-    return {
-        b2 / d, -a2 / d,
-        -b1 / d, a1 / d,
-    };
-}
-
-inline Matrix2 Matrix2::fromJson(nlohmann::json json)
+inline Matrix2::Matrix2(const Matrix3& a)
 {
-    return {json["a1"].get<float>(), json["a2"].get<float>(),
-     json["b1"].get<float>(), json["b2"].get<float>()};
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            data[i][j] = a[i][j];
+        }
+    }
+}
+
+inline Matrix2::Matrix2(const Matrix4& a)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            data[i][j] = a[i][j];
+        }
+    }
+}
+
+inline void Matrix2::Transpose()
+{
+    auto m = *this;
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            data[j][i] = m.data[i][j];
+        }
+    }
+}
+
+inline Matrix2 Matrix2::transpose() const
+{
+    auto m = *this;
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            m.data[j][i] = data[i][j];
+        }
+    }
+    return m;
+}
+
+inline void Matrix2::Inverse()
+{
+    auto m = *this;
+    const auto d = det2(*this);
+    data[0][0] = m[1][1] / d;
+    data[0][1] = -m[0][1] / d;
+    data[1][0] = -m[1][0] / d;
+    data[1][1] = m[0][0] / d;
+}
+
+inline Matrix2 Matrix2::inverse() const
+{
+    auto m = *this;
+    const auto d = det2(*this);
+    m[0][0] = data[1][1] / d;
+    m[0][1] = -data[0][1] / d;
+    m[1][0] = -data[1][0] / d;
+    m[1][1] = data[0][0] / d;
+
+    return m;
+}
+
+inline Matrix2& Matrix2::operator=(const Matrix3& other)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            data[i][j] = other.data[i][j];
+        }
+    }
+    return *this;
+}
+
+inline Matrix2& Matrix2::operator=(const Matrix4& other)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            data[i][j] = other.data[i][j];
+        }
+    }
+    return *this;
+}
+
+inline Matrix2 Matrix2::fromJson(const nlohmann::json& json)
+{
+    Matrix2 result;
+    result.data[0] = Vector2::fromJson(json["col1"]);
+    result.data[1] = Vector2::fromJson(json["col2"]);
+    return result;
 }
 
 inline nlohmann::json Matrix2::toJson()
 {
-    nlohmann::json j;
-
-    j["a1"] = this->a1;
-    j["a2"] = this->a2;
-    j["b1"] = this->b1;
-    j["b2"] = this->b2;
-    return j;
+    nlohmann::json result;
+    result["col1"] = data[0].toJson();
+    result["col2"] = data[1].toJson();
+    return result;
 }
 
-inline Matrix3::Matrix3() {
-    a1 = 1.0; a2 = 0.0; a3 = 0.0;
-    b1 = 0.0; b2 = 1.0; b3 = 0.0;
-    c1 = 0.0; c2 = 0.0; c3 = 1.0;
+#pragma endregion Matrix2
+
+#pragma region Matrix3
+
+inline Matrix3::Matrix3(const Matrix2& a)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (i == 2 && j == 2)
+            {
+                data[i][j] = 1.f;
+                continue;
+            }
+            if (i >= 2 || j >= 2)
+            {
+                data[i][j] = 0.f;
+                continue;
+            }
+            data[i][j] = a.data[i][j];
+        }
+    }
 }
 
-inline Matrix3::Matrix3(float a1, float a2, float a3, float b1, float b2, float b3, float c1, float c2,
-    float c3) {
-    this->a1 = a1; this->a2 = a2; this->a3 = a3;
-    this->b1 = b1; this->b2 = b2; this->b3 = b3;
-    this->c1 = c1; this->c2 = c2; this->c3 = c3;
+inline Matrix3::Matrix3(const Matrix4& a)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            data[i][j] = a[i][j];
+        }
+    }
 }
 
-inline Matrix3::Matrix3(const Matrix4 &a) {
-    a1 = a.a1, a2 = a.a2, a3 = a.a3,
-    b1 = a.b1, b2 = a.b2, b3 = a.b3,
-    c1 = a.c1, c2 = a.c2, c3 = a.c3;
+inline void Matrix3::Transpose()
+{
+    auto m = *this;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            data[j][i] = m.data[i][j];
+        }
+    }
 }
 
-
-inline void Matrix3::Transpose() {
-    const float _a1 = a1; const float _a2 = b1; const float _a3 = c1;
-    const float _b1 = a2; const float _b2 = b2; const float _b3 = c2;
-    const float _c1 = a3; const float _c2 = b3; const float _c3 = c3;
-
-    a1 = _a1; a2 = _a2; a3 = _a3;
-    b1 = _b1; b2 = _b2; b3 = _b3;
-    c1 = _c1; c2 = _c2; c3 = _c3;
+inline Matrix3 Matrix3::transpose() const
+{
+    auto m = *this;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            m.data[j][i] = data[i][j];
+        }
+    }
+    return m;
 }
 
-inline Matrix3 Matrix3::transpose() const {
-    const float _a1 = a1; const float _a2 = b1; const float _a3 = c1;
-    const float _b1 = a2; const float _b2 = b2; const float _b3 = c2;
-    const float _c1 = a3; const float _c2 = b3; const float _c3 = c3;
+inline void Matrix3::Inverse()
+{
+    auto d = det3(*this);
 
-    return {
-        _a1, _a2, _a3,
-        _b1, _b2, _b3,
-        _c1, _c2, _c3
+    Vector2 v00[2] = {
+       Vector2(data[1][1], data[1][2]),
+       Vector2(data[2][1], data[2][2])
     };
+    const Matrix2 a00(v00);
+    Vector2 v01[2] = {
+       Vector2(data[1][0], data[1][2]),
+       Vector2(data[2][0], data[2][2])
+    };
+    const Matrix2 a01(v01);
+    Vector2 v02[2] = {
+       Vector2(data[1][0], data[1][1]),
+       Vector2(data[2][0], data[2][1])
+    };
+    const Matrix2 a02(v02);
+    Vector2 v10[2] = {
+       Vector2(data[0][1], data[0][2]),
+       Vector2(data[2][1], data[2][2])
+    };
+    const Matrix2 a10(v10);
+    Vector2 v11[2] = {
+       Vector2(data[0][0], data[0][2]),
+       Vector2(data[2][0], data[2][2])
+    };
+    const Matrix2 a11(v11);
+    Vector2 v12[2] = {
+       Vector2(data[0][0], data[0][1]),
+       Vector2(data[2][0], data[2][1])
+    };
+    const Matrix2 a12(v12);
+    Vector2 v20[2] = {
+       Vector2(data[0][1], data[0][2]),
+       Vector2(data[1][1], data[1][2])
+    };
+    const Matrix2 a20(v20);
+    Vector2 v21[2] = {
+       Vector2(data[0][0], data[0][2]),
+       Vector2(data[1][0], data[1][2])
+    };
+    const Matrix2 a21(v21);
+    Vector2 v22[2] = {
+       Vector2(data[0][0], data[0][1]),
+       Vector2(data[1][0], data[1][1])
+    };
+    const Matrix2 a22(v22);
+
+    data[0][0] = det2(a00)/d;
+    data[0][1] = -det2(a10)/d;
+    data[0][2] = det2(a20)/d;
+    data[1][0] = -det2(a01)/d;
+    data[1][1] = det2(a11)/d;
+    data[1][2] = -det2(a21)/d;
+    data[2][0] = det2(a02)/d;
+    data[2][1] = -det2(a12)/d;
+    data[2][2] = det2(a22)/d;
 }
 
-inline void Matrix3::Inverse() {
-    float d = det3(*this);
+inline Matrix3 Matrix3::inverse() const
+{
+    auto m = Matrix3{};
+    auto d = det3(*this);
 
-    Matrix2 a00 = {
-        b2, b3,
-        c2, c3
-    };
+    Vector2 v00[2] = {
+        Vector2(data[1][1], data[1][2]),
+        Vector2(data[2][1], data[2][2])
+     };
+    const Matrix2 a00(v00);
+    Vector2 v01[2] = {
+        Vector2(data[1][0], data[1][2]),
+        Vector2(data[2][0], data[2][2])
+     };
+    const Matrix2 a01(v01);
+    Vector2 v02[2] = {
+        Vector2(data[1][0], data[1][1]),
+        Vector2(data[2][0], data[2][1])
+     };
+    const Matrix2 a02(v02);
+    Vector2 v10[2] = {
+        Vector2(data[0][1], data[0][2]),
+        Vector2(data[2][1], data[2][2])
+     };
+    const Matrix2 a10(v10);
+    Vector2 v11[2] = {
+        Vector2(data[0][0], data[0][2]),
+        Vector2(data[2][0], data[2][2])
+     };
+    const Matrix2 a11(v11);
+    Vector2 v12[2] = {
+        Vector2(data[0][0], data[0][1]),
+        Vector2(data[2][0], data[2][1])
+     };
+    const Matrix2 a12(v12);
+    Vector2 v20[2] = {
+        Vector2(data[0][1], data[0][2]),
+        Vector2(data[1][1], data[1][2])
+     };
+    const Matrix2 a20(v20);
+    Vector2 v21[2] = {
+        Vector2(data[0][0], data[0][2]),
+        Vector2(data[1][0], data[1][2])
+     };
+    const Matrix2 a21(v21);
+    Vector2 v22[2] = {
+        Vector2(data[0][0], data[0][1]),
+        Vector2(data[1][0], data[1][1])
+     };
+    const Matrix2 a22(v22);
 
-    Matrix2 a01 = {
-        b1, b3,
-        c1, c3
-    };
+    m[0][0] = det2(a00)/d;
+    m[0][1] = -det2(a10)/d;
+    m[0][2] = det2(a20)/d;
+    m[1][0] = -det2(a01)/d;
+    m[1][1] = det2(a11)/d;
+    m[1][2] = -det2(a21)/d;
+    m[2][0] = det2(a02)/d;
+    m[2][1] = -det2(a12)/d;
+    m[2][2] = det2(a22)/d;
 
-    Matrix2 a02 = {
-        b1, b2,
-        c1, c2
-    };
-
-    Matrix2 a10 = {
-        a2, a3,
-        c2, c3
-    };
-
-    Matrix2 a11 = {
-        a1, a3,
-        c1, c3
-    };
-
-    Matrix2 a12 = {
-        a1, a2,
-        c1, c2
-    };
-
-    Matrix2 a20 = {
-        a2, a3,
-        b2, b3
-    };
-
-    Matrix2 a21 = {
-        a1, a3,
-        b1, b3
-    };
-
-    Matrix2 a22 = {
-        a1, a2,
-        b1, b2
-    };
-
-    *this = {
-        det2(a00)/d, -det2(a01)/d, det2(a02)/d,
-        -det2(a10)/d, det2(a11)/d, -det2(a12)/d,
-        det2(a20)/d, -det2(a21)/d, det2(a22)/d
-    };
-
+    return m;
 }
 
-inline Matrix3 Matrix3::inverse() const {
-    float d = det3(*this);
+inline Matrix3& Matrix3::operator=(const Matrix2& other)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (i == 2 && j == 2)
+            {
+                data[i][j] = 1.f;
+                continue;
+            }
+            if (i >= 2 || j >= 2)
+            {
+                data[i][j] = 0.f;
+                continue;
+            }
+            data[i][j] = other.data[i][j];
+        }
+    }
+    return *this;
+}
 
-    Matrix2 a00 = {
-        b2, b3,
-        c2, c3
-    };
-
-    Matrix2 a01 = {
-        b1, b3,
-        c1, c3
-    };
-
-    Matrix2 a02 = {
-        b1, b2,
-        c1, c2
-    };
-
-    Matrix2 a10 = {
-        a2, a3,
-        c2, c3
-    };
-
-    Matrix2 a11 = {
-        a1, a3,
-        c1, c3
-    };
-
-    Matrix2 a12 = {
-        a1, a2,
-        c1, c2
-    };
-
-    Matrix2 a20 = {
-        a2, a3,
-        b2, b3
-    };
-
-    Matrix2 a21 = {
-        a1, a3,
-        b1, b3
-    };
-
-    Matrix2 a22 = {
-        a1, a2,
-        b1, b2
-    };
-
-    return {
-        det2(a00)/d, -det2(a01)/d, det2(a02)/d,
-        -det2(a10)/d, det2(a11)/d, -det2(a12)/d,
-        det2(a20)/d, -det2(a21)/d, det2(a22)/d
-    };
+inline Matrix3& Matrix3::operator=(const Matrix4& other)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            data[i][j] = other.data[i][j];
+        }
+    }
+    return *this;
 }
 
 inline Matrix3 Matrix3::fromJson(nlohmann::json json)
 {
-    return {json["a1"].get<float>(), json["a2"].get<float>(), json["a3"].get<float>(),
-    json["b1"].get<float>(), json["b2"].get<float>(), json["b3"].get<float>(),
-    json["c1"].get<float>(), json["c2"].get<float>(), json["c3"].get<float>()};
+    Matrix3 m;
+    m[0] = Vector3::fromJson(json["col1"]);
+    m[1] = Vector3::fromJson(json["col2"]);
+    m[2] = Vector3::fromJson(json["col3"]);
+    return m;
 }
 
 inline nlohmann::json Matrix3::toJson()
 {
-    nlohmann::json json;
-
-    json["a1"] = this->a1;
-    json["a2"] = this->a2;
-    json["a3"] = this->a3;
-    json["b1"] = this->b1;
-    json["b2"] = this->b2;
-    json["b3"] = this->b3;
-    json["c1"] = this->c1;
-    json["c2"] = this->c2;
-    json["c3"] = this->c3;
-    return json;
+    nlohmann::json j;
+    j["col1"] = data[0].toJson();
+    j["col2"] = data[1].toJson();
+    j["col3"] = data[2].toJson();
+    return j;
 }
 
-inline Matrix4::Matrix4() {
-    a1 = 1.0; a2 = 0.0; a3 = 0.0; a4 = 0.0;
-    b1 = 0.0; b2 = 1.0; b3 = 0.0; b4 = 0.0;
-    c1 = 0.0; c2 = 0.0; c3 = 1.0; c4 = 0.0;
-    d1 = 0.0; d2 = 0.0; d3 = 0.0; d4 = 1.0;
-}
+#pragma endregion Matrix3
 
-inline Matrix4::Matrix4(float a1, float a2, float a3, float a4, float b1, float b2, float b3, float b4,
-    float c1, float c2, float c3, float c4, float d1, float d2, float d3, float d4)
+#pragma region Matrix4
+
+inline Matrix4::Matrix4(const Matrix2& a)
 {
-    this->a1 = a1; this->a2 = a2; this->a3 = a3; this->a4 = a4;
-    this->b1 = b1; this->b2 = b2; this->b3 = b3; this->b4 = b4;
-    this->c1 = c1; this->c2 = c2; this->c3 = c3; this->c4 = c4;
-    this->d1 = d1; this->d2 = d2; this->d3 = d3; this->d4 = d4;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            if ((i == 3 && j == 3) || (i == 2 && j == 2))
+            {
+                data[i][j] = 1.f;
+                continue;
+            }
+            if (i >= 2 || j >= 2)
+            {
+                data[i][j] = 0.f;
+                continue;
+            }
+            data[i][j] = a.data[i][j];
+        }
+    }
 }
 
-inline Matrix4::Matrix4(const Matrix3 &a) {
-    a1 = a.a1; a2 = a.a2; a3 = a.a3; a4 = 0.0;
-    b1 = a.b1; b2 = a.b2; b3 = a.b3; b4 = 0.0;
-    c1 = a.c1; c2 = a.c2; c3 = a.c3; c4 = 0.0;
-    d1 = 0.0; d2 = 0.0; d3 = 0.0; d4 = 1.0;
-}
-
-inline void Matrix4::Transpose() {
-    const float _a1 = a1; const float _a2 = b1; const float _a3 = c1; const float _a4 = d1;
-    const float _b1 = a2; const float _b2 = b2; const float _b3 = c2; const float _b4 = d2;
-    const float _c1 = a3; const float _c2 = b3; const float _c3 = c3; const float _c4 = d3;
-    const float _d1 = a4; const float _d2 = b4; const float _d3 = c4; const float _d4 = d4;
-
-    a1 = _a1; a2 = _a2; a3 = _a3; a4 = _a4;
-    b1 = _b1; b2 = _b2; b3 = _b3; b4 = _b4;
-    c1 = _c1; c2 = _c2; c3 = _c3; c4 = _c4;
-    d1 = _d1; d2 = _d2; d3 = _d3; d4 = _d4;
-}
-
-inline Matrix4 Matrix4::transpose() const {
-    return {
-        a1, b1, c1, d1,
-        a2, b2, c2, d2,
-        a3, b3, c3, d3,
-        a4, b4, c4, d4,
-    };
-}
-
-inline void Matrix4::Inverse() {
-    float d = det4(*this);
-
-    Matrix3 a00 = {
-        b2, b3, b4,
-        c2, c3, c4,
-        d2, d3, d4
-    };
-    Matrix3 a01 = {
-        b1, b3, b4,
-        c1, c3, c4,
-        d1, d3, d4
-    };
-    Matrix3 a02 = {
-        b1, b2, b4,
-        c1, c2, c4,
-        d1, d2, d4
-    };
-    Matrix3 a03 = {
-        b1, b2, b3,
-        c1, c2, c3,
-        d1, d2, d3
-    };
-    Matrix3 a10 = {
-        a2, a3, a4,
-        c2, c3, c4,
-        d2, d3, d4
-    };
-    Matrix3 a11 = {
-        a1, a3, a4,
-        c1, c3, c4,
-        d1, d3, d4
-    };
-    Matrix3 a12 = {
-        a1, a2, a4,
-        c1, c2, c4,
-        d1, d2, d4
-    };
-    Matrix3 a13 = {
-        a1, a2, a3,
-        c1, c2, c3,
-        d1, d2, d3
-    };
-    Matrix3 a20 = {
-        a2, a3, a4,
-        b2, b3, b4,
-        d2, d3, d4
-    };
-    Matrix3 a21 = {
-        a1, a3, a4,
-        b1, b3, b4,
-        d1, d3, d4
-    };
-    Matrix3 a22 = {
-        a1, a2, a4,
-        b1, b2, b4,
-        d1, d2, d4
-    };
-    Matrix3 a23 = {
-        a1, a2, a3,
-        b1, b2, b3,
-        d1, d2, d3
-    };
-
-    Matrix3 a30 = {
-        a2, a3, a4,
-        b2, b3, b4,
-        c2, c3, c4
-    };
-    Matrix3 a31 = {
-        a1, a3, a4,
-        b1, b3, b4,
-        c1, c3, c4
-    };
-    Matrix3 a32 = {
-        a1, a2, a4,
-        b1, b2, b4,
-        c1, c2, c4
-    };
-    Matrix3 a33 = {
-        a1, a2, a3,
-        b1, b2, b3,
-        c1, c2, c3
-    };
-
-    float _a1 = det3(a00)/d;
-    float _a2 = -det3(a10)/d;
-    float _a3 = det3(a20)/d;
-    float _a4 = -det3(a30)/d;
-    float _b1 = -det3(a01)/d;
-    float _b2 = det3(a11)/d;
-    float _b3 = -det3(a21)/d;
-    float _b4 = det3(a31)/d;
-    float _c1 = det3(a02)/d;
-    float _c2 = -det3(a12)/d;
-    float _c3 = det3(a22)/d;
-    float _c4 = -det3(a32)/d;
-    float _d1 = -det3(a03)/d;
-    float _d2 = det3(a13)/d;
-    float _d3 = -det3(a23)/d;
-    float _d4 = det3(a33)/d;
-
-    *this = {
-        _a1, _a2, _a3, _a4,
-        _b1, _b2, _b3, _b4,
-        _c1, _c2, _c3, _c4,
-        _d1, _d2, _d3, _d4
-    };
-}
-
-inline Matrix4 Matrix4::inverse() const {
-    float d = det4(*this);
-
-    Matrix3 a00 = {
-        b2, b3, b4,
-        c2, c3, c4,
-        d2, d3, d4
-    };
-    Matrix3 a01 = {
-        b1, b3, b4,
-        c1, c3, c4,
-        d1, d3, d4
-    };
-    Matrix3 a02 = {
-        b1, b2, b4,
-        c1, c2, c4,
-        d1, d2, d4
-    };
-    Matrix3 a03 = {
-        b1, b2, b3,
-        c1, c2, c3,
-        d1, d2, d3
-    };
-    Matrix3 a10 = {
-        a2, a3, a4,
-        c2, c3, c4,
-        d2, d3, d4
-    };
-    Matrix3 a11 = {
-        a1, a3, a4,
-        c1, c3, c4,
-        d1, d3, d4
-    };
-    Matrix3 a12 = {
-        a1, a2, a4,
-        c1, c2, c4,
-        d1, d2, d4
-    };
-    Matrix3 a13 = {
-        a1, a2, a3,
-        c1, c2, c3,
-        d1, d2, d3
-    };
-    Matrix3 a20 = {
-        a2, a3, a4,
-        b2, b3, b4,
-        d2, d3, d4
-    };
-    Matrix3 a21 = {
-        a1, a3, a4,
-        b1, b3, b4,
-        d1, d3, d4
-    };
-    Matrix3 a22 = {
-        a1, a2, a4,
-        b1, b2, b4,
-        d1, d2, d4
-    };
-    Matrix3 a23 = {
-        a1, a2, a3,
-        b1, b2, b3,
-        d1, d2, d3
-    };
-
-    Matrix3 a30 = {
-        a2, a3, a4,
-        b2, b3, b4,
-        c2, c3, c4
-    };
-    Matrix3 a31 = {
-        a1, a3, a4,
-        b1, b3, b4,
-        c1, c3, c4
-    };
-    Matrix3 a32 = {
-        a1, a2, a4,
-        b1, b2, b4,
-        c1, c2, c4
-    };
-    Matrix3 a33 = {
-        a1, a2, a3,
-        b1, b2, b3,
-        c1, c2, c3
-    };
-
-    float _a1 = det3(a00)/d;
-    float _a2 = -det3(a10)/d;
-    float _a3 = det3(a20)/d;
-    float _a4 = -det3(a30)/d;
-    float _b1 = -det3(a01)/d;
-    float _b2 = det3(a11)/d;
-    float _b3 = -det3(a21)/d;
-    float _b4 = det3(a31)/d;
-    float _c1 = det3(a02)/d;
-    float _c2 = -det3(a12)/d;
-    float _c3 = det3(a22)/d;
-    float _c4 = -det3(a32)/d;
-    float _d1 = -det3(a03)/d;
-    float _d2 = det3(a13)/d;
-    float _d3 = -det3(a23)/d;
-    float _d4 = det3(a33)/d;
-
-    return {
-        _a1, _a2, _a3, _a4,
-        _b1, _b2, _b3, _b4,
-        _c1, _c2, _c3, _c4,
-        _d1, _d2, _d3, _d4
-    };
-}
-
-inline Matrix4 Matrix4::makeModelMatrix(const Vector3 &position, const Quaternion &rotation, const Vector3 &scale) {
-    const Matrix4 t = {
-        1, 0, 0, position.x,
-        0, 1, 0, position.y,
-        0, 0, 1, position.z,
-        0, 0, 0, 1,
-    };
-    const Matrix4 r = rotation.toMatrix();
-    const Matrix4 s = {
-        scale.x, 0, 0, 0,
-        0, scale.y, 0, 0,
-        0, 0, scale.z, 0,
-        0, 0, 0, 1
-    };
-    return t * r * s;
-}
-
-inline Matrix4 Matrix4::lookAt(const Vector3& eye, const Vector3& target, const Vector3& up)
+inline Matrix4::Matrix4(const Matrix3& a)
 {
-    const Vector3 f = (target - eye).normalize();
-    const Vector3 r = Vector3::cross(f, up).normalize();
-    const Vector3 u = Vector3::cross(r, f);
-
-    return {
-        r.x,  r.y,  r.z, -Vector3::dot(r, eye),
-        u.x,  u.y,  u.z, -Vector3::dot(u, eye),
-       -f.x, -f.y, -f.z,  Vector3::dot(f, eye),
-        0.0,  0.0,  0.0,  1.0
-   };
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            if (i == 3 && j == 3)
+            {
+                data[i][j] = 1.f;
+                continue;
+            }
+            if (i >= 3 || j >= 3)
+            {
+                data[i][j] = 0.f;
+                continue;
+            }
+            data[i][j] = a.data[i][j];
+        }
+    }
 }
 
-inline Matrix4 Matrix4::makePerspectiveMatrix(float fov, float aspect, float near, float far)
+inline void Matrix4::Transpose()
 {
-    return {
-        cot(fov / 2.0f) / aspect, 0, 0, 0,
-        0, cot(fov / 2.0f), 0, 0,
-        0, 0, (near + far) / (near - far), (2 * near * far) / (near - far),
-        0, 0, -1, 0
-    };
+    auto m = *this;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            data[i][j] = m.data[j][i];
+        }
+    }
 }
 
-inline Matrix4 Matrix4::makeOrthographicMatrix(float left, float right, float bottom, float top, float near, float far)
+inline Matrix4 Matrix4::transpose() const
 {
-    return {
-        2.0f / (right - left),  0.0f,                   0.0f,                  -(right + left) / (right - left),
-        0.0f,                   2.0f / (top - bottom),  0.0f,                  -(top + bottom) / (top - bottom),
-        0.0f,                   0.0f,                  -2.0f / (far - near),   -(far + near)   / (far - near),
-        0.0f,                   0.0f,                   0.0f,                   1.0f
+    auto m = *this;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            m.data[i][j] = data[j][i];
+        }
+    }
+    return m;
+}
+
+inline void Matrix4::Inverse()
+{
+    const auto d = det4(*this);
+
+    Vector3 v00[3] = {
+       Vector3(data[1][1], data[1][2], data[1][3]),
+       Vector3(data[2][1], data[2][2], data[2][3]),
+       Vector3(data[3][1], data[3][2], data[3][3])
     };
+    const Matrix3 a00(v00);
+    Vector3 v01[3] = {
+       Vector3(data[1][0], data[1][2], data[1][3]),
+       Vector3(data[2][0], data[2][2], data[2][3]),
+       Vector3(data[3][0], data[3][2], data[3][3])
+    };
+    const Matrix3 a01(v01);
+    Vector3 v02[3] = {
+       Vector3(data[1][0], data[1][1], data[1][3]),
+       Vector3(data[2][0], data[2][1], data[2][3]),
+       Vector3(data[3][0], data[3][1], data[3][3])
+    };
+    const Matrix3 a02(v02);
+    Vector3 v03[3] = {
+       Vector3(data[1][0], data[1][1], data[1][2]),
+       Vector3(data[2][0], data[2][1], data[2][2]),
+       Vector3(data[3][0], data[3][1], data[3][2])
+    };
+    const Matrix3 a03(v03);
+    Vector3 v10[3] = {
+       Vector3(data[0][1], data[0][2], data[0][3]),
+       Vector3(data[2][1], data[2][2], data[2][3]),
+       Vector3(data[3][1], data[3][2], data[3][3])
+    };
+    const Matrix3 a10(v10);
+    Vector3 v11[3] = {
+       Vector3(data[0][0], data[0][2], data[0][3]),
+       Vector3(data[2][0], data[2][2], data[2][3]),
+       Vector3(data[3][0], data[3][2], data[3][3])
+    };
+    const Matrix3 a11(v11);
+    Vector3 v12[3] = {
+       Vector3(data[0][0], data[0][1], data[0][3]),
+       Vector3(data[2][0], data[2][1], data[2][3]),
+       Vector3(data[3][0], data[3][1], data[3][3])
+    };
+    const Matrix3 a12(v12);
+    Vector3 v13[3] = {
+       Vector3(data[0][0], data[0][1], data[0][2]),
+       Vector3(data[2][0], data[2][1], data[2][2]),
+       Vector3(data[3][0], data[3][1], data[3][2])
+    };
+    const Matrix3 a13(v13);
+    Vector3 v20[3] = {
+       Vector3(data[0][1], data[0][2], data[0][3]),
+       Vector3(data[1][1], data[1][2], data[1][3]),
+       Vector3(data[3][1], data[3][2], data[3][3])
+    };
+    const Matrix3 a20(v20);
+    Vector3 v21[3] = {
+       Vector3(data[0][0], data[0][2], data[0][3]),
+       Vector3(data[1][0], data[1][2], data[1][3]),
+       Vector3(data[3][0], data[3][2], data[3][3])
+    };
+    const Matrix3 a21(v21);
+    Vector3 v22[3] = {
+       Vector3(data[0][0], data[0][1], data[0][3]),
+       Vector3(data[1][0], data[1][1], data[1][3]),
+       Vector3(data[3][0], data[3][1], data[3][3])
+    };
+    const Matrix3 a22(v22);
+    Vector3 v23[3] = {
+       Vector3(data[0][0], data[0][1], data[0][2]),
+       Vector3(data[1][0], data[1][1], data[1][2]),
+       Vector3(data[3][0], data[3][1], data[3][2])
+    };
+    const Matrix3 a23(v23);
+    Vector3 v30[3] = {
+       Vector3(data[0][1], data[0][2], data[0][3]),
+       Vector3(data[1][1], data[1][2], data[1][3]),
+       Vector3(data[2][1], data[2][2], data[2][3])
+    };
+    const Matrix3 a30(v30);
+    Vector3 v31[3] = {
+       Vector3(data[0][0], data[0][2], data[0][3]),
+       Vector3(data[1][0], data[1][2], data[1][3]),
+       Vector3(data[2][0], data[2][2], data[2][3])
+    };
+    const Matrix3 a31(v31);
+    Vector3 v32[3] = {
+       Vector3(data[0][0], data[0][1], data[0][3]),
+       Vector3(data[1][0], data[1][1], data[1][3]),
+       Vector3(data[2][0], data[2][1], data[2][3])
+    };
+    const Matrix3 a32(v32);
+    Vector3 v33[3] = {
+       Vector3(data[0][0], data[0][1], data[0][2]),
+       Vector3(data[1][0], data[1][1], data[1][2]),
+       Vector3(data[2][0], data[2][1], data[2][2])
+    };
+    const Matrix3 a33(v33);
+
+    data[0][0] = det3(a00)/d;
+    data[0][1] = -det3(a10)/d;
+    data[0][2] = det3(a20)/d;
+    data[0][3] = -det3(a30)/d;
+    data[1][0] = -det3(a01)/d;
+    data[1][1] = det3(a11)/d;
+    data[1][2] = -det3(a21)/d;
+    data[1][3] = det3(a31)/d;
+    data[2][0] = det3(a02)/d;
+    data[2][1] = -det3(a12)/d;
+    data[2][2] = det3(a22)/d;
+    data[2][3] = -det3(a32)/d;
+    data[3][0] = -det3(a03)/d;
+    data[3][1] = det3(a13)/d;
+    data[3][2] = -det3(a23)/d;
+    data[3][3] = det3(a33)/d;
+}
+
+inline Matrix4 Matrix4::inverse() const
+{
+    auto m = Matrix4{};
+    const auto d = det4(*this);
+
+    Vector3 v00[3] = {
+       Vector3(data[1][1], data[1][2], data[1][3]),
+       Vector3(data[2][1], data[2][2], data[2][3]),
+       Vector3(data[3][1], data[3][2], data[3][3])
+    };
+    const Matrix3 a00(v00);
+    Vector3 v01[3] = {
+       Vector3(data[1][0], data[1][2], data[1][3]),
+       Vector3(data[2][0], data[2][2], data[2][3]),
+       Vector3(data[3][0], data[3][2], data[3][3])
+    };
+    const Matrix3 a01(v01);
+    Vector3 v02[3] = {
+       Vector3(data[1][0], data[1][1], data[1][3]),
+       Vector3(data[2][0], data[2][1], data[2][3]),
+       Vector3(data[3][0], data[3][1], data[3][3])
+    };
+    const Matrix3 a02(v02);
+    Vector3 v03[3] = {
+       Vector3(data[1][0], data[1][1], data[1][2]),
+       Vector3(data[2][0], data[2][1], data[2][2]),
+       Vector3(data[3][0], data[3][1], data[3][2])
+    };
+    const Matrix3 a03(v03);
+    Vector3 v10[3] = {
+       Vector3(data[0][1], data[0][2], data[0][3]),
+       Vector3(data[2][1], data[2][2], data[2][3]),
+       Vector3(data[3][1], data[3][2], data[3][3])
+    };
+    const Matrix3 a10(v10);
+    Vector3 v11[3] = {
+       Vector3(data[0][0], data[0][2], data[0][3]),
+       Vector3(data[2][0], data[2][2], data[2][3]),
+       Vector3(data[3][0], data[3][2], data[3][3])
+    };
+    const Matrix3 a11(v11);
+    Vector3 v12[3] = {
+       Vector3(data[0][0], data[0][1], data[0][3]),
+       Vector3(data[2][0], data[2][1], data[2][3]),
+       Vector3(data[3][0], data[3][1], data[3][3])
+    };
+    const Matrix3 a12(v12);
+    Vector3 v13[3] = {
+       Vector3(data[0][0], data[0][1], data[0][2]),
+       Vector3(data[2][0], data[2][1], data[2][2]),
+       Vector3(data[3][0], data[3][1], data[3][2])
+    };
+    const Matrix3 a13(v13);
+    Vector3 v20[3] = {
+       Vector3(data[0][1], data[0][2], data[0][3]),
+       Vector3(data[1][1], data[1][2], data[1][3]),
+       Vector3(data[3][1], data[3][2], data[3][3])
+    };
+    const Matrix3 a20(v20);
+    Vector3 v21[3] = {
+       Vector3(data[0][0], data[0][2], data[0][3]),
+       Vector3(data[1][0], data[1][2], data[1][3]),
+       Vector3(data[3][0], data[3][2], data[3][3])
+    };
+    const Matrix3 a21(v21);
+    Vector3 v22[3] = {
+       Vector3(data[0][0], data[0][1], data[0][3]),
+       Vector3(data[1][0], data[1][1], data[1][3]),
+       Vector3(data[3][0], data[3][1], data[3][3])
+    };
+    const Matrix3 a22(v22);
+    Vector3 v23[3] = {
+       Vector3(data[0][0], data[0][1], data[0][2]),
+       Vector3(data[1][0], data[1][1], data[1][2]),
+       Vector3(data[3][0], data[3][1], data[3][2])
+    };
+    const Matrix3 a23(v23);
+    Vector3 v30[3] = {
+       Vector3(data[0][1], data[0][2], data[0][3]),
+       Vector3(data[1][1], data[1][2], data[1][3]),
+       Vector3(data[2][1], data[2][2], data[2][3])
+    };
+    const Matrix3 a30(v30);
+    Vector3 v31[3] = {
+       Vector3(data[0][0], data[0][2], data[0][3]),
+       Vector3(data[1][0], data[1][2], data[1][3]),
+       Vector3(data[2][0], data[2][2], data[2][3])
+    };
+    const Matrix3 a31(v31);
+    Vector3 v32[3] = {
+       Vector3(data[0][0], data[0][1], data[0][3]),
+       Vector3(data[1][0], data[1][1], data[1][3]),
+       Vector3(data[2][0], data[2][1], data[2][3])
+    };
+    const Matrix3 a32(v32);
+    Vector3 v33[3] = {
+       Vector3(data[0][0], data[0][1], data[0][2]),
+       Vector3(data[1][0], data[1][1], data[1][2]),
+       Vector3(data[2][0], data[2][1], data[2][2])
+    };
+    const Matrix3 a33(v33);
+
+    m[0][0] = det3(a00)/d;
+    m[0][1] = -det3(a10)/d;
+    m[0][2] = det3(a20)/d;
+    m[0][3] = -det3(a30)/d;
+    m[1][0] = -det3(a01)/d;
+    m[1][1] = det3(a11)/d;
+    m[1][2] = -det3(a21)/d;
+    m[1][3] = det3(a31)/d;
+    m[2][0] = det3(a02)/d;
+    m[2][1] = -det3(a12)/d;
+    m[2][2] = det3(a22)/d;
+    m[2][3] = -det3(a32)/d;
+    m[3][0] = -det3(a03)/d;
+    m[3][1] = det3(a13)/d;
+    m[3][2] = -det3(a23)/d;
+    m[3][3] = det3(a33)/d;
+
+    return m;
+}
+
+inline Matrix4 Matrix4::Translate(const Matrix4& org, const Vector3& translation)
+{
+    Matrix4 t{};
+    t[3][0] = translation.x();
+    t[3][1] = translation.y();
+    t[3][2] = translation.z();
+
+    return org * t;
+}
+
+inline Matrix4 Matrix4::Rotate(const Matrix4& org, Vector3 axis, const float angle)
+{
+    Quaternion q = Quaternion(axis, angle);
+
+    return org * q.toMatrix();
+}
+
+inline Matrix4 Matrix4::Rotate(const Matrix4& org, const Quaternion& rotation)
+{
+    return org * rotation.toMatrix();
+}
+
+inline Matrix4 Matrix4::Scale(const Matrix4& org, const Vector3& scale)
+{
+    Matrix4 s{};
+
+    s[0][0] = scale.x();
+    s[1][1] = scale.y();
+    s[2][2] = scale.z();
+
+    return org * s;
+}
+
+inline Matrix4 Matrix4::ModelMatrix(const Vector3& position, const Quaternion& rotation, const Vector3& scale)
+{
+    return Scale(Rotate(Translate({}, position), rotation), scale);
+}
+
+inline Matrix4 Matrix4::LookAt(const Vector3& eye, const Vector3& target, const Vector3& up)
+{
+    const auto f = (target - eye).normalize();
+    const auto r = Vector3::cross(f, up).normalize();
+    const auto u = Vector3::cross(r, f).normalize();
+
+    Vector4 v[4] {
+        Vector4(r.x(), u.x(), -f.x(), 0.f),
+        Vector4(r.y(), u.y(), -f.y(), 0.f),
+        Vector4(r.z(), u.z(), -f.z(), 0.f),
+        Vector4(-Vector3::dot(r, eye), -Vector3::dot(u, eye), Vector3::dot(f, eye), 1.f)
+    };
+
+    const Matrix4 m{v};
+    return m;
+}
+
+inline Matrix4 Matrix4::PerspectiveMatrix(const float fov, const float aspect, const float near, const float far)
+{
+    Vector4 v[4] {
+        Vector4(cot(fov / 2.0f) / aspect, 0, 0, 0),
+        Vector4(0, cot(fov / 2.0f), 0, 0),
+        Vector4(0, 0, (near + far) / (near - far), -1),
+        Vector4(0, 0, (2 * near * far) / (near - far), 0)
+    };
+    Matrix4 m{v};
+    return m;
+}
+
+inline Matrix4 Matrix4::OrthographicMatrix(const float left, const float right, const float bottom, const float top, const float near, const float far)
+{
+    Vector4 v[4] {
+        Vector4(2.f / (right - left),0.f,0.f,0.f),
+        Vector4(0.f,2.f / (top - bottom),0.f,0.f),
+        Vector4(0.f,0.f,-2.f / (far - near),0.f),
+        Vector4(-(right + left) / (right - left),-(top + bottom) / (top - bottom),-(far + near) / (far - near),1.0f)
+    };
+    const Matrix4 m(v);
+    return m;
+}
+
+inline Matrix4& Matrix4::operator=(const Matrix2& other)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            if ((i == 3 && j == 3) || (i == 2 && j == 2))
+            {
+                data[i][j] = 1.f;
+                continue;
+            }
+            if (i >= 2 || j >= 2)
+            {
+                data[i][j] = 0.f;
+                continue;
+            }
+            data[i][j] = other.data[i][j];
+        }
+    }
+    return *this;
+}
+
+inline Matrix4& Matrix4::operator=(const Matrix3& other)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            if ((i == 3 && j == 3))
+            {
+                data[i][j] = 1.f;
+                continue;
+            }
+            if (i >= 3 || j >= 3)
+            {
+                data[i][j] = 0.f;
+                continue;
+            }
+            data[i][j] = other.data[i][j];
+        }
+    }
+    return *this;
 }
 
 inline Matrix4 Matrix4::fromJson(nlohmann::json json)
 {
-    return {json["a1"].get<float>(), json["a2"].get<float>(), json["a3"].get<float>(), json["a4"].get<float>(),
-    json["b1"].get<float>(), json["b2"].get<float>(), json["b3"].get<float>(), json["b4"].get<float>(),
-    json["c1"].get<float>(), json["c2"].get<float>(), json["c3"].get<float>(), json["c4"].get<float>(),
-    json["d1"].get<float>(), json["d2"].get<float>(), json["d3"].get<float>(), json["d4"].get<float>()};
+    Matrix4 m{};
+    m[0] = Vector4::fromJson(json["col1"]);
+    m[1] = Vector4::fromJson(json["col2"]);
+    m[2] = Vector4::fromJson(json["col3"]);
+    m[3] = Vector4::fromJson(json["col4"]);
+    return m;
 }
 
-inline nlohmann::json Matrix4::toJson()
+inline nlohmann::json Matrix4::toJson() const
 {
     nlohmann::json j;
-
-    j["a1"] = this->a1;
-    j["a2"] = this->a2;
-    j["a3"] = this->a3;
-    j["a4"] = this->a4;
-    j["b1"] = this->b1;
-    j["b2"] = this->b2;
-    j["b3"] = this->b3;
-    j["b4"] = this->b4;
-    j["c1"] = this->c1;
-    j["c2"] = this->c2;
-    j["c3"] = this->c3;
-    j["c4"] = this->c4;
-    j["d1"] = this->d1;
-    j["d2"] = this->d2;
-    j["d3"] = this->d3;
-    j["d4"] = this->d4;
+    j["col1"] = data[0].toJson();
+    j["col2"] = data[1].toJson();
+    j["col3"] = data[2].toJson();
+    j["col4"] = data[3].toJson();
     return j;
 }
+
+#pragma endregion Matrix4
 
 std::vector<Vector4> getFrustumCornersWorldSpace(const Matrix4& projectionMatrix, const Matrix4& viewMatrix);
 
@@ -1721,14 +2274,14 @@ inline std::vector<Vector4> getFrustumCornersWorldSpace(const Matrix4& projectio
         {
             for (int z = 0; z < 2; z++)
             {
-                const Vector4 pt =
+                Vector4 pt =
                     inv * Vector4(
                       2.0f * x - 1.0f,
                       2.0f * y - 1.0f,
                       2.0f * z - 1.0f,
                         1.0f
                       );
-                frustumCorners.push_back(pt / pt.w);
+                frustumCorners.push_back(pt / pt.w());
             }
         }
     }

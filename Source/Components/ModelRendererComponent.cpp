@@ -4,6 +4,8 @@
 
 #include "ModelRendererComponent.h"
 
+#include <iostream>
+
 #include "CameraComponent.h"
 #include "LightComponent.h"
 #include "LogManager.h"
@@ -97,13 +99,14 @@ void ModelRendererComponent::drawToShadowMap(LightComponent* light)
 void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
 {
     glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
     mat.load();
 
     const auto model = getParent()->getWorldMatrix();
     const auto view = Resource.getMainCamera()->getViewMatrix();
     const auto proj = Resource.getMainCamera()->getProjectionMatrix();
     const auto orthographic = Resource.getMainCamera()->getOrthographicMatrix();
-
 
     switch (mat.getType())
     {
@@ -128,6 +131,8 @@ void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
         mat.setUniform("projection", orthographic);
         break;
     }
+
+    glDisable(GL_CULL_FACE);
 }
 
 void ModelRendererComponent::destroy()

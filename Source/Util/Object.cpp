@@ -32,12 +32,12 @@ void Object::setLocalScale(const Vector3 &scale) {
 }
 
 Matrix4 Object::getLocalMatrix() const {
-    return Matrix4::makeModelMatrix(m_localPosition, m_localRotation, m_localScale);
+    return Matrix4::ModelMatrix(m_localPosition, m_localRotation, m_localScale);
 }
 
 Vector3 Object::getWorldPosition() const {
     const Matrix4 m = getWorldMatrix();
-    return Vector3(m.a4, m.b4, m.c4);
+    return {m[0][3], m[1][3], m[2][3]};
 }
 
 void Object::setWorldPosition(const Vector3 &position) {
@@ -76,17 +76,17 @@ Matrix4 Object::getWorldMatrix() const {
 
 Vector3 Object::getWorldForward() const {
     const Matrix4 m = getWorldMatrix();
-    return Vector3(-m.a3, -m.b3, -m.c3).normalize();
+    return Vector3(-m[0][2], -m[1][2], -m[2][2]).normalize();
 }
 
 Vector3 Object::getWorldRight() const {
     const Matrix4 m = getWorldMatrix();
-    return Vector3(m.a1, m.b1, m.c1).normalize();
+    return Vector3(m[0][0], m[1][0], m[2][0]).normalize();
 }
 
 Vector3 Object::getWorldUp() const {
     const Matrix4 m = getWorldMatrix();
-    return Vector3(m.a2, m.b2, m.c2).normalize();
+    return Vector3(m[0][1], m[1][1], m[2][1]).normalize();
 }
 
 Object * Object::getParent() const {
@@ -162,18 +162,11 @@ nlohmann::json Object::toJson()
 
     j["ActiveState"] = m_activeState;
 
-    j["Position"]["x"] = m_localPosition.x;
-    j["Position"]["y"] = m_localPosition.y;
-    j["Position"]["z"] = m_localPosition.z;
+    j["Position"] = m_localPosition.toJson();
 
-    j["Rotation"]["x"] = m_localRotation.x;
-    j["Rotation"]["y"] = m_localRotation.y;
-    j["Rotation"]["z"] = m_localRotation.z;
-    j["Rotation"]["w"] = m_localRotation.w;
+    j["Rotation"] = m_localRotation.toJson();
 
-    j["Scale"]["x"] = m_localScale.x;
-    j["Scale"]["y"] = m_localScale.y;
-    j["Scale"]["z"] = m_localScale.z;
+    j["Scale"] = m_localScale.toJson();
 
     std::vector<nlohmann::json> components{};
     for (const auto& c : m_components)

@@ -11,7 +11,6 @@
 #include "AudioSourceComponent.h"
 #include "Object.h"
 #include "LogManager.h"
-#include "LinearMath.h"
 #include "CameraComponent.h"
 #include "LightComponent.h"
 #include "ModelRendererComponent.h"
@@ -398,14 +397,14 @@ void ResourceManager::loadHDR(const std::string& path)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    auto captureProjection = Matrix4::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
+    auto captureProjection = Matrix4::PerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
     Matrix4 captureViews[] = {
-        Matrix4::lookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  1.0f,  0.0f), Vector3(0.0f, 0.0f,  1.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  -1.0f,  0.0f), Vector3(0.0f, 0.0f,  -1.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  -1.0f), Vector3(0.0f, -1.0f,  0.0f))
+        Matrix4::LookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  1.0f,  0.0f), Vector3(0.0f, 0.0f,  1.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  -1.0f,  0.0f), Vector3(0.0f, 0.0f,  -1.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  0.0f,  -1.0f), Vector3(0.0f, -1.0f,  0.0f))
     };
 
     loadMaterial("assets/defaultAssets/Materials/equirectangular.json");
@@ -750,14 +749,14 @@ void ResourceManager::makeIrradiancePrefilterMap(unsigned int cubeMap)
     loadMaterial("assets/defaultAssets/Materials/irradiance.json");
     auto mat = getMaterial("assets/defaultAssets/Materials/irradiance.json");
 
-    auto captureProjection = Matrix4::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
+    auto captureProjection = Matrix4::PerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
     Matrix4 captureViews[] = {
-        Matrix4::lookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  1.0f,  0.0f), Vector3(0.0f, 0.0f,  1.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  -1.0f,  0.0f), Vector3(0.0f, 0.0f,  -1.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  -1.0f), Vector3(0.0f, -1.0f,  0.0f))
+        Matrix4::LookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  1.0f,  0.0f), Vector3(0.0f, 0.0f,  1.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  -1.0f,  0.0f), Vector3(0.0f, 0.0f,  -1.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  0.0f,  -1.0f), Vector3(0.0f, -1.0f,  0.0f))
     };
 
     glActiveTexture(GL_TEXTURE0);
@@ -860,14 +859,14 @@ void ResourceManager::updateIrradiancePrefilterMap(unsigned int cubeMap)
     auto mesh = getModel("assets/defaultAssets/Models/cube.fbx").m_meshes[0];
     auto mat = getMaterial("assets/defaultAssets/Materials/irradiance.json");
 
-    auto captureProjection = Matrix4::makePerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
+    auto captureProjection = Matrix4::PerspectiveMatrix(toRadians(90.0f), 1.0f, 0.1f, 10.0f);
     Matrix4 captureViews[] = {
-        Matrix4::lookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  1.0f,  0.0f), Vector3(0.0f, 0.0f,  1.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  -1.0f,  0.0f), Vector3(0.0f, 0.0f,  -1.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
-        Matrix4::lookAt(Vector3{}, Vector3(0.0f,  0.0f,  -1.0f), Vector3(0.0f, -1.0f,  0.0f))
+        Matrix4::LookAt(Vector3{}, Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  1.0f,  0.0f), Vector3(0.0f, 0.0f,  1.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  -1.0f,  0.0f), Vector3(0.0f, 0.0f,  -1.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
+        Matrix4::LookAt(Vector3{}, Vector3(0.0f,  0.0f,  -1.0f), Vector3(0.0f, -1.0f,  0.0f))
     };
 
     glActiveTexture(GL_TEXTURE0);
@@ -948,7 +947,7 @@ void ResourceManager::loadLights(Material mat)
                     Log.logWarning("One directional light is already loaded... replacing");
                 }
                 glUseProgram(mat.m_shaderProgram);
-                mat.setUniform("dirLightDir", light->m_direction);
+                mat.setUniform("dirLightDir", Vector3(light->m_direction));
                 mat.setUniform("dirLightColor", light->m_color);
                 mat.setUniform("dirLightPow", light->m_power);
                 dir = true;
@@ -1396,29 +1395,29 @@ void ResourceManager::processMesh(const aiMesh* mesh, const std::string &path)
         Vertex vertex;
 
         Vector3 vector;
-        vector.x = mesh->mVertices[i].x;
-        vector.y = mesh->mVertices[i].y;
-        vector.z = mesh->mVertices[i].z;
+        vector[0] = mesh->mVertices[i].x;
+        vector[1] = mesh->mVertices[i].y;
+        vector[2] = mesh->mVertices[i].z;
         vertex.m_position = vector;
 
-        model.m_boundingBox.min.x = std::min(model.m_boundingBox.min.x, vector.x);
-        model.m_boundingBox.min.y = std::min(model.m_boundingBox.min.y, vector.y);
-        model.m_boundingBox.min.z = std::min(model.m_boundingBox.min.z, vector.z);
+        model.m_boundingBox.min[0] = std::min(model.m_boundingBox.min[0], vector.x());
+        model.m_boundingBox.min[1] = std::min(model.m_boundingBox.min[1], vector.y());
+        model.m_boundingBox.min[2] = std::min(model.m_boundingBox.min[2], vector.z());
 
-        model.m_boundingBox.max.x = std::max(model.m_boundingBox.max.x, vector.x);
-        model.m_boundingBox.max.y = std::max(model.m_boundingBox.max.y, vector.y);
-        model.m_boundingBox.max.z = std::max(model.m_boundingBox.max.z, vector.z);
+        model.m_boundingBox.max[0] = std::max(model.m_boundingBox.max[0], vector.x());
+        model.m_boundingBox.max[1] = std::max(model.m_boundingBox.max[1], vector.y());
+        model.m_boundingBox.max[2] = std::max(model.m_boundingBox.max[2], vector.z());
 
-        vector.x = mesh->mNormals[i].x;
-        vector.y = mesh->mNormals[i].y;
-        vector.z = mesh->mNormals[i].z;
+        vector[0] = mesh->mNormals[i].x;
+        vector[1] = mesh->mNormals[i].y;
+        vector[2] = mesh->mNormals[i].z;
         vertex.m_normal = vector;
 
         if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
         {
             Vector2 vec;
-            vec.x = mesh->mTextureCoords[0][i].x;
-            vec.y = mesh->mTextureCoords[0][i].y;
+            vec[0] = mesh->mTextureCoords[0][i].x;
+            vec[1] = mesh->mTextureCoords[0][i].y;
             vertex.m_uvs = vec;
         }
         else
@@ -1501,7 +1500,7 @@ void ResourceManager::loadUniformMap()
 
         glUseProgram(shaderProgram);
         const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniform2f(uniform, value.x, value.y);
+        glUniform2f(uniform, value.x(), value.y());
     }});
 
     m_uniformMap.insert({"Vector3", [](const unsigned int shaderProgram, const nlohmann::json& j)
@@ -1511,7 +1510,7 @@ void ResourceManager::loadUniformMap()
 
         glUseProgram(shaderProgram);
         const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniform3f(uniform, value.x, value.y, value.z);
+        glUniform3f(uniform, value.x(), value.y(), value.z());
     }});
 
     m_uniformMap.insert({"Vector4", [](const unsigned int shaderProgram, const nlohmann::json& j)
@@ -1521,7 +1520,7 @@ void ResourceManager::loadUniformMap()
 
         glUseProgram(shaderProgram);
         const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniform4f(uniform, value.x, value.y, value.z, value.w);
+        glUniform4f(uniform, value.x(), value.y(), value.z(), value.w());
     }});
 
     m_uniformMap.insert({"Matrix4", [](const unsigned int shaderProgram, const nlohmann::json& j)
@@ -1531,7 +1530,7 @@ void ResourceManager::loadUniformMap()
 
         glUseProgram(shaderProgram);
         const int uniform = glGetUniformLocation(shaderProgram, name.c_str());
-        glUniformMatrix4fv(uniform, 1, GL_FALSE, value.toFloatArray());
+        glUniformMatrix4fv(uniform, 1, GL_FALSE, &value[0][0]);
     }});
 }
 

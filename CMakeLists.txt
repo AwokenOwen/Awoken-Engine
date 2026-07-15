@@ -29,7 +29,6 @@ add_library(Awoken_Engine STATIC
         include/WindowManager.h
         include/WorldManager.h
         include/Event.h
-        include/LinearMath.h
         include/Object.h
         include/ResourceManager.h
         include/stb_image.h
@@ -53,6 +52,8 @@ add_library(Awoken_Engine STATIC
         Source/Components/AudioSourceComponent.cpp
         Source/Components/TextRendererComponent.cpp
         include/TextRendererComponent.h
+        include/LinearMath.h
+        include/ft2build.h
 )
 
 target_include_directories(Awoken_Engine PUBLIC

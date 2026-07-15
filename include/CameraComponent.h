@@ -28,7 +28,7 @@ public:
 private:
     float m_fov{toRadians(90.0f)};
     float m_near{0.001f};
-    float m_far{100000.0f};
+    float m_far{1000.0f};
 
     bool m_main{true};
     bool m_perspective{true};
