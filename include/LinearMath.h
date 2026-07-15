@@ -2261,8 +2261,6 @@ inline nlohmann::json Matrix4::toJson() const
 
 #pragma endregion Matrix4
 
-std::vector<Vector4> getFrustumCornersWorldSpace(const Matrix4& projectionMatrix, const Matrix4& viewMatrix);
-
 inline std::vector<Vector4> getFrustumCornersWorldSpace(const Matrix4& projectionMatrix, const Matrix4& viewMatrix)
 {
     const auto inv = (projectionMatrix * viewMatrix).inverse();
