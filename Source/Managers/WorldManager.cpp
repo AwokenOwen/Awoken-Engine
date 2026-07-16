@@ -4,7 +4,7 @@
 
 #include "WorldManager.h"
 #include "Renderer.h"
-#include "Object3D.h"
+#include "Object.h"
 #include <iostream>
 
 #include "LightComponent.h"
@@ -18,9 +18,9 @@ WorldManager & WorldManager::getInstance() {
     return instance;
 }
 
-Object3D* WorldManager::instantiateObject(Object3D* parent)
+Object* WorldManager::instantiateObject(Object* parent)
 {
-    const auto a = new Object3D();
+    const auto a = new Object();
 
     m_tobeAdded.push_back(a);
 
@@ -84,7 +84,7 @@ void WorldManager::update() {
     // Add all to be objects into the scene
     for (const auto object: m_tobeAdded) {
         // Add object to update event
-        UpdateEvent.add(object, &Object3D::update);
+        UpdateEvent.add(object, &Object::update);
     }
     // clear to be added so no repeats
     m_tobeAdded.clear();
@@ -123,7 +123,7 @@ void WorldManager::update() {
 
     // Remove all to be objects from the scene
     for (const auto object: m_tobeDestroyed) {
-        UpdateEvent.remove(object, &Object3D::update);
+        UpdateEvent.remove(object, &Object::update);
 
         Log.log("Destroying object %s", object->m_name.c_str());
 

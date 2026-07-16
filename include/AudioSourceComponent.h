@@ -10,7 +10,7 @@
 class AudioSourceComponent : public Component{
     friend class ResourceManager;
 public:
-    explicit AudioSourceComponent(Object3D* parent);
+    explicit AudioSourceComponent(Object* parent);
 
     void play();
 

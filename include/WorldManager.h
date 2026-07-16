@@ -17,7 +17,7 @@
 class LightComponent;
 struct Scene;
 class Renderer;
-class Object3D;
+class Object;
 
 /**
  * @brief Singleton class that handles all Frame-buffers and the World events
@@ -39,7 +39,7 @@ public:
      * @param parent The parent of the new Object
      * @return Pointer to the newly created Object
      */
-    Object3D* instantiateObject(Object3D* parent = nullptr);
+    Object* instantiateObject(Object* parent = nullptr);
 
     /**
      * @brief The getter for the current active scene
@@ -102,8 +102,8 @@ private:
 
     void drawPostprocess();
 
-    std::vector<Object3D*> m_tobeAdded{};
-    std::vector<Object3D*> m_tobeDestroyed{};
+    std::vector<Object*> m_tobeAdded{};
+    std::vector<Object*> m_tobeDestroyed{};
 
     Event<> UpdateEvent{};
     Event<> EnableEvent{};

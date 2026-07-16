@@ -11,7 +11,7 @@ struct Mesh;
 class ModelRendererComponent : public Component, public Renderer{
     friend class ResourceManager;
 public:
-    explicit ModelRendererComponent(Object3D* parent);
+    explicit ModelRendererComponent(Object* parent);
     ~ModelRendererComponent() override = default;
 
     void setActiveState(bool active) override;

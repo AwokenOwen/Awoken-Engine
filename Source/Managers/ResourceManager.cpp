@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "AudioSourceComponent.h"
-#include "Object3D.h"
+#include "Object.h"
 #include "LogManager.h"
 #include "CameraComponent.h"
 #include "LightComponent.h"
@@ -98,7 +98,7 @@ Scene * Scene::fromJson(const nlohmann::json &j) {
     Resource.makeIrradiancePrefilterMap(Resource.getTexture(scene->m_reflectionMapName).m_textureID);
 
     for (const std::vector<nlohmann::json> objects = j["Root Objects"]; const auto& o : objects) {
-        scene->m_rootObjects.emplace_back(Object3D::fromJson(o));
+        scene->m_rootObjects.emplace_back(Object::fromJson(o));
     }
     return scene;
 }
@@ -176,7 +176,7 @@ template <typename T>
 void ResourceManager::registerComponent(const std::string& type)
 {
     static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
-    std::function lambda = [](Object3D* obj, nlohmann::json j)
+    std::function lambda = [](Object* obj, nlohmann::json j)
     {
         auto a = obj->addComponent<T>();
         a->fromJson(std::move(j));
@@ -185,7 +185,7 @@ void ResourceManager::registerComponent(const std::string& type)
     Log.log("Registered component '%s'", type.c_str());
 }
 
-void ResourceManager::loadComponent(Object3D* obj, nlohmann::json component) const
+void ResourceManager::loadComponent(Object* obj, nlohmann::json component) const
 {
     auto type = component["Type"].get<std::string>();
 

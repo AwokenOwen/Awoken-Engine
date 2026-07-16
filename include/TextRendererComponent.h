@@ -17,7 +17,7 @@ class TextRendererComponent : public Component, public Renderer
 {
     friend class ResourceManager;
 public:
-    explicit TextRendererComponent(Object3D* parent)
+    explicit TextRendererComponent(Object* parent)
         : Component(parent)
     {
     }

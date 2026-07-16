@@ -20,7 +20,7 @@ add_library(Awoken_Engine STATIC
         include/WindowManager.h
         include/WorldManager.h
         include/Event.h
-        include/Object3D.h
+        include/Object.h
         include/ResourceManager.h
         include/stb_image.h
         include/ModelRendererComponent.h
@@ -33,7 +33,7 @@ add_library(Awoken_Engine STATIC
         Source/Managers/WindowManager.cpp
         Source/Managers/WorldManager.cpp
         Source/Util/glad.c
-        Source/Util/Object3D.cpp
+        Source/Util/Object.cpp
         Source/Components/Component.cpp
         Source/Components/CameraComponent.cpp
         Source/Components/ModelRendererComponent.cpp
@@ -45,10 +45,6 @@ add_library(Awoken_Engine STATIC
         include/TextRendererComponent.h
         include/LinearMath.h
         include/ft2build.h
-        Source/Components/ComponentUI.cpp
-        include/ComponentUI.h
-        Source/Util/ObjectUI.cpp
-        include/ObjectUI.h
 )
 
 target_include_directories(Awoken_Engine PUBLIC

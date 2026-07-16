@@ -1,29 +1,20 @@
 //
-// Created by AwokenOwen on 4/23/26.
+// Created by AwokenOwen on 7/16/26.
 //
-
 #pragma once
-#include <nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
 
-class Object3D;
-class Component {
-    friend class Object3D;
+class Object;
+class Component
+{
+    friend class Object;
     friend class ResourceManager;
 public:
     /**
      * @brief Constructor necessary for all components
-     *
-     * @param parent The object that the component is attached to
      */
-    explicit Component(Object3D* parent);
+    explicit Component(Object *parent);
     virtual ~Component() = default;
-
-    /**
-     * @brief Getter for the parent object this component is attached to
-     *
-     * @return Pointer to the Parent Object
-     */
-    [[nodiscard]] Object3D* getParent() const;
 
     /**
      * @brief Getter for the active state of the Component
@@ -38,7 +29,14 @@ public:
      */
     virtual void setActiveState(bool active);
 
-private:
+    /**
+ * @brief Getter for the parent object this component is attached to
+ *
+ * @return Pointer to the Parent Object
+ */
+    [[nodiscard]] Object* getParent() const;
+
+protected:
     /**
      * @brief Called on the first frame this component exists
      */
@@ -68,7 +66,7 @@ private:
     virtual nlohmann::json toJson() = 0;
     virtual void fromJson(nlohmann::json j) = 0;
 
-    Object3D* p_parent{};
-
     bool m_activeState{};
+
+    Object* p_parent{nullptr};
 };

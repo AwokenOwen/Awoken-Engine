@@ -191,7 +191,7 @@ private:
     int listeners{1};
 };
 
-class Object3D;
+class Object;
 class CameraComponent;
 struct Scene {
     friend class WorldManager;
@@ -205,7 +205,7 @@ struct Scene {
     [[nodiscard]] std::string getName() const;
     [[nodiscard]] nlohmann::json toJson() const;
 
-    std::vector<Object3D*> m_rootObjects{};
+    std::vector<Object*> m_rootObjects{};
 
     void setReflectiveMap(const std::string& name);
 private:
@@ -267,7 +267,7 @@ public:
      * @param obj The object that the component will be added to
      * @param component The JSON file that will be converted into a component
      */
-    void loadComponent(Object3D* obj, nlohmann::json component) const;
+    void loadComponent(Object* obj, nlohmann::json component) const;
     /**
      * @brief Function at the start of the engine to register components that will be added via the JSON file
      *
@@ -395,7 +395,7 @@ private:
     std::map<std::string, std::string> m_sceneMap{};
     std::map<std::string, Scene*> m_loadedScenes{};
 
-    std::map<std::string, std::function<void(Object3D* obj, nlohmann::json j)>> m_componentMap{};
+    std::map<std::string, std::function<void(Object* obj, nlohmann::json j)>> m_componentMap{};
 
     std::map<std::string, Model> m_loadedModels{};
     std::map<std::string, Texture> m_loadedTextures{};

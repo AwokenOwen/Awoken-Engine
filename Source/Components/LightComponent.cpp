@@ -5,7 +5,7 @@
 #include "LightComponent.h"
 
 #include "CameraComponent.h"
-#include "Object3D.h"
+#include "Object.h"
 #include "ResourceManager.h"
 
 void LightComponent::activateShadowMap() const

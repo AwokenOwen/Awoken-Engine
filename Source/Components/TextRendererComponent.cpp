@@ -7,7 +7,7 @@
 #include "TextRendererComponent.h"
 
 #include "CameraComponent.h"
-#include "Object3D.h"
+#include "Object.h"
 #include "WindowManager.h"
 
 void TextRendererComponent::setFont(const std::string& path)

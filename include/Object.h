@@ -11,13 +11,13 @@
 #include "nlohmann/json.hpp"
 
 class Component;
-class Object3D {
+class Object {
     friend class WorldManager;
     friend struct Scene;
     friend class ResourceManager;
 public:
-    Object3D() = default;
-    virtual ~Object3D() = default;
+    Object() = default;
+    virtual ~Object() = default;
 
     /**
      * @return the local position of the object
@@ -95,7 +95,7 @@ public:
     /**
      * @return The parent of the object, nullptr if no parent
      */
-    [[nodiscard]] Object3D* getParent() const;
+    [[nodiscard]] Object* getParent() const;
 
     /**
      * @return The active state of the object
@@ -163,8 +163,8 @@ private:
     Quaternion m_localRotation{};
     Vector3 m_localScale{1,1,1};
 
-    Object3D* p_parent{};
-    std::vector<Object3D*> m_children{};
+    Object* p_parent{};
+    std::vector<Object*> m_children{};
     std::vector<Component*> m_components{};
 
     bool m_activeState{true};
@@ -176,10 +176,10 @@ private:
     Event<> DestroyEvent{};
 
     nlohmann::json toJson();
-    static Object3D* fromJson(const nlohmann::json& j);
+    static Object* fromJson(const nlohmann::json& j);
 };
 
-template<typename T> T* Object3D::addComponent() {
+template<typename T> T* Object::addComponent() {
     static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
     for (auto c: m_components) {
@@ -194,7 +194,7 @@ template<typename T> T* Object3D::addComponent() {
     return newComponent;
 }
 
-template<typename T> T* Object3D::getComponent() {
+template<typename T> T* Object::getComponent() {
     static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
     for (auto c: m_components) {
