@@ -71,8 +71,8 @@ void TextRendererComponent::setText(const std::string& text)
 
     // Edit these to fit anchor points
     Vector2 anchorValues{};
-    anchorValues[0] = -xSize / 2.f;
-    anchorValues[1] = ySize / 2.f;
+    anchorValues[0] = -boxSize.x() / 2.f;
+    anchorValues[1] = boxSize.y() / 2.f;
 
     constexpr int copyX{};
     int x = copyX;
@@ -100,7 +100,7 @@ void TextRendererComponent::setText(const std::string& text)
                 x+= (Advance >> 6);
             }
         }
-        if (x + (xSpace >> 6) > xSize)
+        if (x + (xSpace >> 6) > boxSize.x())
         {
             y -= yLine * 1.3f;
             x = copyX;
@@ -112,6 +112,11 @@ void TextRendererComponent::setText(const std::string& text)
 
     glBufferSubData( GL_ARRAY_BUFFER, 0, m_instanceData.size() * sizeof(InstanceData), m_instanceData.data());
     glBindVertexArray(0);
+}
+
+void TextRendererComponent::setBoxSize(const Vector2& size)
+{
+    boxSize = size;
 }
 
 void TextRendererComponent::init()
@@ -186,6 +191,7 @@ nlohmann::json TextRendererComponent::toJson()
     j["Text"] = m_text;
     j["Font"] = m_fontPath;
     j["Material"] = m_materialPath;
+    j["BoxSize"] = boxSize.toJson();
 
     return j;
 }
@@ -195,6 +201,7 @@ void TextRendererComponent::fromJson(nlohmann::json j)
     init();
     m_fontPath = j["Font"];
     m_materialPath = j["Material"];
+    boxSize = Vector2::fromJson(j["BoxSize"]);
 
     Resource.loadFont(m_fontPath);
     Resource.loadMaterial(m_materialPath);

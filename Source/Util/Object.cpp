@@ -119,6 +119,11 @@ void Object::setComponentActiveState(Component *component, const bool active) {
     }
 }
 
+void Object::Translate(const Vector3& translation)
+{
+    m_localPosition += translation;
+}
+
 void Object::update() {
     StartEvent.callEvent();
     StartEvent.clearEvent();

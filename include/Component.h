@@ -36,7 +36,7 @@ public:
  */
     [[nodiscard]] Object* getParent() const;
 
-protected:
+private:
     /**
      * @brief Called on the first frame this component exists
      */

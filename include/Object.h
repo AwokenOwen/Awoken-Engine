@@ -134,6 +134,8 @@ public:
     EVENT_ACCESSORS(DisableEvent)
     EVENT_ACCESSORS(DestroyEvent)
 
+    void Translate(const Vector3 &translation);
+
 protected:
     /**
      * @brief Called every frame
