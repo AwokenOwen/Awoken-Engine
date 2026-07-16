@@ -5,7 +5,7 @@
 #include "LogManager.h"
 #include "ResourceManager.h"
 
-AudioSourceComponent::AudioSourceComponent(Object *parent) : Component(parent)
+AudioSourceComponent::AudioSourceComponent(Object3D *parent) : Component(parent)
 {
 }
 

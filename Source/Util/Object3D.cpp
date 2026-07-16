@@ -2,84 +2,76 @@
 // Created by AwokenOwen on 4/13/26.
 //
 
-#include "Object.h"
+#include "Object3D.h"
 #include "Component.h"
 #include "ResourceManager.h"
 #include "WindowManager.h"
 #include "WorldManager.h"
 
-Vector3 Object::getLocalPosition() const {
+Vector3 Object3D::getLocalPosition() const {
     return m_localPosition;
 }
 
-void Object::setLocalPosition(const Vector3 &position) {
+void Object3D::setLocalPosition(const Vector3 &position) {
     m_localPosition = position;
 }
 
-Quaternion Object::getLocalRotation() const {
+Quaternion Object3D::getLocalRotation() const {
     return m_localRotation;
 }
 
-void Object::setLocalRotation(const Quaternion &rotation) {
+void Object3D::setLocalRotation(const Quaternion &rotation) {
     m_localRotation = rotation;
 }
 
-Vector3 Object::getLocalScale() const {
+Vector3 Object3D::getLocalScale() const {
     return m_localScale;
 }
 
-void Object::setLocalScale(const Vector3 &scale) {
+void Object3D::setLocalScale(const Vector3 &scale) {
     m_localScale = scale;
 }
 
-Matrix4 Object::getLocalMatrix() const {
+Matrix4 Object3D::getLocalMatrix() const {
     auto position = m_localPosition;
     auto rotation = m_localRotation;
     auto scale = m_localScale;
 
-    if (m_objectType == ObjectType::ScreenObject)
-    {
-        position[2] = 0.f;
-        scale[2] = 1.f;
-        const auto eulerAngles = m_localRotation.eulerAngles();
-        rotation = Quaternion(Vector3(0.f, 0.f, eulerAngles.z()));
-    }
-
     return Matrix4::ModelMatrix(position, rotation, scale);
 }
 
-Vector3 Object::getWorldPosition() const {
+Vector3 Object3D::getWorldPosition() const {
     const Matrix4 m = getWorldMatrix();
     return {m[0][3], m[1][3], m[2][3]};
 }
 
-void Object::setWorldPosition(const Vector3 &position) {
+void Object3D::setWorldPosition(const Vector3 &position) {
     m_localPosition = Vector3(getWorldMatrix().inverse() * Vector4(position));
 }
 
-Quaternion Object::getWorldRotation() const {
+Quaternion Object3D::getWorldRotation() const {
     const Matrix4 worldRotation = getWorldMatrix() * m_localRotation.toMatrix();
 
     return Quaternion(worldRotation);
 }
 
-void Object::setWorldRotation(const Quaternion &rotation) {
+void Object3D::setWorldRotation(const Quaternion &rotation) {
     const Matrix4 worldRotation = getWorldMatrix().inverse() * rotation.toMatrix();
 
     m_localRotation = Quaternion(worldRotation);
 }
 
-Vector3 Object::getWorldScale() const {
+Vector3 Object3D::getWorldScale() const {
     return Vector3(getWorldMatrix() * Vector4(m_localScale));
 }
 
-void Object::setWorldScale(const Vector3 &scale) {
+void Object3D::setWorldScale(const Vector3 &scale) {
     m_localScale = Vector3(getWorldMatrix().inverse() * Vector4(scale));
 }
 
-Matrix4 Object::getWorldMatrix() const {
+Matrix4 Object3D::getWorldMatrix() const {
     Matrix4 worldMatrix = getLocalMatrix();
-    const Object* currentParent = p_parent;
+    Object3D* currentParent = p_parent;
     while(currentParent != nullptr) {
         worldMatrix = worldMatrix * currentParent->getWorldMatrix();
         currentParent = currentParent->p_parent;
@@ -87,37 +79,37 @@ Matrix4 Object::getWorldMatrix() const {
     return worldMatrix;
 }
 
-Vector3 Object::getWorldForward() const {
+Vector3 Object3D::getWorldForward() const {
     const Matrix4 m = getWorldMatrix();
     return Vector3(-m[0][2], -m[1][2], -m[2][2]).normalize();
 }
 
-Vector3 Object::getWorldRight() const {
+Vector3 Object3D::getWorldRight() const {
     const Matrix4 m = getWorldMatrix();
     return Vector3(m[0][0], m[1][0], m[2][0]).normalize();
 }
 
-Vector3 Object::getWorldUp() const {
+Vector3 Object3D::getWorldUp() const {
     const Matrix4 m = getWorldMatrix();
     return Vector3(m[0][1], m[1][1], m[2][1]).normalize();
 }
 
-Object * Object::getParent() const {
+Object3D * Object3D::getParent() const {
     return p_parent;
 }
 
-bool Object::getActiveState() const {
+bool Object3D::getActiveState() const {
     return m_activeState;
 }
 
-void Object::setActiveState(const bool active) {
+void Object3D::setActiveState(const bool active) {
     if (m_activeState == active)
         return;
-    active ? World.addUpdateEvent(this, &Object::update) : World.removeUpdateEvent(this, &Object::update);
+    active ? World.addUpdateEvent(this, &Object3D::update) : World.removeUpdateEvent(this, &Object3D::update);
     m_activeState = active;
 }
 
-void Object::setComponentActiveState(Component *component, const bool active) {
+void Object3D::setComponentActiveState(Component *component, const bool active) {
     if (active) {
         EnableEvent.add(component, &Component::enable);
         UpdateEvent.add(component, &Component::update);
@@ -127,47 +119,37 @@ void Object::setComponentActiveState(Component *component, const bool active) {
     }
 }
 
-void Object::setObjectType(const ObjectType type)
-{
-    m_objectType = type;
-}
-
-ObjectType Object::getObjectType() const
-{
-    return m_objectType;
-}
-
-void Object::update() {
+void Object3D::update() {
     StartEvent.callEvent();
     StartEvent.clearEvent();
 
     UpdateEvent.callEvent();
 }
 
-void Object::enable() {
+void Object3D::enable() {
     EnableEvent.callEvent();
 }
 
-void Object::disable() {
+void Object3D::disable() {
     DisableEvent.callEvent();
 }
 
-void Object::destroy() {
+void Object3D::destroy() {
     DestroyEvent.callEvent();
 }
 
-void Object::end() {
+void Object3D::end() {
     for (const auto child : m_children) {
         child->end();
     }
     DestroyEvent.callEvent();
 
-    World.removeUpdateEvent(this, &Object::update);
-    World.removeDestroyEvent(this, &Object::destroy);
+    World.removeUpdateEvent(this, &Object3D::update);
+    World.removeDestroyEvent(this, &Object3D::destroy);
     delete this;
 }
 
-nlohmann::json Object::toJson()
+nlohmann::json Object3D::toJson()
 {
     nlohmann::json j;
 
@@ -199,14 +181,12 @@ nlohmann::json Object::toJson()
     }
 
     j["Children"] = children;
-
-    j["ObjectType"] = m_objectType;
     return j;
 }
 
-Object* Object::fromJson(const nlohmann::json& j)
+Object3D* Object3D::fromJson(const nlohmann::json& j)
 {
-    const auto a = new Object();
+    const auto a = new Object3D();
 
     a->m_activeState = j["ActiveState"];
 
@@ -226,9 +206,7 @@ Object* Object::fromJson(const nlohmann::json& j)
         a->m_children.push_back(child);
     }
 
-    a->m_objectType = j["ObjectType"];
-
-    World.addUpdateEvent(a, &Object::update);
+    World.addUpdateEvent(a, &Object3D::update);
 
     return a;
 }

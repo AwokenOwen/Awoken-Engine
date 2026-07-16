@@ -15,7 +15,7 @@ class LightComponent : public Component
 {
     friend class ResourceManager;
 public:
-    explicit LightComponent(Object* parent)
+    explicit LightComponent(Object3D* parent)
         : Component(parent)
     {
     }

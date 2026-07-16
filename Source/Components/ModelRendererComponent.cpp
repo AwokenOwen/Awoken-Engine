@@ -9,9 +9,9 @@
 #include "CameraComponent.h"
 #include "LightComponent.h"
 #include "LogManager.h"
-#include "Object.h"
+#include "Object3D.h"
 
-ModelRendererComponent::ModelRendererComponent(Object *parent) : Component(parent), Renderer() {
+ModelRendererComponent::ModelRendererComponent(Object3D *parent) : Component(parent), Renderer() {
 
 }
 

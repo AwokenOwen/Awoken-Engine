@@ -4,11 +4,11 @@
 
 #include "CameraComponent.h"
 
-#include "Object.h"
+#include "Object3D.h"
 #include "ResourceManager.h"
 #include "WindowManager.h"
 
-CameraComponent::CameraComponent(Object *parent) : Component(parent) {
+CameraComponent::CameraComponent(Object3D *parent) : Component(parent) {
 }
 
 Matrix4 CameraComponent::getViewMatrix() const {

@@ -16,7 +16,7 @@ struct Texture;
 class CameraComponent : public Component, public Renderer{
     friend class ResourceManager;
 public:
-    explicit CameraComponent(Object* parent);
+    explicit CameraComponent(Object3D* parent);
     ~CameraComponent() override = default;
 
     void setActiveState(bool active) override;

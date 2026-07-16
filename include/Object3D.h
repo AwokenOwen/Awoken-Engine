@@ -10,20 +10,14 @@
 #include "LogManager.h"
 #include "nlohmann/json.hpp"
 
-enum ObjectType
-{
-    WorldObject,
-    ScreenObject
-};
-
 class Component;
-class Object {
+class Object3D {
     friend class WorldManager;
     friend struct Scene;
     friend class ResourceManager;
 public:
-    Object() = default;
-    virtual ~Object() = default;
+    Object3D() = default;
+    virtual ~Object3D() = default;
 
     /**
      * @return the local position of the object
@@ -101,7 +95,7 @@ public:
     /**
      * @return The parent of the object, nullptr if no parent
      */
-    [[nodiscard]] Object* getParent() const;
+    [[nodiscard]] Object3D* getParent() const;
 
     /**
      * @return The active state of the object
@@ -140,9 +134,6 @@ public:
     EVENT_ACCESSORS(DisableEvent)
     EVENT_ACCESSORS(DestroyEvent)
 
-    void setObjectType(ObjectType type);
-    [[nodiscard]] ObjectType getObjectType() const;
-
 protected:
     /**
      * @brief Called every frame
@@ -172,8 +163,8 @@ private:
     Quaternion m_localRotation{};
     Vector3 m_localScale{1,1,1};
 
-    Object* p_parent{};
-    std::vector<Object*> m_children{};
+    Object3D* p_parent{};
+    std::vector<Object3D*> m_children{};
     std::vector<Component*> m_components{};
 
     bool m_activeState{true};
@@ -184,13 +175,11 @@ private:
     Event<> DisableEvent{};
     Event<> DestroyEvent{};
 
-    ObjectType m_objectType{ObjectType::WorldObject};
-
     nlohmann::json toJson();
-    static Object* fromJson(const nlohmann::json& j);
+    static Object3D* fromJson(const nlohmann::json& j);
 };
 
-template<typename T> T* Object::addComponent() {
+template<typename T> T* Object3D::addComponent() {
     static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
     for (auto c: m_components) {
@@ -205,7 +194,7 @@ template<typename T> T* Object::addComponent() {
     return newComponent;
 }
 
-template<typename T> T* Object::getComponent() {
+template<typename T> T* Object3D::getComponent() {
     static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
     for (auto c: m_components) {

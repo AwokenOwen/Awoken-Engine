@@ -3,9 +3,9 @@
 //
 
 #include "Component.h"
-#include "Object.h"
+#include "Object3D.h"
 
-Component::Component(Object *parent) {
+Component::Component(Object3D *parent) {
     p_parent = parent;
 
     p_parent->addStartEvent(this, &Component::start);
@@ -13,7 +13,7 @@ Component::Component(Object *parent) {
     p_parent->addDestroyEvent(this, &Component::destroy);
 }
 
-Object * Component::getParent() const {
+Object3D * Component::getParent() const {
     return p_parent;
 }
 

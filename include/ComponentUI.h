@@ -1,13 +1,13 @@
 //
-// Created by AwokenOwen on 4/23/26.
+// Created by AwokenOwen on 7/16/26.
 //
-
 #pragma once
 #include <nlohmann/json.hpp>
 
-class Object3D;
-class Component {
-    friend class Object3D;
+class ObjectUI;
+class ComponentUI
+{
+    friend class ObjectUI;
     friend class ResourceManager;
 public:
     /**
@@ -15,15 +15,15 @@ public:
      *
      * @param parent The object that the component is attached to
      */
-    explicit Component(Object3D* parent);
-    virtual ~Component() = default;
+    explicit ComponentUI(ObjectUI* parent);
+    virtual ~ComponentUI() = default;
 
     /**
      * @brief Getter for the parent object this component is attached to
      *
      * @return Pointer to the Parent Object
      */
-    [[nodiscard]] Object3D* getParent() const;
+    [[nodiscard]] ObjectUI* getParent() const;
 
     /**
      * @brief Getter for the active state of the Component
@@ -68,7 +68,7 @@ private:
     virtual nlohmann::json toJson() = 0;
     virtual void fromJson(nlohmann::json j) = 0;
 
-    Object3D* p_parent{};
+    ObjectUI* p_parent{};
 
     bool m_activeState{};
 };

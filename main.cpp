@@ -9,7 +9,7 @@
 #include "ModelRendererComponent.h"
 #include "LightComponent.h"
 #include "CameraComponent.h"
-#include "Object.h"
+#include "Object3D.h"
 #include "ResourceManager.h"
 #include "TextRendererComponent.h"
 
@@ -21,28 +21,27 @@ int main(int argc, char* argv[])
 
     auto scene = new Scene("testScene");
 
-    auto dir = new Object();
+    auto dir = new Object3D();
     dir->addComponent<LightComponent>();
 
-    auto cube = new Object();
+    auto cube = new Object3D();
     cube->addComponent<ModelRendererComponent>();
 
     cube->setLocalPosition(Vector3(0, 1, -5));
     cube->setLocalRotation(Quaternion(Vector3(45, 45, 0)));
 
-    auto floor = new Object();
+    auto floor = new Object3D();
     floor->addComponent<ModelRendererComponent>();
 
     floor->setLocalPosition(Vector3(0, -2, 0));
     floor->setLocalScale(Vector3(10, 1, 10));
 
-    auto camera = new Object();
+    auto camera = new Object3D();
     camera->addComponent<CameraComponent>();
 
     camera->setLocalPosition(Vector3(0, 0, 0));
 
-    auto text = new Object();
-    text->setObjectType(ScreenObject);
+    auto text = new Object3D();
     text->addComponent<TextRendererComponent>();
     text->setLocalPosition(Vector3(0, 0, 0));
     text->setLocalScale(Vector3(1, 1, 1));
