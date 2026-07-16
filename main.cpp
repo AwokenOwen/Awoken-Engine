@@ -19,7 +19,6 @@ int main(int argc, char* argv[])
     // Make a name
     // All the objects with their components turned into JSON
 
-
     auto scene = new Scene("testScene");
 
     auto dir = new Object();
@@ -45,6 +44,8 @@ int main(int argc, char* argv[])
     auto text = new Object();
     text->setObjectType(ScreenObject);
     text->addComponent<TextRendererComponent>();
+    text->setLocalPosition(Vector3(0, 0, 0));
+    text->setLocalScale(Vector3(1, 1, 1));
 
     scene->m_rootObjects.push_back(dir);
     scene->m_rootObjects.push_back(cube);

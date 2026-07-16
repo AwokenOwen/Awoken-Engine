@@ -111,7 +111,7 @@
             "Components": [
                 {
                     "FOV": 1.5707963705062866,
-                    "Far": 100000.0,
+                    "Far": 1000.0,
                     "Main": true,
                     "Near": 0.0010000000474974513,
                     "Perspective": true,
@@ -125,7 +125,7 @@
             "ObjectType": 0,
             "Position": {
                 "x": 0.0,
-                "y": 1.0,
+                "y": 0.0,
                 "z": 0.0
             },
             "Rotation": {
@@ -146,7 +146,7 @@
             "Components": [
                 {
                     "Font": "assets/defaultAssets/Fonts/arial.ttf",
-                    "Material": "assets/defaultAssets/Materials/unlit.json",
+                    "Material": "assets/defaultAssets/Materials/text.json",
                     "Text": "Hello World!",
                     "Type": "TextRenderer"
                 }

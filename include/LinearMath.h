@@ -2186,10 +2186,10 @@ inline Matrix4 Matrix4::PerspectiveMatrix(const float fov, const float aspect, c
 inline Matrix4 Matrix4::OrthographicMatrix(const float left, const float right, const float bottom, const float top, const float near, const float far)
 {
     Vector4 v[4] {
-        Vector4(2.f / (right - left),0.f,0.f,0.f),
-        Vector4(0.f,2.f / (top - bottom),0.f,0.f),
-        Vector4(0.f,0.f,-2.f / (far - near),0.f),
-        Vector4(-(right + left) / (right - left),-(top + bottom) / (top - bottom),-(far + near) / (far - near),1.0f)
+        Vector4(2.f / (right - left),0.f,0.f,-(right + left) / (right - left)),
+        Vector4(0.f,2.f / (top - bottom),0.f,-(top + bottom) / (top - bottom)),
+        Vector4(0.f,0.f,-2.f / (far - near),-(far + near) / (far - near)),
+        Vector4(0.f, 0.f, 0.f,1.0f)
     };
     const Matrix4 m(v);
     return m;

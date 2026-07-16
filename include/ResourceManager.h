@@ -96,6 +96,8 @@ struct Material
             glUniformMatrix4fv(uniform, 1, GL_FALSE, &value[0][0]);
         else if constexpr (std::is_same_v<T, std::vector<int>>)
             glUniform1iv(uniform, 1, &value[0]);
+        else if constexpr (std::is_same_v<T, std::vector<Matrix4>>)
+            glUniformMatrix4fv(uniform, value.size(), GL_FALSE, &value[0][0][0]);
     }
 private:
     unsigned int m_shaderProgram{};

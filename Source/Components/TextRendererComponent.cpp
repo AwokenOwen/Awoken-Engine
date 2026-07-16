@@ -4,7 +4,9 @@
 
 #include "TextRendererComponent.h"
 
+#include "CameraComponent.h"
 #include "Object.h"
+#include "WindowManager.h"
 
 void TextRendererComponent::setFont(const std::string& path)
 {
@@ -15,23 +17,44 @@ void TextRendererComponent::setFont(const std::string& path)
 
 void TextRendererComponent::start()
 {
-    constexpr GLfloat vertex_data[] = {
-        0.0f,1.0f,
-        0.0f,0.0f,
-        1.0f,1.0f,
-        1.0f,0.0f,
+    setTransparency(true);
+
+    const std::vector vertices
+    {
+        Vector2(0.f, 1.f),
+        Vector2(0.f, 0.f),
+        Vector2(1.f, 1.f),
+        Vector2(1.f, 0.f)
     };
 
-    // configure VAO/VBO for texture quads
-    // -----------------------------------
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &instanceVBO);
+
     glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vector2), &vertices[0], GL_STATIC_DRAW);
+
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,0, nullptr);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vector2), static_cast<void*>(nullptr));
+
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, ARRAY_LIMIT * sizeof(InstanceData), nullptr, GL_DYNAMIC_DRAW);
+
+    for (int i = 0; i < 4; i++)
+    {
+        glEnableVertexAttribArray(1 + i);
+        glVertexAttribPointer(1 + i, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
+            reinterpret_cast<void*>(offsetof(InstanceData, transform) + sizeof(Vector4) * i));
+        glVertexAttribDivisor(1 + i, 1);
+    }
+
+    glEnableVertexAttribArray(5);
+    glVertexAttribIPointer(5, 1, GL_INT, sizeof(InstanceData),
+        reinterpret_cast<void*>(offsetof(InstanceData, letterIndex)));
+
+    glVertexAttribDivisor(5, 1);
     glBindVertexArray(0);
 }
 
@@ -79,67 +102,70 @@ void TextRendererComponent::fromJson(nlohmann::json j)
 
 void TextRendererComponent::draw()
 {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     m_material.load();
+    m_material.setUniform("projection", Resource.getMainCamera()->getOrthographicMatrix());
+    m_material.setUniform("model", getParent()->getWorldMatrix());
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, m_font.m_textureArray);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    std::vector<Matrix4> transforms{};
-    std::vector<int> letterMap{};
+    // Edit these to fit anchor points
 
-    transforms.resize(400);
-    letterMap.resize(400);
+    auto copyX = 0;
+    auto x = copyX;
+    auto y = 0;
 
-    float x = getParent()->getWorldPosition().x();
-    float y = getParent()->getWorldPosition().y();
-
-    int workingIndex = 0;
-
+    // iterate through all characters
     std::string::const_iterator c;
     for (c = m_text.begin(); c != m_text.end(); ++c)
     {
-        Character ch = m_font.m_characters.at(*c);
+        auto [index, Size, Bearing, Advance] = m_font.m_characters[*c];
 
-        if (*c == '\n')
+        if (*c == '\n') {
+            y -= Size.y() * 1.3f ;
+            x = copyX;
+        }
+        else if (*c==' ') {
+            x += (Advance >> 6);
+        }
+        else
         {
-            y -= ch.Bearing.y();
-            x = getParent()->getWorldPosition().x();
-        }else if (*c == ' ')
-        {
-            x += ch.Advance >> 6;
-        }else
-        {
-            float xpos = x + ch.Bearing.x();
-            float ypos = y - (256 - ch.Bearing.y());
+            float xPos = x + Bearing.x();
+            float yPos = y - (256 - Bearing.y());
+            InstanceData instanceData{};
+            instanceData.transform = Matrix4::Translate({}, {xPos, yPos, 0}) * Matrix4::Scale({}, {256, 256, 0});
+            instanceData.letterIndex = index;
+            m_instanceData.push_back(instanceData);
 
-            transforms[workingIndex] = Matrix4::Translate(Matrix4(), Vector3(xpos, ypos, 0.0f)) * Matrix4::Scale(Matrix4(), Vector3(256, 256, 0));
-            letterMap[workingIndex] = ch.index;
-
-            x += (ch.Advance >> 6); // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
-            workingIndex++;
-            if (workingIndex == 400 ) {
-                drawLimit(workingIndex);
-                workingIndex = 0;
+            x+= (Advance >> 6);
+            if (m_instanceData.size() == ARRAY_LIMIT)
+            {
+                drawHelper();
+                m_instanceData.clear();
             }
         }
     }
 
-    drawLimit(workingIndex);
+    drawHelper();
+    m_instanceData.clear();
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-void TextRendererComponent::drawLimit(int length)
+void TextRendererComponent::drawHelper() const
 {
-    if (length <= 0)
-    {
-        return;
-    }
-    //Log.log("%s", m_text.c_str());
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferSubData( GL_ARRAY_BUFFER, 0, m_instanceData.size() * sizeof(InstanceData), m_instanceData.data());
+
+    glBindVertexArray(VAO);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, m_instanceData.size());
+    glBindVertexArray(0);
 }
+
 
 void TextRendererComponent::drawToShadowMap(LightComponent* light)
 {

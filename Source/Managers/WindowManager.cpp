@@ -16,8 +16,6 @@ int WindowManager::initialize() {
     }
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     // Log Done
     Log.log("WindowManager Initialized");
@@ -152,7 +150,7 @@ void WindowManager::framebuffer_size_callback(const int width, const int height)
         else if (static_cast<float>(width) / static_cast<float>(height) < m_aspectRatio)
         {
             m_viewportWidth = width;
-            m_viewportHeight = static_cast<int>(static_cast<float>(m_windowWidth) * (1.0f/m_aspectRatio));
+            m_viewportHeight = static_cast<int>(static_cast<float>(m_windowWidth) / m_aspectRatio);
         }
         else
         {
@@ -166,8 +164,9 @@ void WindowManager::framebuffer_size_callback(const int width, const int height)
         m_viewportWidth = width;
         m_viewportHeight = height;
     }
+
     // Set the viewport so that it's in the middle of the window rather than starting at the bottom right
-    glViewport(static_cast<int>((width - m_viewportWidth) / 2), static_cast<int>((height - m_viewportHeight) / 2), m_viewportWidth, m_viewportHeight);
+    glViewport((width - m_viewportWidth) / 2, (height - m_viewportHeight) / 2, m_viewportWidth, m_viewportHeight);
     Resource.resizeFrameBuffer("post", m_viewportWidth, m_viewportHeight);
 }
 

@@ -13,5 +13,5 @@
             }
         }
     ],
-    "VertexShader": "assets/defaultAssets/Shaders/defaultUI.vert"
+    "VertexShader": "assets/defaultAssets/Shaders/text.vert"
 }

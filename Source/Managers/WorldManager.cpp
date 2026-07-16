@@ -108,10 +108,10 @@ void WorldManager::update() {
 
     // Draw all drawers to the screen/framebuffer, transparent first then opaque
     Resource.activateFramebuffer("post");
-    TransparentDrawEvent.callEvent();
     OpaqueDrawEvent.callEvent();
-    TransparentDrawEvent.clearEvent();
+    TransparentDrawEvent.callEvent();
     OpaqueDrawEvent.clearEvent();
+    TransparentDrawEvent.clearEvent();
     Resource.activateFramebuffer();
 
     drawPostprocess();

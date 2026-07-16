@@ -7,6 +7,14 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 
+#define ARRAY_LIMIT 400
+
+struct InstanceData
+{
+    Matrix4 transform{};
+    int letterIndex{};
+};
+
 class TextRendererComponent : public Component, public Renderer
 {
     friend class ResourceManager;
@@ -27,8 +35,9 @@ private:
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;
     void draw() override;
-    void drawLimit(int length);
     void drawToShadowMap(LightComponent* light) override;
+
+    void drawHelper() const;
 
     std::string m_fontPath{"assets/defaultAssets/Fonts/arial.ttf"};
     Font m_font;
@@ -36,6 +45,7 @@ private:
     Material m_material{};
     std::string m_text{"Hello World!"};
 
-    unsigned int VAO{}, VBO{};
+    std::vector<InstanceData> m_instanceData{};
+    unsigned int VAO{}, VBO{}, instanceVBO{};
 };
 

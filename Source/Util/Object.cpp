@@ -5,6 +5,7 @@
 #include "Object.h"
 #include "Component.h"
 #include "ResourceManager.h"
+#include "WindowManager.h"
 #include "WorldManager.h"
 
 Vector3 Object::getLocalPosition() const {
@@ -32,7 +33,19 @@ void Object::setLocalScale(const Vector3 &scale) {
 }
 
 Matrix4 Object::getLocalMatrix() const {
-    return Matrix4::ModelMatrix(m_localPosition, m_localRotation, m_localScale);
+    auto position = m_localPosition;
+    auto rotation = m_localRotation;
+    auto scale = m_localScale;
+
+    if (m_objectType == ObjectType::ScreenObject)
+    {
+        position[2] = 0.f;
+        scale[2] = 1.f;
+        const auto eulerAngles = m_localRotation.eulerAngles();
+        rotation = Quaternion(Vector3(0.f, 0.f, eulerAngles.z()));
+    }
+
+    return Matrix4::ModelMatrix(position, rotation, scale);
 }
 
 Vector3 Object::getWorldPosition() const {
@@ -186,6 +199,8 @@ nlohmann::json Object::toJson()
     }
 
     j["Children"] = children;
+
+    j["ObjectType"] = m_objectType;
     return j;
 }
 
@@ -210,6 +225,8 @@ Object* Object::fromJson(const nlohmann::json& j)
         child->p_parent = a;
         a->m_children.push_back(child);
     }
+
+    a->m_objectType = j["ObjectType"];
 
     World.addUpdateEvent(a, &Object::update);
 
