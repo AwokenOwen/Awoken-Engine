@@ -93,7 +93,7 @@ else()
     target_link_libraries(Awoken_Engine PUBLIC
             libassimp.so
             libfreetype.a
-            libglfw3LINUX.a
+            libglfw3.a
             libopenal.so
             -lz
     )

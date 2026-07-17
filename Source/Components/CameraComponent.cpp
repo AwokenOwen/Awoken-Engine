@@ -49,9 +49,9 @@ void CameraComponent::draw()
     glCullFace(GL_FRONT);
 
     const auto view = Matrix3(getViewMatrix());
+    m_skyboxMaterial.load();
     m_skyboxMaterial.setUniform("view", Matrix4(view));
     m_skyboxMaterial.setUniform("projection", getPerspectiveMatrix());
-    m_skyboxMaterial.load();
 
     m_skyboxMaterial.setUniform<int>("skybox", 1);
     glActiveTexture(GL_TEXTURE1);
