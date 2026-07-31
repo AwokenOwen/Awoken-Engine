@@ -46,13 +46,13 @@ public:
      *
      * @return The delta time defined by the game loop
      */
-    [[nodiscard]] double getDeltaTime() const;
+    [[nodiscard]] float getDeltaTime() const;
     /**
      * @brief Sets the maximum the framerate the game loop will run at. If 0 then it's set to unlimited
      *
      * @param framerate The new maximum framerate the game will run at
      */
-    void setMaxFramerate(double framerate);
+    void setMaxFramerate(float framerate);
 private:
     /**
      * @brief Private default constructor for singleton functionality
@@ -66,11 +66,11 @@ private:
     /**
      * @brief The time it takes for each frame to run
      */
-    double m_deltaTime{};
+    float m_deltaTime{0.0001};
     /**
      * @brief Maximum FPS the game loop will run at
      */
-    double m_framerateFactor{};
+    float m_framerateFactor{};
 
     ALCdevice* m_device{};
     ALCcontext* m_context{};

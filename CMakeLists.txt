@@ -45,6 +45,8 @@ add_library(Awoken_Engine STATIC
         include/TextRendererComponent.h
         include/LinearMath.h
         include/ft2build.h
+        Source/Components/ParticleSystemComponent.cpp
+        include/ParticleSystemComponent.h
 )
 
 target_include_directories(Awoken_Engine PUBLIC

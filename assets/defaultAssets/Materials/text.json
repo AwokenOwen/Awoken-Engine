@@ -1,5 +1,6 @@
 {
     "FragmentShader": "assets/defaultAssets/Shaders/text.frag",
+    "GeometryShader": "",
     "Textures": [],
     "Type": 1,
     "Uniforms": [

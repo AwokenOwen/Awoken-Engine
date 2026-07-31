@@ -137,15 +137,13 @@ public:
         }
         return *this;
     }
-    friend Vector2 operator*(Vector2& lhs, const float rhs)
+    friend Vector2 operator*(const Vector2& lhs, const float rhs)
     {
-        lhs *= rhs;
-        return lhs;
+        return {lhs.x() * rhs, lhs.y() * rhs};
     }
-    friend Vector2 operator*(const float lhs, Vector2& rhs)
+    friend Vector2 operator*(const float lhs, const Vector2& rhs)
     {
-        rhs *= lhs;
-        return rhs;
+        return {rhs.x() * lhs, rhs.y() * lhs};
     }
     friend Vector2 operator/(Vector2& lhs, const float rhs)
     {
@@ -270,6 +268,25 @@ public:
         lhs /= rhs;
         return lhs;
     }
+    friend Vector3 operator+(Vector3 lhs, Vector3& rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+    friend Vector3 operator-(Vector3 lhs, Vector3& rhs)
+    {
+        lhs -= rhs;
+        return lhs;
+    }
+    friend Vector3 operator*(Vector3 lhs, Vector3& rhs)
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+    friend Vector3 operator/(Vector3 lhs, Vector3& rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
     Vector3& operator*=(const float other)
     {
         for (float & i : data)
@@ -286,15 +303,16 @@ public:
         }
         return *this;
     }
-    friend Vector3 operator*(Vector3& lhs, const float rhs)
+
+    friend Vector3 operator*(const Vector3& lhs, const float rhs)
     {
-        lhs *= rhs;
-        return lhs;
+        Vector3 result{lhs.x() * rhs, lhs.y() * rhs, lhs.z() * rhs};
+        return result;
     }
-    friend Vector3 operator*(const float lhs, Vector3& rhs)
+    friend Vector3 operator*(const float lhs, const Vector3& rhs)
     {
-        rhs *= lhs;
-        return rhs;
+        Vector3 result{rhs.x() * lhs, rhs.y() * lhs, rhs.z() * lhs};
+        return result;
     }
     friend Vector3 operator/(Vector3& lhs, const float rhs)
     {
@@ -435,15 +453,13 @@ public:
         }
         return *this;
     }
-    friend Vector4 operator*(Vector4& lhs, const float rhs)
+    friend Vector4 operator*(const Vector4& lhs, const float rhs)
     {
-        lhs *= rhs;
-        return lhs;
+        return {lhs.x() * rhs, lhs.y() * rhs, lhs.z() * rhs, lhs.w() * rhs};
     }
-    friend Vector4 operator*(const float lhs, Vector4& rhs)
+    friend Vector4 operator*(const float lhs, const Vector4& rhs)
     {
-        rhs *= lhs;
-        return rhs;
+        return {lhs * rhs.x(), lhs * rhs.y(), lhs * rhs.z(), rhs.w() * lhs};
     }
     friend Vector4 operator/(Vector4& lhs, const float rhs)
     {

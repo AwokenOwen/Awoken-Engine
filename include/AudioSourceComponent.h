@@ -23,7 +23,7 @@ private:
     void fromJson(nlohmann::json j) override;
     void destroy() override;
 
-    void update_stream(std::size_t& cursor);
+    void update_stream(std::size_t& cursor) const;
 
     std::string path{};
     Sound m_sound{};

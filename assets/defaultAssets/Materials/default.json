@@ -1,5 +1,6 @@
 {
     "FragmentShader": "assets/defaultAssets/Shaders/default.frag",
+    "GeometryShader": "",
     "Textures": [
         {
             "Name": "irradiance",

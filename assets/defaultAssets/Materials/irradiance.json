@@ -1,5 +1,6 @@
 {
   "FragmentShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.frag",
+  "GeometryShader": "",
   "Textures": [],
   "Type": 0,
   "Uniforms": [],

@@ -19,6 +19,8 @@ int GameManager::initialize() {
         exit(-1);
     }
 
+    const std::string devices = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
+
     // Init Audio
     m_device = alcOpenDevice(nullptr);
     if (!m_device)
@@ -92,7 +94,7 @@ void GameManager::run() {
         // If no max framerate just run right through
         if (m_framerateFactor != 0.0)
             // Sleep to keep the max framerate
-            std::this_thread::sleep_for(std::chrono::duration<double> (std::max(0.0, m_framerateFactor - m_deltaTime)));
+            std::this_thread::sleep_for(std::chrono::duration<float> (std::max(0.0f, m_framerateFactor - m_deltaTime)));
         lastTime = glfwGetTime();
     }
 
@@ -101,12 +103,12 @@ void GameManager::run() {
 }
 
 // Getter for delta time
-double GameManager::getDeltaTime() const {
+float GameManager::getDeltaTime() const {
     return m_deltaTime;
 }
 
 // Setter for the max framerate
-void GameManager::setMaxFramerate(const double framerate) {
+void GameManager::setMaxFramerate(const float framerate) {
     if (framerate <= 0.0) {
         // setting this to 0 will make max FPS unlimited
         m_framerateFactor = 0.0;

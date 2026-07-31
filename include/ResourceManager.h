@@ -35,12 +35,11 @@ private:
     int listeners{1};
 };
 
-enum TextureType
+enum ImageType
 {
     PNG = 0,
     JPEG = 1,
     HDR = 2,
-    CUBEMAP = 3,
 };
 
 struct FrameBuffer
@@ -50,11 +49,18 @@ struct FrameBuffer
     unsigned int m_renderBuffer;
 };
 
+enum TextureType
+{
+    TEXTURE2D = GL_TEXTURE_2D,
+    CUBEMAP = GL_TEXTURE_CUBE_MAP,
+    TEXTURE2D_ARRAY = GL_TEXTURE_2D_ARRAY,
+};
+
 struct Texture
 {
     friend class ResourceManager;
     unsigned int m_textureID{};
-    bool cubeMap{false};
+    TextureType m_type{TEXTURE2D};
 private:
     int listeners{1};
 };
@@ -71,6 +77,12 @@ struct Material
 {
     friend class ResourceManager;
     void load();
+    [[nodiscard]] int numTextures() const {
+        return static_cast<int>(m_textures.size());
+    }
+
+
+
     [[nodiscard]] MaterialType getType() const
     {
         return m_type;
@@ -101,7 +113,6 @@ struct Material
     }
 private:
     unsigned int m_shaderProgram{};
-    std::map<std::string, std::function<void()>> m_uniforms{};
     std::map<std::string, Texture> m_textures{};
     MaterialType m_type;
     int listeners{1};

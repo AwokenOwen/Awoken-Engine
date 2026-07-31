@@ -19,6 +19,9 @@
 #include "assimp/postprocess.h"
 
 #include <ft2build.h>
+
+#include "ParticleSystemComponent.h"
+
 #include FT_FREETYPE_H
 
 #include "TextRendererComponent.h"
@@ -53,25 +56,16 @@ void Scene::setReflectiveMap(const std::string& name)
 void Material::load()
 {
     glUseProgram(m_shaderProgram);
-    for (const auto& func : m_uniforms | std::views::values)
-    {
-        func();
-    }
 
-    int shaderTexture = 0;
+    int i = 0;
     for (const auto& [key, texture] : m_textures)
     {
-        glActiveTexture(GL_TEXTURE0 + shaderTexture);
-        if (texture.cubeMap)
-        {
-            setUniform<int>(std::string(key), shaderTexture);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, texture.m_textureID);
-        }else
-        {
-            setUniform<int>(std::string(key), shaderTexture);
-            glBindTexture(GL_TEXTURE_2D, texture.m_textureID);
-        }
-        shaderTexture++;
+        glActiveTexture(GL_TEXTURE0 + i);
+
+        setUniform<int>(std::string(key), i);
+        glBindTexture(texture.m_type, texture.m_textureID);
+
+        i++;
     }
 }
 
@@ -441,7 +435,7 @@ void ResourceManager::loadHDR(const std::string& path)
     auto texture = Texture{};
     texture.m_textureID = cubeMap;
     texture.listeners = 0;
-    texture.cubeMap = true;
+    texture.m_type = CUBEMAP;
 
     m_loadedTextures.insert({path, texture});
 }
@@ -543,10 +537,47 @@ void ResourceManager::loadMaterial(const std::string& path)
        Log.logError(infoLog);
     }
 
+    auto geometryShaderPath = j["GeometryShader"].get<std::string>();
+    unsigned int geometryShader;
+
+    if (!geometryShaderPath.empty())
+    {
+        std::string geometryShaderCode{};
+        std::ifstream gShaderFile;
+
+        gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try {
+            gShaderFile.open(geometryShaderPath);
+            std::stringstream gShaderStream;
+            gShaderStream << gShaderFile.rdbuf();
+            gShaderFile.close();
+            geometryShaderCode = gShaderStream.str();
+        }catch (std::ifstream::failure e) {
+            Log.logError(e.what());
+        }
+
+        const char* geometryShaderSource = geometryShaderCode.c_str();
+
+
+        geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+        glShaderSource(geometryShader, 1, &geometryShaderSource, nullptr);
+        glCompileShader(geometryShader);
+
+        glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
+        if (!success)
+        {
+            glGetShaderInfoLog(geometryShader, 512, nullptr, infoLog);
+            Log.logError(infoLog);
+        }
+    }
+
     unsigned int shaderProgram = glCreateProgram();
 
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
+    if (!geometryShaderPath.empty()) {
+        glAttachShader(shaderProgram, geometryShader);
+    }
     glLinkProgram(shaderProgram);
 
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
@@ -785,7 +816,7 @@ void ResourceManager::makeIrradiancePrefilterMap(unsigned int cubeMap)
     framebuffer.m_colorBuffer = -1;
     framebuffer.m_renderBuffer = captureRBO;
     auto texture = Texture{};
-    texture.cubeMap = true;
+    texture.m_type = CUBEMAP;
     texture.m_textureID = irradianceMap;
 
     m_framebuffers.insert({"irradiance", framebuffer});
@@ -846,7 +877,7 @@ void ResourceManager::makeIrradiancePrefilterMap(unsigned int cubeMap)
     Window.resetViewport();
 
     texture = Texture{};
-    texture.cubeMap = true;
+    texture.m_type = CUBEMAP;
     texture.m_textureID = prefilterMap;
 
     m_loadedTextures.insert({"prefilter", texture});
@@ -1150,6 +1181,7 @@ void ResourceManager::loadSound(std::string& path)
     if (m_loadedSounds.contains(path))
     {
         m_loadedSounds.at(path).listeners++;
+        
         return;
     }
 
@@ -1348,6 +1380,7 @@ int ResourceManager::initialize() {
     registerComponent<LightComponent>("Light");
     registerComponent<AudioSourceComponent>("AudioSource");
     registerComponent<TextRendererComponent>("TextRenderer");
+    registerComponent<ParticleSystemComponent>("ParticleSystem");
 
     loadUniformMap();
     makePostprocessingScreen();

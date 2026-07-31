@@ -1,4 +1,4 @@
-#include "AudioSourceComponent.h"
+ #include "AudioSourceComponent.h"
 
 #include <format>
 
@@ -19,8 +19,7 @@ void AudioSourceComponent::play() {
 
     alSourcePlay(m_source);
 
-    auto error = alGetError();
-    if(error != AL_NO_ERROR)
+    if(const auto error = alGetError(); error != AL_NO_ERROR)
     {
         switch(error)
         {
@@ -96,8 +95,7 @@ void AudioSourceComponent::destroy()
     delete this;
 }
 
-void AudioSourceComponent::update_stream(std::size_t& cursor)
-{
+void AudioSourceComponent::update_stream(std::size_t& cursor) const {
     ALint buffersProcessed = 0;
     alGetSourcei(m_source, AL_BUFFERS_PROCESSED, &buffersProcessed);
 
