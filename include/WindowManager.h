@@ -41,6 +41,8 @@ public:
     [[nodiscard]] int getViewportHeight() const;
 
     void resetViewport();
+
+    void setMaximized(bool maximized = true);
 private:
     /**
      * @brief Starts the Window Manager and creates the window for the game

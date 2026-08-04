@@ -84,10 +84,13 @@ if(IS_MSVC_BUILD)
     # Copy required DLLs to bin alongside the executable
     add_custom_command(TARGET Awoken_Engine POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/assimp/assimp-vc145-mtd.dll"
+            "${CMAKE_SOURCE_DIR}/lib/assimp-vc145-mtd.dll"
             "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/openAL/soft_oal.dll"
+            "${CMAKE_SOURCE_DIR}/lib/OpenAL32.dll"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/lib/freetype.dll"
             "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             COMMENT "Copying DLLs to bin..."
     )

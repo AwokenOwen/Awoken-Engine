@@ -77,6 +77,8 @@ void GameManager::run() {
     // Log start
     Log.log("Starting Game Loop");
 
+    Window.setMaximized();
+
     World.awake();
     // Game loop defining delta time and updating the game
     double lastTime = glfwGetTime();

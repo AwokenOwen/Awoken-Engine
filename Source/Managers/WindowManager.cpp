@@ -66,6 +66,11 @@ void WindowManager::resetViewport()
     glViewport(0, 0, m_viewportWidth, m_viewportHeight);
 }
 
+void WindowManager::setMaximized(const bool maximized)
+{
+    maximized ? glfwMaximizeWindow(p_window) : glfwRestoreWindow(p_window);
+}
+
 void WindowManager::clear() {
     // Clear the screen
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -91,6 +96,7 @@ int WindowManager::createWindow() {
     glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
     glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
     glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     // Loading variables for screen loading
     m_windowWidth = mode->width;
