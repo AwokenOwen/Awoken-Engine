@@ -4,7 +4,6 @@
 
 #pragma once
 #include "Component.h"
-#include "Renderer.h"
 #include "ResourceManager.h"
 
 struct InstanceData
@@ -13,7 +12,7 @@ struct InstanceData
     int letterIndex{};
 };
 
-class TextRendererComponent : public Component, public Renderer
+class TextRendererComponent : public Component
 {
     friend class ResourceManager;
 public:
@@ -35,8 +34,8 @@ private:
     void destroy() override;
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;
-    void draw() override;
-    void drawToShadowMap(LightComponent* light) override;
+    void draw();
+    void drawToShadowMap(LightComponent* light);
 
     std::string m_fontPath{"assets/defaultAssets/Fonts/arial.ttf"};
     Font m_font;

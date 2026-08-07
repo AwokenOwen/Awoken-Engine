@@ -105,7 +105,7 @@ bool Object::getActiveState() const {
 void Object::setActiveState(const bool active) {
     if (m_activeState == active)
         return;
-    active ? World.addUpdateEvent(this, &Object::update) : World.removeUpdateEvent(this, &Object::update);
+    //active ? World.addUpdateEvent(this, &Object::update) : World.removeUpdateEvent(this, &Object::update);
     m_activeState = active;
 }
 
@@ -124,33 +124,38 @@ void Object::Translate(const Vector3& translation)
     m_localPosition += translation;
 }
 
-void Object::update() {
-    StartEvent.callEvent();
-    StartEvent.clearEvent();
+Scene* Object::getScene() const
+{
+    return m_scene;
+}
 
-    UpdateEvent.callEvent();
+void Object::update() {
+    StartEvent.call();
+    StartEvent.clear();
+
+    UpdateEvent.call();
 }
 
 void Object::enable() {
-    EnableEvent.callEvent();
+    EnableEvent.call();
 }
 
 void Object::disable() {
-    DisableEvent.callEvent();
+    DisableEvent.call();
 }
 
 void Object::destroy() {
-    DestroyEvent.callEvent();
+    DestroyEvent.call();
 }
 
 void Object::end() {
     for (const auto child : m_children) {
         child->end();
     }
-    DestroyEvent.callEvent();
+    DestroyEvent.call();
 
-    World.removeUpdateEvent(this, &Object::update);
-    World.removeDestroyEvent(this, &Object::destroy);
+    //World.removeUpdateEvent(this, &Object::update);
+    //World.removeDestroyEvent(this, &Object::destroy);
     delete this;
 }
 
@@ -169,6 +174,7 @@ nlohmann::json Object::toJson()
     j["Scale"] = m_localScale.toJson();
 
     std::vector<nlohmann::json> components{};
+    components.reserve(m_components.size());
     for (const auto& c : m_components)
     {
         components.push_back(c->toJson());
@@ -210,8 +216,6 @@ Object* Object::fromJson(const nlohmann::json& j)
         child->p_parent = a;
         a->m_children.push_back(child);
     }
-
-    World.addUpdateEvent(a, &Object::update);
 
     return a;
 }

@@ -66,8 +66,8 @@ void ParticleSystemComponent::draw() {
     m_material.load();
 
     m_material.setUniform("model", getParent()->getWorldMatrix());
-    m_material.setUniform("view", Resource.getMainCamera()->getViewMatrix());
-    m_material.setUniform("projection", Resource.getMainCamera()->getProjectionMatrix());
+    m_material.setUniform("view", World.getMainCamera()->getViewMatrix());
+    m_material.setUniform("projection", World.getMainCamera()->getProjectionMatrix());
 
     updatePoints();
 

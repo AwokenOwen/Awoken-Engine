@@ -3,7 +3,6 @@
 //
 #pragma once
 #include "Component.h"
-#include "Renderer.h"
 #include "ResourceManager.h"
 
 struct Particles {
@@ -13,7 +12,7 @@ struct Particles {
     int numParticles{};
 };
 
-class ParticleSystemComponent : public Component, public Renderer {
+class ParticleSystemComponent : public Component {
 public:
     friend class ResourceManager;
     explicit ParticleSystemComponent(Object *parent)
@@ -37,9 +36,9 @@ private:
 
     void fromJson(nlohmann::json j) override;
 
-    void draw() override;
+    void draw();
 
-    void drawToShadowMap(LightComponent *light) override;
+    void drawToShadowMap(LightComponent *light);
 
     void init();
 

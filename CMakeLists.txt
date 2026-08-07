@@ -12,7 +12,6 @@ if(MSVC)
 endif()
 
 add_library(Awoken_Engine STATIC
-        include/Renderer.h
         include/GameManager.h
         include/InputManager.h
         include/LogManager.h

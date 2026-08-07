@@ -136,6 +136,8 @@ public:
 
     void Translate(const Vector3 &translation);
 
+    Scene* getScene() const;
+
 protected:
     /**
      * @brief Called every frame
@@ -165,6 +167,7 @@ private:
     Quaternion m_localRotation{};
     Vector3 m_localScale{1,1,1};
 
+    Scene* m_scene;
     Object* p_parent{};
     std::vector<Object*> m_children{};
     std::vector<Component*> m_components{};

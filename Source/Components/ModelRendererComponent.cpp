@@ -11,7 +11,7 @@
 #include "LogManager.h"
 #include "Object.h"
 
-ModelRendererComponent::ModelRendererComponent(Object *parent) : Component(parent), Renderer() {
+ModelRendererComponent::ModelRendererComponent(Object *parent) : Component(parent) {
 
 }
 
@@ -28,8 +28,19 @@ void ModelRendererComponent::update()
     // decide whether to draw
     m_model.m_boundingBox = m_model.m_boundingBox * getParent()->getWorldMatrix();
 
-    addToDraw();
-    addToShadowDraw();
+    if (m_model.meshCount() != m_materials.size())
+        Log.logError("Mesh Count does not match Material Count.");
+    for (int i = 0; i < m_model.meshCount(); ++i)
+    {
+        Resource.addToDraw([this, i]()
+        {
+            this->defaultDynamicUniformLoader(m_materials[i]);
+
+            glBindVertexArray(m_model.m_meshes[i].VAO());
+            glDrawElements(GL_TRIANGLES, m_model.m_meshes[i].indexCount(), GL_UNSIGNED_INT, nullptr);
+            glBindVertexArray(0);
+        }, false);
+    }
 }
 
 void ModelRendererComponent::enable()
@@ -48,8 +59,6 @@ nlohmann::json ModelRendererComponent::toJson()
 
     j["Model"] = m_modelName;
 
-    j["Transparency"] = getTransparency();
-
     j["Materials"] = m_materialNames;
 
     return j;
@@ -58,8 +67,6 @@ nlohmann::json ModelRendererComponent::toJson()
 void ModelRendererComponent::fromJson(nlohmann::json j)
 {
     m_modelName = j["Model"].get<std::string>();
-
-    setTransparency(j["Transparency"].get<bool>());
 
     m_materialNames = j["Materials"].get<std::vector<std::string>>();
 
@@ -74,28 +81,6 @@ void ModelRendererComponent::fromJson(nlohmann::json j)
     m_shadowMapMaterial = Resource.getMaterial("assets/defaultAssets/Materials/shadowMap.json");
 }
 
-void ModelRendererComponent::draw()
-{
-    if (m_materials.size() != m_model.meshCount())
-    {
-        Log.logError("Material Count does not match Mesh Count.");
-        return;
-    }
-    for (int i = 0; i < m_model.meshCount(); ++i)
-    {
-        defaultDynamicUniformLoader(m_materials[i]);
-
-        glBindVertexArray(m_model.m_meshes[i].VAO());
-        glDrawElements(GL_TRIANGLES, m_model.m_meshes[i].indexCount(), GL_UNSIGNED_INT, nullptr);
-        glBindVertexArray(0);
-    }
-}
-
-void ModelRendererComponent::drawToShadowMap(LightComponent* light)
-{
-
-}
-
 void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
 {
     glEnable(GL_CULL_FACE);
@@ -104,9 +89,9 @@ void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
     mat.load();
 
     const auto model = getParent()->getWorldMatrix();
-    const auto view = Resource.getMainCamera()->getViewMatrix();
-    const auto proj = Resource.getMainCamera()->getProjectionMatrix();
-    const auto orthographic = Resource.getMainCamera()->getOrthographicMatrix();
+    const auto view = World.getMainCamera()->getViewMatrix();
+    const auto proj = World.getMainCamera()->getProjectionMatrix();
+    const auto orthographic = World.getMainCamera()->getOrthographicMatrix();
 
     switch (mat.getType())
     {

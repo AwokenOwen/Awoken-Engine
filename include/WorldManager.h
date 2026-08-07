@@ -14,6 +14,7 @@
  */
 #define World WorldManager::getInstance()
 
+class CameraComponent;
 class LightComponent;
 struct Scene;
 class Renderer;
@@ -34,43 +35,14 @@ public:
     static WorldManager& getInstance();
 
     /**
-     * @brief Function to add an object into the game during runtime
-     *
-     * @param parent The parent of the new Object
-     * @return Pointer to the newly created Object
-     */
-    Object* instantiateObject(Object* parent = nullptr);
-
-    /**
-     * @brief The getter for the current active scene
-     *
-     * @return The current active Scene
-     */
-    [[nodiscard]] Scene* getActiveScene() const;
-
-    /**
-     * @brief Function used to set a new active scene and load all the necessary resources
-     *
-     * @param name Name of the scene in the resource manager scene map to set as the active scene
-     */
-    void setActiveScene(const std::string& name);
-
-    /**
      * @brief sets the name of the base scene needed to start the engine
      *
      * @param name Name of the scene in the resource manager scene map
      */
     void setBaseScene(const std::string& name);
 
-    EVENT_ACCESSORS(UpdateEvent)
-    EVENT_ACCESSORS(EnableEvent)
-    EVENT_ACCESSORS(DisableEvent)
-    EVENT_ACCESSORS(DestroyEvent)
-    EVENT_ACCESSORS(TransparentDrawEvent)
-    EVENT_ACCESSORS(OpaqueDrawEvent)
-    EVENT_ACCESSORS(ShadowMapDrawEvent, LightComponent*)
-    EVENT_ACCESSORS(LoadEvent)
-    EVENT_ACCESSORS(UnloadEvent)
+    void setMainCamera(CameraComponent* camera);
+    [[nodiscard]] CameraComponent* getMainCamera() const;
 
 private:
     /**
@@ -90,7 +62,7 @@ private:
     /**
      * @brief Caller function for the update event sent to all objects
      */
-    void update();
+    void update() const;
     /**
     * @brief Private default constructor for singleton functionality
     */
@@ -100,28 +72,10 @@ private:
     */
     ~WorldManager() override = default;
 
-    void drawPostprocess();
-
-    std::vector<Object*> m_tobeAdded{};
-    std::vector<Object*> m_tobeDestroyed{};
-
-    Event<> UpdateEvent{};
-    Event<> EnableEvent{};
-    Event<> DisableEvent{};
-    Event<> DestroyEvent{};
-
-    Event<> TransparentDrawEvent{};
-    Event<> OpaqueDrawEvent{};
-
-    Event<LightComponent*> ShadowMapDrawEvent{};
-
-    Event<> LoadEvent{};
-    Event<> UnloadEvent{};
+    void drawPostprocess() const;
 
     std::string m_baseScene{"default"};
-    std::string m_activeSceneName{};
-
-    Scene* m_activeScene{nullptr};
 
     std::vector<LightComponent*> m_lights{};
+    CameraComponent* m_mainCamera{};
 };

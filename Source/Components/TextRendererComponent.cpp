@@ -121,7 +121,6 @@ void TextRendererComponent::setBoxSize(const Vector2& size)
 
 void TextRendererComponent::init()
 {
-    setTransparency(true);
     const std::vector vertices
     {
         Vector2(0.f, 1.f),
@@ -168,7 +167,7 @@ void TextRendererComponent::start()
 
 void TextRendererComponent::update()
 {
-    addToDraw();
+
 }
 
 void TextRendererComponent::enable()
@@ -220,7 +219,7 @@ void TextRendererComponent::draw()
     glCullFace(GL_BACK);
 
     m_material.load();
-    m_material.setUniform("projection", Resource.getMainCamera()->getOrthographicMatrix());
+    m_material.setUniform("projection", World.getMainCamera()->getOrthographicMatrix());
     m_material.setUniform("model", getParent()->getWorldMatrix());
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, m_font.m_textureArray);

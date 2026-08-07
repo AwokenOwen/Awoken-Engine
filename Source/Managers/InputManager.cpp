@@ -49,24 +49,24 @@ void InputManager::mouseMoveInput(float posX, float posY)
 	m_lastX = posX;
 	m_lastY = posY;
 
-	m_mouseMoveEvent.callEvent(Vector2(posX, posY), Vector2(offsetX, offsetY));
+	m_mouseMoveEvent.call(Vector2(posX, posY), Vector2(offsetX, offsetY));
 }
 
 // Input function for keyboard inputs
 void InputManager::keyboardInputs(int key, int scancode, int action, int mods)
 {
-	m_keyboardEvent.callEvent(KeyboardContext(key, action, mods));
+	m_keyboardEvent.call(KeyboardContext(key, action, mods));
 }
 
 // Input function for mouse button inputs
 void InputManager::mouseButtonInputs(int button, int action, int mods)
 {
-	m_mouseButtonEvent.callEvent(MouseButtonContext(button, action, mods));
+	m_mouseButtonEvent.call(MouseButtonContext(button, action, mods));
 }
 
 void InputManager::scrollInput(double xOffset, double yOffset)
 {
-	m_scrollEvent.callEvent(Vector2(static_cast<float>(xOffset), static_cast<float>(yOffset)));
+	m_scrollEvent.call(Vector2(static_cast<float>(xOffset), static_cast<float>(yOffset)));
 }
 
 #pragma region callbacks

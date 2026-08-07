@@ -1,12 +1,7 @@
 {
     "FragmentShader": "assets/defaultAssets/Shaders/defaultPostProcess.frag",
     "GeometryShader": "",
-    "Textures": [
-        {
-            "Name": "post",
-            "Path": "post"
-        }
-    ],
+    "Textures": [],
     "Type": 0,
     "Uniforms": [],
     "VertexShader": "assets/defaultAssets/Shaders/defaultPostProcess.vert"

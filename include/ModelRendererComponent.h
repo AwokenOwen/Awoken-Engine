@@ -4,11 +4,10 @@
 
 #pragma once
 #include "Component.h"
-#include "Renderer.h"
 #include "ResourceManager.h"
 
 struct Mesh;
-class ModelRendererComponent : public Component, public Renderer{
+class ModelRendererComponent : public Component{
     friend class ResourceManager;
 public:
     explicit ModelRendererComponent(Object* parent);
@@ -25,8 +24,6 @@ private:
 
     nlohmann::json toJson() override;
     void fromJson(nlohmann::json j) override;
-    void draw() override;
-    void drawToShadowMap(LightComponent* light) override;
 
     void defaultDynamicUniformLoader(Material mat) const;
     void destroy() override;

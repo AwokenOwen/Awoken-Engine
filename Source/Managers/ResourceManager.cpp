@@ -53,6 +53,19 @@ void Scene::setReflectiveMap(const std::string& name)
     Resource.makeIrradiancePrefilterMap(Resource.getTexture(name).m_textureID);
 }
 
+void Scene::addCamera(CameraComponent* camera)
+{
+    m_cameraComponents.push_back(camera);
+}
+
+void Scene::addToDraw(const std::function<void()>& function, const bool transparent) const
+{
+    for (const auto camera : m_cameraComponents)
+    {
+        camera->addToDraw(function, transparent);
+    }
+}
+
 void Material::load()
 {
     glUseProgram(m_shaderProgram);
@@ -92,7 +105,10 @@ Scene * Scene::fromJson(const nlohmann::json &j) {
     Resource.makeIrradiancePrefilterMap(Resource.getTexture(scene->m_reflectionMapName).m_textureID);
 
     for (const std::vector<nlohmann::json> objects = j["Root Objects"]; const auto& o : objects) {
-        scene->m_rootObjects.emplace_back(Object::fromJson(o));
+        auto obj = Object::fromJson(o);
+        obj->m_scene = scene;
+        scene->m_rootObjects.emplace_back(obj);
+        scene->addToUpdate(obj, &Object::update);
     }
     return scene;
 }
@@ -152,10 +168,8 @@ Scene * ResourceManager::getScene(const std::string &name) {
     return m_loadedScenes[name];
 }
 
-void ResourceManager::flushLoadedScenes(const std::vector<std::string>& keepLoaded) {
-    auto v = keepLoaded;
-    v.push_back(World.m_activeSceneName);
-
+void ResourceManager::flushLoadedScenes(const std::vector<std::string>& keepLoaded)
+{
     std::erase_if(m_loadedScenes, [&](const auto& pair) {
         // Return true if the key should be erased (not in the vector)
         if (bool e = std::find(keepLoaded.begin(), keepLoaded.end(), pair.first) == keepLoaded.end()) {
@@ -633,21 +647,6 @@ void ResourceManager::unloadMaterial(const std::string& path)
     }
 }
 
-void ResourceManager::setMainCamera(CameraComponent* camera)
-{
-    if (m_mainCamera != nullptr)
-    {
-        m_mainCamera->m_main = false;
-    }
-    m_mainCamera = camera;
-    m_mainCamera->m_main = true;
-}
-
-CameraComponent* ResourceManager::getMainCamera() const
-{
-    return m_mainCamera;
-}
-
 FrameBuffer ResourceManager::makeFramebuffer(const std::string& name, int width, int height)
 {
     if (m_framebuffers.contains(name))
@@ -742,7 +741,18 @@ void ResourceManager::resizeFrameBuffer(const std::string& name, const int width
     makeFramebuffer(name, width, height);
 }
 
-void ResourceManager::makeIrradiancePrefilterMap(unsigned int cubeMap)
+void ResourceManager::resizeCameraBuffers()
+{
+    for (const auto scene : m_loadedScenes | std::views::values)
+    {
+        for (const auto camera : scene->m_cameraComponents)
+        {
+            camera->resetFramebuffers();
+        }
+    }
+}
+
+void ResourceManager::makeIrradiancePrefilterMap(const unsigned int cubeMap)
 {
     if (m_framebuffers.contains("irradiance"))
     {
@@ -1362,6 +1372,14 @@ void ResourceManager::makeShadowMap(LightComponent* light)
     
 }
 
+void ResourceManager::addToDraw(const std::function<void()>& function, const bool transparent)
+{
+    for (auto scene : m_loadedScenes | std::views::values)
+    {
+        scene->addToDraw(function, transparent);
+    }
+}
+
 int ResourceManager::initialize() {
     std::ifstream f("gameInit.json");
     nlohmann::json j = nlohmann::json::parse(f);
@@ -1582,7 +1600,6 @@ void ResourceManager::makePostprocessingScreen()
     };
 
     makeMesh("post", vertices, indices);
-    makeFramebuffer("post", 1920, 1080);
 }
 
 void ResourceManager::makeBRDFMap()

@@ -219,15 +219,52 @@ struct Scene {
     std::vector<Object*> m_rootObjects{};
 
     void setReflectiveMap(const std::string& name);
+
+    template<typename T>
+    void addToUpdate(T* object, void(T::*func)());
+
+    template<typename T>
+    void removeFromUpdate(T* object, void(T::*func)());
+
+    void addCamera(CameraComponent* camera);
+
 private:
+    void addToDraw(const std::function<void()>& function, bool transparent) const;
+
     std::string m_name{};
     std::string m_reflectionMapName{"assets/defaultAssets/Skybox/skybox.hdr"};
     std::vector<LightComponent*> m_lightComponents{};
+    std::vector<CameraComponent*> m_cameraComponents{};
+
+    Event<> LoadEvent;
+    Event<> UnloadEvent;
+
+    Event<> UpdateEvent;
+    Event<> DestroyEvent;
 
     static Scene* fromJson(const nlohmann::json& j);
 
     void end() const;
 };
+
+template <typename T>
+void Scene::addToUpdate(T* object, void(T::* func)())
+{
+    LoadEvent.addRaw([object, func, this]()
+    {
+        UpdateEvent.add(object, func);
+    });
+}
+
+template <typename T>
+void Scene::removeFromUpdate(T* object, void(T::* func)())
+{
+    UnloadEvent.addRaw([object, func, this]()
+    {
+        UpdateEvent.remove(object, func);
+    });
+}
+
 
 /**
  * @brief Singleton Macro
@@ -335,12 +372,10 @@ public:
     Material getMaterial(const std::string& path);
     void unloadMaterial(const std::string& path);
 
-    void setMainCamera(CameraComponent* camera);
-    [[nodiscard]] CameraComponent* getMainCamera() const;
-
     FrameBuffer makeFramebuffer(const std::string& name, int width = -1, int height = -1);
     void activateFramebuffer(const std::string& name = "") const;
     void resizeFrameBuffer(const std::string& name, int width, int height);
+    void resizeCameraBuffers();
 
     void makeIrradiancePrefilterMap(unsigned int cubeMap);
     void updateIrradiancePrefilterMap(unsigned int cubeMap);
@@ -354,6 +389,11 @@ public:
     void loadFont(const std::string& path);
     [[nodiscard]] Font getFont(const std::string& path) const;
     void unloadFont(const std::string& path);
+
+    template<typename T>
+    void addToDraw(T* object, void(T::* func)(), bool transparent);
+
+    void addToDraw(const std::function<void()>& function, bool transparent);
 
 private:
     /**
@@ -414,10 +454,17 @@ private:
 
     std::map<std::string, std::function<void(unsigned int shaderProgram, nlohmann::json j)>> m_uniformMap{};
 
-    CameraComponent* m_mainCamera{};
-
     std::map<std::string, FrameBuffer> m_framebuffers{};
 
     std::map<std::string, Sound> m_loadedSounds{};
     std::map<std::string, Font> m_loadedFonts{};
 };
+
+template <typename T>
+void ResourceManager::addToDraw(T* object, void(T::* func)(), bool transparent)
+{
+    for (auto scene : m_loadedScenes | std::views::values)
+    {
+        scene->addToDraw([object, func](){(object->*func)();}, transparent);
+    }
+}

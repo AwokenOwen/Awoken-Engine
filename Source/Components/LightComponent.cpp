@@ -18,7 +18,7 @@ void LightComponent::activateShadowMap() const
 Matrix4 LightComponent::getLightViewProjectionMatrix() const
 {
     Vector3 center{};
-    const auto corners = getFrustumCornersWorldSpace(Resource.getMainCamera()->getPerspectiveMatrix(), Resource.getMainCamera()->getViewMatrix());
+    const auto corners = getFrustumCornersWorldSpace(World.getMainCamera()->getPerspectiveMatrix(), World.getMainCamera()->getViewMatrix());
     for (const auto& v : corners)
     {
         center = center + Vector3{v};

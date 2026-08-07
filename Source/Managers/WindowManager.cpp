@@ -173,7 +173,7 @@ void WindowManager::framebuffer_size_callback(const int width, const int height)
 
     // Set the viewport so that it's in the middle of the window rather than starting at the bottom right
     glViewport((width - m_viewportWidth) / 2, (height - m_viewportHeight) / 2, m_viewportWidth, m_viewportHeight);
-    Resource.resizeFrameBuffer("post", m_viewportWidth, m_viewportHeight);
+    Resource.resizeCameraBuffers();
 }
 
 // Helper static function that GLFW calls
