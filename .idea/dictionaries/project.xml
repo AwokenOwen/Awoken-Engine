@@ -2,6 +2,10 @@
   <dictionary name="project">
     <words>
       <w>Wwise</w>
+      <w>brdf</w>
+      <w>cubemap</w>
+      <w>lerp</w>
+      <w>slerp</w>
     </words>
   </dictionary>
 </component>

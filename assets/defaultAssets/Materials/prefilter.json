@@ -1,0 +1,8 @@
+{
+  "FragmentShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/prefilteredMap.frag",
+  "GeometryShader": "",
+  "Textures": [],
+  "Type": 0,
+  "Uniforms": [],
+  "VertexShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/irradiance.vert"
+}

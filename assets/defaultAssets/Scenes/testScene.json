@@ -1,0 +1,108 @@
+{
+    "Name": "testScene",
+    "ReflectionMap": "assets/defaultAssets/Skybox/skybox.hdr",
+    "Root Objects": [
+        {
+            "ActiveState": true,
+            "Children": [],
+            "Components": [
+                {
+                    "FOV": 1.5707963705062866,
+                    "Far": 1000.0,
+                    "Main": true,
+                    "Near": 0.0010000000474974513,
+                    "Perspective": true,
+                    "SkyboxMaterial": "assets/defaultAssets/Materials/skybox.json",
+                    "SkyboxModel": "assets/defaultAssets/Models/cube.fbx",
+                    "SkyboxTexture": "assets/defaultAssets/Skybox/skybox.hdr",
+                    "Type": "Camera"
+                }
+            ],
+            "Name": "Untitled_0",
+            "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        },
+        {
+            "ActiveState": true,
+            "Children": [],
+            "Components": [
+                {
+                    "Color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "Direction": {
+                        "x": 0.0,
+                        "y": -1.0,
+                        "z": 0.0
+                    },
+                    "LightType": 0,
+                    "Power": 1.0,
+                    "Type": "Light"
+                }
+            ],
+            "Name": "Untitled_1",
+            "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        },
+        {
+            "ActiveState": true,
+            "Children": [],
+            "Components": [
+                {
+                    "Materials": [
+                        "assets/defaultAssets/Materials/default.json"
+                    ],
+                    "Model": "assets/defaultAssets/Models/cube.fbx",
+                    "Type": "ModelRenderer"
+                }
+            ],
+            "Name": "Untitled_2",
+            "Position": {
+                "x": 0.0,
+                "y": -2.0,
+                "z": 0.0
+            },
+            "Rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 10.0,
+                "y": 1.0,
+                "z": 10.0
+            }
+        }
+    ]
+}

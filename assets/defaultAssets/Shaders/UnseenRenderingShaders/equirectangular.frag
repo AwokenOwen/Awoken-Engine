@@ -1,10 +1,8 @@
 #version 330 core
-#extension GL_NV_shadow_samplers_cube : enable
 out vec4 FragColor;
 in vec3 localPos;
 
-#define NUM_TEXTURES 12
-uniform sampler2D textures[NUM_TEXTURES];
+uniform sampler2D hdr;
 
 const vec2 invAtan = vec2(0.1591, 0.3183);
 vec2 SampleSphericalMap(vec3 v)
@@ -18,7 +16,7 @@ vec2 SampleSphericalMap(vec3 v)
 void main()
 {
     vec2 uv = SampleSphericalMap(normalize(localPos)); // make sure to normalize localPos
-    vec3 color = texture2D(textures[0], uv).rgb;
+    vec3 color = texture2D(hdr, uv).rgb;
     //vec3 color = vec3(1.0);
 
     FragColor = vec4(color, 1.0);

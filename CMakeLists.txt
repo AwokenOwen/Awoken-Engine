@@ -1,114 +1,127 @@
-cmake_minimum_required(VERSION 4.1.2)
-project(Awoken_Engine)
-project(Awoken_Engine_Test)
+cmake_minimum_required(VERSION 3.20)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+project(Awoken_Engine)
 set(CMAKE_CXX_STANDARD 20)
 
-include(FetchContent)
-
-# Declare and make Assimp available
-FetchContent_Declare(
-        assimp
-        GIT_REPOSITORY https://github.com/assimp/assimp.git
-        GIT_TAG v5.3.1 # Recommended to use a specific version tag
-)
-
-# Optional: Disable unnecessary Assimp features for faster builds
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
-
-FetchContent_MakeAvailable(assimp)
-
-# Declare the OpenAL Soft dependency from its GitHub repository
-FetchContent_Declare(
-        OpenAL
-        GIT_REPOSITORY https://github.com/kcat/openal-soft.git
-        GIT_TAG        master # You can specify a specific release tag or commit hash here
-)
-
-# Make the content available and add its CMake targets to the project
-FetchContent_MakeAvailable(OpenAL)
-
-FetchContent_Declare(
-        glfw
-        GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG        "3.4" # Use the desired version tag, e.g., "3.4"
-        GIT_SHALLOW    ON    # Use shallow clone to save time and space
-)
-
-set(GLFW_BUILD_DOCS OFF CACHE INTERNAL BOOL "") # Disable building documentation
-set(GLFW_BUILD_TESTS OFF CACHE INTERNAL BOOL "") # Disable building tests
-set(GLFW_INSTALL OFF CACHE INTERNAL BOOL "")   # Disable the install target
-
-FetchContent_MakeAvailable(glfw)
-
-FetchContent_Declare(
-        FreeType
-        GIT_REPOSITORY  https://github.com/freetype/freetype.git
-        GIT_TAG         master
-)
-
-FetchContent_MakeAvailable(FreeType)
-
-find_package(Freetype REQUIRED)
-
-FetchContent_Declare(
-        glm
-        GIT_REPOSITORY  https://github.com/g-truc/glm.git
-        GIT_TAG         master
-)
-
-FetchContent_MakeAvailable(glm)
-
-FetchContent_Declare(
-        json
-        GIT_REPOSITORY  https://github.com/nlohmann/json.git
-        GIT_TAG         master
-)
-
-FetchContent_MakeAvailable(json)
-
-include_directories(
-        glad/include
-        ${CMAKE_BINARY_DIR}/_deps/freetype-src/include
-        ${CMAKE_BINARY_DIR}/_deps/glfw-src/include
-        ${CMAKE_BINARY_DIR}/_deps/glm-src/glm
-        ${CMAKE_BINARY_DIR}/_deps/json-src/include
-        ${CMAKE_BINARY_DIR}/_deps/openal-src/include
-)
+if(MSVC)
+    set(IS_MSVC_BUILD TRUE)
+endif()
 
 add_library(Awoken_Engine STATIC
-        Camera.cpp
-        Component.cpp
-        DirectionalLight.cpp
-        GameManager.cpp
-        InputManager.cpp
-        Material.cpp
-        Mesh.cpp
-        MeshRenderer.cpp
-        Object.cpp
-        PointLight.cpp
-        ResourceManager.cpp
-        Scene.cpp
-        WindowManager.cpp
-        TextRenderer.cpp
-        AudioManager.cpp
-        AudioSource.cpp
-        AudioSource.h
-        glad.c
+        include/GameManager.h
+        include/InputManager.h
+        include/LogManager.h
+        include/Manager.h
+        include/WindowManager.h
+        include/WorldManager.h
+        include/Event.h
+        include/Object.h
+        include/ResourceManager.h
+        include/stb_image.h
+        include/ModelRendererComponent.h
+        include/Component.h
+        include/CameraComponent.h
+        Source/Managers/GameManager.cpp
+        Source/Managers/InputManager.cpp
+        Source/Managers/LogManager.cpp
+        Source/Managers/ResourceManager.cpp
+        Source/Managers/WindowManager.cpp
+        Source/Managers/WorldManager.cpp
+        Source/Util/glad.c
+        Source/Util/Object.cpp
+        Source/Components/Component.cpp
+        Source/Components/CameraComponent.cpp
+        Source/Components/ModelRendererComponent.cpp
+        Source/Components/LightComponent.cpp
+        include/LightComponent.h
+        include/AudioSourceComponent.h
+        Source/Components/AudioSourceComponent.cpp
+        Source/Components/TextRendererComponent.cpp
+        include/TextRendererComponent.h
+        include/LinearMath.h
+        include/ft2build.h
+        Source/Components/ParticleSystemComponent.cpp
+        include/ParticleSystemComponent.h
 )
 
-file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
-
-add_executable(Awoken_Engine_Test
-        main.cpp
+target_include_directories(Awoken_Engine PUBLIC
+        include
 )
 
-
-target_link_libraries(Awoken_Engine_Test PRIVATE
-        Awoken_Engine
-        assimp::assimp
-        Freetype::Freetype
-        glfw
-        OpenAL::OpenAL
+target_link_directories(Awoken_Engine PUBLIC
+        lib
 )
+
+# MSVC-specific compiler options
+if(IS_MSVC_BUILD)
+    target_compile_options(Awoken_Engine PRIVATE
+            /W3
+            /MP
+            /utf-8
+            /EHsc
+    )
+    # Suppress common warnings from third-party headers
+    target_compile_definitions(Awoken_Engine PUBLIC
+            _CRT_SECURE_NO_WARNINGS
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+    )
+endif()
+
+if(IS_MSVC_BUILD)
+    target_link_libraries(Awoken_Engine PUBLIC
+            assimp-vc145-mtd.lib
+            freetype.lib
+            glfw3.lib
+            OpenAL32.lib
+            opengl32.lib
+    )
+    # Copy required DLLs to bin alongside the executable
+    add_custom_command(TARGET Awoken_Engine POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/lib/assimp-vc145-mtd.dll"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/lib/OpenAL32.dll"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/lib/freetype.dll"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            COMMENT "Copying DLLs to bin..."
+    )
+else()
+    target_link_libraries(Awoken_Engine PUBLIC
+            libassimp.so
+            libfreetype.a
+            libglfw3.a
+            libopenal.so
+            -lz
+    )
+endif()
+
+# For testing purposes
+file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}/bin")
+file(COPY gameInit.json DESTINATION "${CMAKE_BINARY_DIR}/bin")
+
+project(Awoken_Engine_Test)
+add_executable(Awoken_Engine_Test main.cpp)
+
+target_link_libraries(Awoken_Engine_Test PUBLIC Awoken_Engine)
+
+target_include_directories(Awoken_Engine_Test PUBLIC
+        include
+)
+
+# MSVC: ensure the test executable also gets the right flags
+if(IS_MSVC_BUILD)
+    target_compile_options(Awoken_Engine_Test PRIVATE /W3 /MP /utf-8 /EHsc)
+    target_compile_definitions(Awoken_Engine_Test PUBLIC
+            _CRT_SECURE_NO_WARNINGS
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+    )
+endif()

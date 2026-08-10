@@ -1,0 +1,8 @@
+{
+  "FragmentShader": "assets/defaultAssets/Shaders/UnseenRenderingShaders/brdf.frag",
+  "GeometryShader": "",
+  "Textures": [],
+  "Type": 0,
+  "Uniforms": [],
+  "VertexShader": "assets/defaultAssets/Shaders/defaultPostProcess.vert"
+}
