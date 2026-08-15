@@ -1,24 +1,22 @@
  #include "AudioSourceComponent.h"
 
-#include <format>
-
 #include "LogManager.h"
 #include "ResourceManager.h"
 
-AudioSourceComponent::AudioSourceComponent(Object *parent) : Component(parent)
-{
-}
-
 void AudioSourceComponent::play() {
+    // Set mix values to the audio source
     alSourcef(m_source, AL_GAIN, 1.0f);
     alSource3f(m_source, AL_POSITION, 0, 0,0);
     alSource3f(m_source, AL_VELOCITY, 0, 0,0);
     alSourcei(m_source, AL_LOOPING, AL_FALSE);
 
+    // Queue the sound data into the buffers
     alSourceQueueBuffers(m_source, NUM_BUFFERS, &m_sound.m_ID[0]);
 
+    // Play the sound
     alSourcePlay(m_source);
 
+    // Error check
     if(const auto error = alGetError(); error != AL_NO_ERROR)
     {
         switch(error)
@@ -43,92 +41,108 @@ void AudioSourceComponent::play() {
         }
     }
 
+    // Set the state to playing
     m_state = AL_PLAYING;
-}
-
-void AudioSourceComponent::start()
-{
-
 }
 
 void AudioSourceComponent::update()
 {
+    // If the state is playing
     if (m_state == AL_PLAYING)
     {
-        update_stream(m_cursor);
+        // Update the buffers
+        update_stream();
+        // Update the state
         alGetSourcei(m_source, AL_SOURCE_STATE, &m_state);
     }
 }
 
-void AudioSourceComponent::enable()
-{
-}
-
-void AudioSourceComponent::disable()
-{
-}
-
 nlohmann::json AudioSourceComponent::toJson()
 {
+    // Make a JSON object
     auto j = nlohmann::json();
 
+    // Set the type to Audio Source
     j["Type"] = "AudioSource";
 
-    j["Sound"] = path;
+    // Set Sound to be the path to the sound file
+    j["Sound"] = m_soundPath;
 
+    // Add the other values as well
+
+    // Return the JSON
     return j;
 }
 
 void AudioSourceComponent::fromJson(nlohmann::json j)
 {
-    path = j["Sound"].get<std::string>();
+    // Grab the sound file
+    m_soundPath = j["Sound"].get<std::string>();
 
-    Resource.loadSound(path);
-    m_sound = Resource.getSound(path);
+    // Load and get the sound file
+    Resource.loadSound(m_soundPath);
+    m_sound = Resource.getSound(m_soundPath);
 
+    // Generate our source
     alGenSources(1, &m_source);
 }
 
 void AudioSourceComponent::destroy()
 {
+    // Delete the source from memory
     alDeleteBuffers(1, &m_source);
-    delete this;
+
+    // Tell the ResourceManager this no longer needs the sound
+    Resource.unloadSound(m_soundPath);
 }
 
-void AudioSourceComponent::update_stream(std::size_t& cursor) const {
+void AudioSourceComponent::update_stream() {
+    // Get the buffers that need to be processed from the source
     ALint buffersProcessed = 0;
     alGetSourcei(m_source, AL_BUFFERS_PROCESSED, &buffersProcessed);
 
+    // If it's 0 or less return nothing to do
     if(buffersProcessed <= 0)
         return;
 
+    // While buffers need to be processed
     while(buffersProcessed--)
     {
+        // Grab the next buffer
         ALuint buffer;
         alSourceUnqueueBuffers(m_source, 1, &buffer);
 
-        ALsizei dataSize = BUFFER_SIZE;
+        // Set the size to be the buffer size
+        constexpr ALsizei dataSize = BUFFER_SIZE;
 
-        char* data = new char[dataSize];
+        // Make a char array from the heap and set it all to 0
+        const auto data = new char[dataSize];
         std::memset(data, 0, dataSize);
 
+        // Get the right amount of data necessary to copy from the sound data
         std::size_t dataSizeToCopy = BUFFER_SIZE;
-        if(cursor + BUFFER_SIZE > m_sound.m_soundData.size())
-            dataSizeToCopy = m_sound.m_soundData.size() - cursor;
+        // If there is less data needed to be processed that BUFFER_SIZE then only copy the amount needed to finish the data
+        if(m_cursor + BUFFER_SIZE > m_sound.m_soundData.size())
+            dataSizeToCopy = m_sound.m_soundData.size() - m_cursor;
 
-        std::memcpy(&data[0], &m_sound.m_soundData[cursor], dataSizeToCopy);
-        cursor += dataSizeToCopy;
+        // Copy the data from the sound data over to the array
+        std::memcpy(&data[0], &m_sound.m_soundData[m_cursor], dataSizeToCopy);
+        m_cursor += dataSizeToCopy;
 
+        // Make sure to grab the beginning of the data and fit it at the end for looping if activated
         if(dataSizeToCopy < BUFFER_SIZE)
         {
-            cursor = 0;
-            std::memcpy(&data[dataSizeToCopy], &m_sound.m_soundData[cursor], BUFFER_SIZE - dataSizeToCopy);
-            cursor = BUFFER_SIZE - dataSizeToCopy;
+            m_cursor = 0;
+            std::memcpy(&data[dataSizeToCopy], &m_sound.m_soundData[m_cursor], BUFFER_SIZE - dataSizeToCopy);
+            m_cursor = BUFFER_SIZE - dataSizeToCopy;
         }
 
+        // Update the buffer data with the data grabbed
         alBufferData(buffer, m_sound.m_format, data, BUFFER_SIZE, m_sound.m_sampleRate);
+        // Requeue the buffer to be played
         alSourceQueueBuffers(m_source, 1, &buffer);
 
+        /// Delete the data from the heap to prevent mem leak
         delete[] data;
     }
 }

@@ -4,7 +4,6 @@
 #pragma once
 #include <functional>
 #include <map>
-#include <ranges>
 #include <cstdint>
 
 #include "LogManager.h"
@@ -78,73 +77,125 @@ public:
 	 */
 	void call(R... args);
 
+	/**
+	 * @brief Function to tell if a function is already added to the event
+	 *
+	 * @tparam T The object type
+	 * @param object Pointer to the object that owns the function getting tested
+	 * @param func Pointer to the function being tested
+	 * @return Whether the has of the two pointers is in function map
+	 */
 	template<typename T>
 	bool contains(T* object, void(T::* func)(R...));
 
 private:
+
+	/**
+	 * @brief Takes in two uint64_ts and produces a hash value for them (used to get a hash for the object and function pointer)
+	 *
+	 * @param h1 Value 1
+	 * @param h2 Value 2
+	 * @return The hash value of the two uint64s
+	 */
+	static uint64_t hash(uint64_t h1, uint64_t h2);
+
+	/**
+	 * @brief Unordered map storing all the hash values with the position in the vector of the lambda
+	 */
+	std::unordered_map<uint64_t, unsigned int> m_functionMap{};
 	/**
 	 * @brief Vector of lambda functions ready to be called on callEvent()
 	 */
-	//std::vector<Listener<R...>> m_functions{};
-	static unsigned int hash(uint64_t h1, uint64_t h2);
-
-	std::map<uint64_t, std::function<void(R...)>> m_functions{};
-
-	std::vector<std::function<void(R...)>> m_rawFunctions{};
+	std::vector<std::function<void(R...)>> m_functions{};
+	/**
+	 * @brief Vector of keys in the function map parallel to m_functions
+	 */
+	std::vector<uint64_t> m_functionKeys{};
 };
 
 template<typename ... R>
 template<typename T>
 void Event<R...>::add(T *object, void(T::*func)(R...)) {
-	int key = hash(reinterpret_cast<uint64_t>(object), reinterpret_cast<uint64_t>(&func));
+	// Get the hash of the object pointer and the function pointer
+	const auto key = hash(reinterpret_cast<uint64_t>(object), reinterpret_cast<uint64_t>(&func));
 
-	if (m_functions.contains(key))
+	// See if the has is already in the map AKA see if the function of this object instance is already in the function list
+	if (m_functionMap.contains(key))
 	{
-		Log.log("Function already in event... returning");
+		// Log Warning, not logging as error because it's only an error if the hash of different pairs of pointers creates the same hash
+		Log.logWarning("Function already in event... returning");
+		return;
 	}
 
+	// Create lambda function from the two pointers
 	std::function<void(R...)> lambda = [object, func](R... args)
     {
         (object->*func)(args...);
     };
 
-    m_functions.insert({key, lambda});
+	// Insert hash value with the position of the function in the vector of lambda functions
+    m_functionMap.insert({key, static_cast<unsigned int>(m_functions.size())});
+	m_functions.push_back(lambda);
+	m_functionKeys.push_back(key);
 }
 
 template <typename ... R>
 void Event<R...>::addRaw(std::function<void(R...)> function)
 {
-	m_rawFunctions.push_back(function);
+	// Add a lambda function directly to the function list
+	m_functions.push_back(function);
 }
 
 template<typename ... R>
 template<typename T>
 void Event<R...>::remove(T *object, void(T::*func)(R...)) {
-	int key = hash(reinterpret_cast<uint64_t>(object), reinterpret_cast<uint64_t>(&func));
+	// Get the hash of the object pointer and the function pointer
+	const auto key = hash(reinterpret_cast<uint64_t>(object), reinterpret_cast<uint64_t>(&func));
 
-	if (!m_functions.contains(key))
+	// Check if the hash is not in the function map AKA there is no function to remove
+	auto it = m_functionMap.find(key);
+	if (it == m_functionMap.end())
 	{
-		Log.log("Function is not in event... returning");
+		// Log Warning, Not logging as error because it's only an error if the pointer's no longer match which shouldn't happen
+		Log.logWarning("Function is not in event... returning");
 		return;
 	}
-	m_functions.erase(key);
+
+	// Get the index of the function in the function list
+	auto index = it->second;
+	m_functionMap.erase(it);
+
+	// Grab the last index to make sure the function being removed isn't already at the end
+	auto lastIndex = static_cast<unsigned int>(m_functions.size() - 1);
+	if (index != lastIndex)
+	{
+		// Swap the function and the key to the end
+		std::swap(m_functions[index], m_functions.back());
+		std::swap(m_functionKeys[index], m_functionKeys.back());
+		// Whatever moved into `index` needs its map entry updated
+		m_functionMap[m_functionKeys[index]] = index;
+	}
+
+	// Pop the end of the functions and keys to remove functions at constant time
+	m_functions.pop_back();
+	m_functionKeys.pop_back();
 }
 
 template<typename ... R>
 void Event<R...>::clear() {
+	// Clear the vectors and unordered map
 	m_functions.clear();
-	m_rawFunctions.clear();
+	m_functionKeys.clear();
+	m_functionMap.clear();
 }
 
 template<typename ... R>
 void Event<R...>::call(R... args) {
-	for (const auto& it : std::views::values(m_functions))
+	// Loop through the functions
+	for (const auto& func : m_functions)
 	{
-		it(args...);
-	}
-	for (const auto& it : m_rawFunctions)
-	{
-		it(args...);
+		// Call each lambda function which will call the member functions (even private ones)
+		func(args...);
 	}
 }
 
@@ -152,13 +203,17 @@ template <typename ... R>
 template <typename T>
 bool Event<R...>::contains(T* object, void(T::* func)(R...))
 {
-	auto key = hash(reinterpret_cast<uint64_t>(object), reinterpret_cast<uint64_t>(&func));
-	return m_functions.contains(key);
+	// Get the hash
+	const auto key = hash(reinterpret_cast<uint64_t>(object), reinterpret_cast<uint64_t>(&func));
+	// Check if the key is in the map and return it
+	return m_functionMap.contains(key);
 }
 
 template <typename ... R>
-unsigned int Event<R...>::hash(uint64_t h1, const uint64_t h2)
+uint64_t Event<R...>::hash(uint64_t h1, const uint64_t h2)
 {
+	// The hash function does a bitwise exclusive OR with addition of h2, a magic constant, bit shifted h1 and bit shifted h2
 	h1 ^= h2 + 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2);
+	// return the result as the hash function
 	return h1;
 }

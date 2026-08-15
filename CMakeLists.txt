@@ -15,7 +15,6 @@ add_library(Awoken_Engine STATIC
         include/GameManager.h
         include/InputManager.h
         include/LogManager.h
-        include/Manager.h
         include/WindowManager.h
         include/WorldManager.h
         include/Event.h

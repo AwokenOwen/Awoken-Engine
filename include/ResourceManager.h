@@ -32,7 +32,7 @@ struct Sound
     std::int32_t m_sampleRate{};
     std::vector<char> m_soundData{};
 private:
-    int listeners{1};
+    int listeners{0};
 };
 
 enum ImageType
@@ -62,7 +62,7 @@ struct Texture
     unsigned int m_textureID{};
     TextureType m_type{TEXTURE2D};
 private:
-    int listeners{1};
+    int listeners{0};
 };
 
 enum MaterialType
@@ -115,7 +115,7 @@ private:
     unsigned int m_shaderProgram{};
     std::map<std::string, Texture> m_textures{};
     MaterialType m_type;
-    int listeners{1};
+    int listeners{0};
 };
 
 struct Vertex
@@ -168,7 +168,7 @@ struct Model
     }
 private:
     BoundingBox m_boundingBox{};
-    int listeners{1};
+    int listeners{0};
 };
 
 /**
@@ -199,7 +199,7 @@ struct Font
     unsigned int m_textureArray{};
     std::map<char, Character> m_characters{};
 private:
-    int listeners{1};
+    int listeners{0};
 };
 
 class Object;
@@ -228,6 +228,8 @@ struct Scene {
 
     void addCamera(CameraComponent* camera);
 
+    EVENT_ACCESSORS(DestroyEvent)
+
 private:
     void addToDraw(const std::function<void()>& function, bool transparent) const;
 
@@ -244,7 +246,7 @@ private:
 
     static Scene* fromJson(const nlohmann::json& j);
 
-    void end() const;
+    void destroy() const;
 };
 
 template <typename T>
@@ -270,7 +272,7 @@ void Scene::removeFromUpdate(T* object, void(T::* func)())
  * @brief Singleton Macro
  */
 #define Resource ResourceManager::getInstance()
-class ResourceManager : public Manager {
+class ResourceManager {
     friend class GameManager;
     friend class WorldManager;
 public:
@@ -401,11 +403,11 @@ private:
      *
      * @return 0 if successful and 1 if unsuccessful
      */
-    int initialize() override;
+    int initialize();
     /**
      * @brief Shuts down the Resource Manager freeing and necessary data
      */
-    void terminate() override;
+    void terminate();
     /**
      * @brief Private default constructor for singleton functionality
      */
@@ -413,7 +415,7 @@ private:
     /**
      * @brief Private default deconstructor for singleton functionality
      */
-    ~ResourceManager() override = default;
+    ~ResourceManager() = default;
 
     /**
      * @brief Helper function for loading models

@@ -19,32 +19,39 @@ int GameManager::initialize() {
         exit(-1);
     }
 
-    const std::string devices = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
-
-    // Init Audio
+    // Grab the default audio device
     m_device = alcOpenDevice(nullptr);
+    // Error check if no device was grabbed
     if (!m_device)
     {
+        // Log the error
         Log.logError("Could not find a default audio device.");
         return 1;
     }
+    // Create a context from the device
     m_context = alcCreateContext(m_device, nullptr);
+    // Error check if the context failed
     if (!m_context)
     {
+        // Log the error
         Log.logError("Could not create a audio context.");
         return 1;
     }
+    // Make the created context the current context
     alcMakeContextCurrent(m_context);
+    // Error check if context doesn't works
     if (alcGetError(m_device) != ALC_NO_ERROR )
     {
+        // Log the error... We have a bigger problem
         Log.logError("Could not make context the current context.");
         return 1;
     }
 
-    // Log Done
+    // Log all managers done
     Log.log("GameManager Initialized.");
     Log.log("All Managers initialized.");
 
+    // Return success
     return 0;
 }
 
@@ -56,11 +63,12 @@ void GameManager::terminate() {
     Resource.terminate();
     // other manager terminate
 
+    // Destroy OpenAL data (doesn't really matter because the engine is terminating)
     alcCloseDevice(m_device);
     alcMakeContextCurrent(nullptr);
     alcDestroyContext(m_context);
 
-    // Log Done
+    // Log all managers done
     Log.log("All Managers terminated. Closing Engine");
     Log.log("GameManager terminated.");
     // Close the log manager last because we want to be able to make logs until the end
@@ -77,45 +85,49 @@ void GameManager::run() {
     // Log start
     Log.log("Starting Game Loop");
 
+    // Set the window to maximized mode
     Window.setMaximized();
 
+    // Run awake on the world manager to load the starting scene
     World.awake();
     // Game loop defining delta time and updating the game
-    double lastTime = glfwGetTime();
+    auto lastTime = static_cast<float>(glfwGetTime());
     // While window open
     while (!glfwWindowShouldClose(Window.getWindow())) {
         // Clear window
         Window.clear();
 
+        // Run the the update loop
         World.update();
 
         // Swap buffers
         Window.swap();
         // Set delta time
-        m_deltaTime = glfwGetTime() - lastTime;
-        // If no max framerate just run right through
+        m_deltaTime = static_cast<float>(glfwGetTime()) - lastTime;
+        // If max framerate is 0, the framerate is infinite so skip sleep
         if (m_framerateFactor != 0.0)
             // Sleep to keep the max framerate
             std::this_thread::sleep_for(std::chrono::duration<float> (std::max(0.0f, m_framerateFactor - m_deltaTime)));
-        lastTime = glfwGetTime();
+        lastTime = static_cast<float>(glfwGetTime());
     }
 
-    // Log Done
+    // Log the update loop has ended
     Log.log("Finished Game Loop");
 }
 
 // Getter for delta time
 float GameManager::getDeltaTime() const {
-    return m_deltaTime;
+    // incase m_deltaTimes ends up being 0 and will cause errors
+    return std::max(m_deltaTime, 0.00001f);
 }
 
 // Setter for the max framerate
 void GameManager::setMaxFramerate(const float framerate) {
-    if (framerate <= 0.0) {
+    if (framerate <= 0.0f) {
         // setting this to 0 will make max FPS unlimited
-        m_framerateFactor = 0.0;
+        m_framerateFactor = 0.0f;
         return;
     }
     // The min time in seconds a frame will take
-    m_framerateFactor = 1.0 / framerate;
+    m_framerateFactor = 1.0f / framerate;
 }

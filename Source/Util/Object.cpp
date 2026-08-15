@@ -4,6 +4,7 @@
 
 #include "Object.h"
 #include "Component.h"
+#include "GameManager.h"
 #include "ResourceManager.h"
 #include "WindowManager.h"
 #include "WorldManager.h"
@@ -14,6 +15,10 @@ Vector3 Object::getLocalPosition() const {
 
 void Object::setLocalPosition(const Vector3 &position) {
     m_localPosition = position;
+
+    // Reload the model matrix
+    m_localMatrix = Matrix4::ModelMatrix(m_localPosition, m_localRotation, m_localScale);
+    makeWorldDirty();
 }
 
 Quaternion Object::getLocalRotation() const {
@@ -22,6 +27,10 @@ Quaternion Object::getLocalRotation() const {
 
 void Object::setLocalRotation(const Quaternion &rotation) {
     m_localRotation = rotation;
+
+    // Reload the model matrix
+    m_localMatrix = Matrix4::ModelMatrix(m_localPosition, m_localRotation, m_localScale);
+    makeWorldDirty();
 }
 
 Vector3 Object::getLocalScale() const {
@@ -30,14 +39,14 @@ Vector3 Object::getLocalScale() const {
 
 void Object::setLocalScale(const Vector3 &scale) {
     m_localScale = scale;
+
+    // Reload the model matrix
+    m_localMatrix = Matrix4::ModelMatrix(m_localPosition, m_localRotation, m_localScale);
+    makeWorldDirty();
 }
 
 Matrix4 Object::getLocalMatrix() const {
-    auto position = m_localPosition;
-    auto rotation = m_localRotation;
-    auto scale = m_localScale;
-
-    return Matrix4::ModelMatrix(position, rotation, scale);
+    return m_localMatrix;
 }
 
 Vector3 Object::getWorldPosition() const {
@@ -46,19 +55,17 @@ Vector3 Object::getWorldPosition() const {
 }
 
 void Object::setWorldPosition(const Vector3 &position) {
-    m_localPosition = Vector3(getWorldMatrix().inverse() * Vector4(position));
+    const Vector3 localPos = p_parent ? Vector3(p_parent->getWorldMatrix().inverse() * Vector4(position, 1.0f)) : position;
+    setLocalPosition(localPos);
 }
 
 Quaternion Object::getWorldRotation() const {
-    const Matrix4 worldRotation = getWorldMatrix() * m_localRotation.toMatrix();
-
-    return Quaternion(worldRotation);
+    return Quaternion(getWorldMatrix());
 }
 
 void Object::setWorldRotation(const Quaternion &rotation) {
-    const Matrix4 worldRotation = getWorldMatrix().inverse() * rotation.toMatrix();
-
-    m_localRotation = Quaternion(worldRotation);
+    const Quaternion localRot = p_parent ? Quaternion(p_parent->getWorldMatrix().inverse() * rotation.toMatrix()) : rotation;
+    setLocalRotation(localRot);
 }
 
 Vector3 Object::getWorldScale() const {
@@ -66,17 +73,16 @@ Vector3 Object::getWorldScale() const {
 }
 
 void Object::setWorldScale(const Vector3 &scale) {
-    m_localScale = Vector3(getWorldMatrix().inverse() * Vector4(scale));
+    const Vector3 localScale = p_parent ? Vector3(p_parent->getWorldMatrix().inverse() * Vector4(scale, 0.0f)) : scale;
+    setLocalScale(localScale);
 }
 
 Matrix4 Object::getWorldMatrix() const {
-    Matrix4 worldMatrix = getLocalMatrix();
-    Object* currentParent = p_parent;
-    while(currentParent != nullptr) {
-        worldMatrix = worldMatrix * currentParent->getWorldMatrix();
-        currentParent = currentParent->p_parent;
+    if (m_dirtyWorld) {
+        m_worldMatrix = p_parent ? m_localMatrix * p_parent->getWorldMatrix() : m_localMatrix;
+        m_dirtyWorld = false;
     }
-    return worldMatrix;
+    return m_worldMatrix;
 }
 
 Vector3 Object::getWorldForward() const {
@@ -119,14 +125,41 @@ void Object::setComponentActiveState(Component *component, const bool active) {
     }
 }
 
-void Object::Translate(const Vector3& translation)
+void Object::Translate(const Vector3& delta)
 {
-    m_localPosition += translation;
+    setLocalPosition(m_localPosition + delta);
+}
+
+void Object::Rotate(const Quaternion& delta)
+{
+    setLocalRotation((m_localRotation * delta).normalize());
+}
+
+void Object::Scale(const Vector3& delta)
+{
+    setLocalScale(m_localScale + delta);
 }
 
 Scene* Object::getScene() const
 {
     return m_scene;
+}
+
+void Object::destroy()
+{
+    getScene()->removeFromUpdate(this, &Object::update);
+
+    for (const auto child : m_children)
+    {
+        child->destroy();
+    }
+
+    for (const auto component : m_components)
+    {
+        component->destroy();
+        delete component;
+    }
+    delete this;
 }
 
 void Object::update() {
@@ -144,19 +177,15 @@ void Object::disable() {
     DisableEvent.call();
 }
 
-void Object::destroy() {
-    DestroyEvent.call();
-}
-
-void Object::end() {
-    for (const auto child : m_children) {
-        child->end();
+void Object::makeWorldDirty() const
+{
+    if (m_dirtyWorld)
+        return;
+    m_dirtyWorld = true;
+    for (const auto child : m_children)
+    {
+        child->makeWorldDirty();
     }
-    DestroyEvent.call();
-
-    //World.removeUpdateEvent(this, &Object::update);
-    //World.removeDestroyEvent(this, &Object::destroy);
-    delete this;
 }
 
 nlohmann::json Object::toJson()

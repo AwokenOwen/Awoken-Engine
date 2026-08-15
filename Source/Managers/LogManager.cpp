@@ -3,7 +3,7 @@
 //
 
 #include "LogManager.h"
-#include <stdarg.h>
+#include <cstdarg>
 
 int LogManager::initialize() {
     // Open the file

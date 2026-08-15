@@ -16,9 +16,6 @@ class Object {
     friend struct Scene;
     friend class ResourceManager;
 public:
-    Object() = default;
-    virtual ~Object() = default;
-
     /**
      * @return the local position of the object
      */
@@ -108,6 +105,12 @@ public:
      */
     void setActiveState(bool active = true);
 
+    /**
+     * @brief Sets the active state of a component
+     *
+     * @param component The component to update the active state of
+     * @param active The new active state of the component
+     */
     void setComponentActiveState(Component* component, bool active);
 
     /**
@@ -128,15 +131,38 @@ public:
     template<typename T>
     T* getComponent();
 
+    /**
+     * @brief Function that translates the object through local space
+     *
+     * @param delta The change in position
+     */
+    void Translate(const Vector3 &delta);
+    /**
+     * @brief Function that rotates the object through local space
+     *
+     * @param delta The change in rotation
+     */
+    void Rotate(const Quaternion &delta);
+    /**
+     * @brief Function that scales the object through local space
+     *
+     * @param delta The change in scale
+     */
+    void Scale(const Vector3 &delta);
+
+    /**
+     * @brief Getter for the scene that owns this object
+     *
+     * @return The scene this object is from
+     */
+    [[nodiscard]] Scene* getScene() const;
+
+    void destroy();
+
     EVENT_ACCESSORS(StartEvent)
     EVENT_ACCESSORS(UpdateEvent)
     EVENT_ACCESSORS(EnableEvent)
     EVENT_ACCESSORS(DisableEvent)
-    EVENT_ACCESSORS(DestroyEvent)
-
-    void Translate(const Vector3 &translation);
-
-    Scene* getScene() const;
 
 protected:
     /**
@@ -151,62 +177,136 @@ protected:
      * @brief Called when the object's active state is set to false
      */
     void disable();
-    /**
-     * @brief Called when the object is destroyed
-     */
-    void destroy();
-    /**
-     * @brief Called during the termination of the engine to free everything
-     */
-    void end();
 
 private:
+    /**
+     * @brief default constructor
+     */
+    Object() = default;
+    /**
+     * @brief default deconstructor
+     */
+    virtual ~Object() = default;
+
+    /**
+     * @brief The name of the object in the scene file
+     */
     std::string m_name;
-
+    /**
+     * @brief The local position of the object
+     */
     Vector3 m_localPosition{};
+    /**
+     * @brief The local rotation of the object
+     */
     Quaternion m_localRotation{};
+    /**
+     * @brief The local scale of the object
+     */
     Vector3 m_localScale{1,1,1};
+    /**
+     * @brief The model matrix of the object
+     */
+    Matrix4 m_localMatrix{};
 
-    Scene* m_scene;
+    mutable Matrix4 m_worldMatrix{};
+    mutable bool m_dirtyWorld{};
+    void makeWorldDirty() const;
+
+    /**
+     * @brief The scene the object belongs to
+     */
+    Scene* m_scene{};
+    /**
+     * @brief The parent object of this object
+     */
     Object* p_parent{};
+    /**
+     * @brief The list of children of this object
+     *
+     * Not sure if this needs to be removed or not
+     */
     std::vector<Object*> m_children{};
+    /**
+     * @brief The list of the components attached to this object
+     */
     std::vector<Component*> m_components{};
 
+    /**
+     * @brief The active state of the object
+     */
     bool m_activeState{true};
 
+    /**
+     * @brief The start event for the components of this object
+     */
     Event<> StartEvent{};
+    /**
+     * @brief The update event for the components of this object
+     */
     Event<> UpdateEvent{};
+    /**
+     * @brief The enable event for the components of this object
+     */
     Event<> EnableEvent{};
+    /**
+     * @brief The disable event for the components of this object
+     */
     Event<> DisableEvent{};
-    Event<> DestroyEvent{};
 
+    /**
+     * @brief Function to convert an Object into a JSON file
+     *
+     * @return JSON object with the object data
+     */
     nlohmann::json toJson();
+    /**
+     * @brief Function used to make an object from the JSON in the scene file
+     *
+     * @param j JSON object with all the data to build an object
+     * @return A new object
+     */
     static Object* fromJson(const nlohmann::json& j);
 };
 
 template<typename T> T* Object::addComponent() {
+    // Require T to be a Component
     static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
+    // Loop through all components
     for (auto c: m_components) {
+        // Check if the component is already added
         if (dynamic_cast<T*>(c))
         {
-            Log.logError("Component already added... returning unique component");
+            // Log the warning
+            Log.logWarning("Component already added... returning unique component");
+            // Return the component already added
             return dynamic_cast<T*>(c);
         }
     }
+    // Create the new component and attach it to the object
     auto newComponent = new T(this);
+    // Add the component to the list
     this->m_components.push_back(newComponent);
+    // Return the new component
     return newComponent;
 }
 
 template<typename T> T* Object::getComponent() {
+    // Require T to be a Component
     static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
+    // Loop through all components
     for (auto c: m_components) {
+        // If it's the component being looking for
         if (dynamic_cast<T*>(c))
         {
+            // Return that component
             return dynamic_cast<T*>(c);
         }
     }
+    // If there is no component log error
+    Log.logWarning("No component of that type...");
+    // Return nullptr
     return nullptr;
 }

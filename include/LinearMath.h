@@ -155,10 +155,11 @@ public:
         rhs /= lhs;
         return rhs;
     }
-#pragma endregion operators
 
     Vector2& operator=(const Vector3& other);
     Vector2& operator=(const Vector4& other);
+
+#pragma endregion operators
 
     static Vector2 fromJson(const nlohmann::json& json);
     nlohmann::json toJson();
@@ -324,10 +325,9 @@ public:
         rhs /= lhs;
         return rhs;
     }
-#pragma endregion operators
-
     Vector3& operator=(const Vector2& other);
     Vector3& operator=(const Vector4& other);
+#pragma endregion operators
 
     static Vector3 fromJson(nlohmann::json json);
     nlohmann::json toJson();
@@ -501,9 +501,9 @@ public:
     [[nodiscard]] Matrix4 toMatrix() const;
 
     static float dot(const Quaternion &a, const Quaternion &b);
-    static Quaternion slerp(Quaternion &a, Quaternion &b, float t);
+    static Quaternion slerp(Quaternion a, Quaternion b, float t);
 
-    #pragma region operators
+#pragma region operators
     float& operator[](const int index) {
         return data[index];
     }
@@ -548,38 +548,40 @@ public:
     }
     Quaternion& operator*=(const Quaternion& other)
     {
-        for (int i = 0; i < 4; i++)
-        {
-            data[i] *= other.data[i];
-        }
+        data[0] = data[3] * other.data[3] + data[0] * other.data[0] + data[1] * other.data[1] - data[2] * other.data[2];
+        data[1] = data[3] * other.data[3] - data[0] * other.data[0] + data[1] * other.data[1] + data[2] * other.data[2];
+        data[2] = data[3] * other.data[3] + data[0] * other.data[0] - data[1] * other.data[1] + data[2] * other.data[2];
+        data[3] = data[3] * other.data[3] - data[0] * other.data[0] - data[1] * other.data[1] - data[2] * other.data[2];
         return *this;
     }
-    Quaternion& operator/=(const Quaternion& other)
-    {
+    friend Quaternion operator+(const Quaternion lhs, const Quaternion& rhs) {
+        Quaternion result{};
         for (int i = 0; i < 4; i++)
         {
-            data[i] /= other.data[i];
+            result[i] = lhs.data[i] + rhs.data[i];
         }
-        return *this;
+        return result;
     }
-    friend Quaternion operator+(Quaternion lhs, const Quaternion& rhs) {
-        lhs += rhs;
-        return lhs;
-    }
-    friend Quaternion operator-(Quaternion lhs, const Quaternion& rhs)
+    friend Quaternion operator-(const Quaternion lhs, const Quaternion& rhs)
     {
-        lhs -= rhs;
-        return lhs;
+        Quaternion result{};
+        for (int i = 0; i < 4; i++)
+        {
+            result[i] = lhs.data[i] - rhs.data[i];
+        }
+        return result;
     }
-    friend Quaternion operator*(Quaternion lhs, const Quaternion& rhs)
+    friend Quaternion operator*(const Quaternion lhs, const Quaternion& rhs)
     {
-        lhs *= rhs;
-        return lhs;
-    }
-    friend Quaternion operator/(Quaternion lhs, const Quaternion& rhs)
-    {
-        lhs /= rhs;
-        return lhs;
+        const float lx = lhs.data[0], ly = lhs.data[1], lz = lhs.data[2], lw = lhs.data[3];
+        const float rx = rhs.data[0], ry = rhs.data[1], rz = rhs.data[2], rw = rhs.data[3];
+
+        Quaternion result;
+        result.data[0] = lw * rx + lx * rw + ly * rz - lz * ry;
+        result.data[1] = lw * ry - lx * rz + ly * rw + lz * rx;
+        result.data[2] = lw * rz + lx * ry - ly * rx + lz * rw;
+        result.data[3] = lw * rw - lx * rx - ly * ry - lz * rz;
+        return result;
     }
     Quaternion& operator*=(const float other)
     {
@@ -597,25 +599,41 @@ public:
         }
         return *this;
     }
-    friend Quaternion operator*(Quaternion& lhs, const float rhs)
+    friend Quaternion operator*(const Quaternion lhs, const float rhs)
     {
-        lhs *= rhs;
-        return lhs;
+        Quaternion result{};
+        for (int i = 0; i < 4; i++)
+        {
+            result.data[i] = lhs.data[i] * rhs;
+        }
+        return result;
     }
-    friend Quaternion operator*(const float lhs, Quaternion& rhs)
+    friend Quaternion operator*(const float lhs, const Quaternion rhs)
     {
-        rhs *= lhs;
-        return rhs;
+        Quaternion result{};
+        for (int i = 0; i < 4; i++)
+        {
+            result.data[i] = rhs.data[i] * lhs;
+        }
+        return result;
     }
-    friend Quaternion operator/(Quaternion& lhs, const float rhs)
+    friend Quaternion operator/(const Quaternion lhs, const float rhs)
     {
-        lhs /= rhs;
-        return lhs;
+        Quaternion result{};
+        for (int i = 0; i < 4; i++)
+        {
+            result.data[i] = lhs.data[i] / rhs;
+        }
+        return result;
     }
-    friend Quaternion operator/(const float lhs, Quaternion& rhs)
+    friend Quaternion operator/(const float lhs, const Quaternion rhs)
     {
-        rhs /= lhs;
-        return rhs;
+        Quaternion result{};
+        for (int i = 0; i < 4; i++)
+        {
+            result.data[i] = rhs.data[i] / lhs;
+        }
+        return result;
     }
 #pragma endregion operators
 
@@ -1335,51 +1353,61 @@ inline Quaternion::Quaternion(const Vector3& EulerAngles)
 }
 
 inline Quaternion::Quaternion(const Matrix4 &m) {
+    // 1. Remove scaling by normalizing the basis vectors of the 3x3 sub-matrix
+    const float scaleX = std::sqrt(m[0][0]*m[0][0] + m[1][0]*m[1][0] + m[2][0]*m[2][0]);
+    const float scaleY = std::sqrt(m[0][1]*m[0][1] + m[1][1]*m[1][1] + m[2][1]*m[2][1]);
+    const float scaleZ = std::sqrt(m[0][2]*m[0][2] + m[1][2]*m[1][2] + m[2][2]*m[2][2]);
 
-    auto tw = 1 + m[0][0] + m[1][1] + m[2][2];
-    auto tx = 1 + m[0][0] - m[1][1] - m[2][2];
-    auto ty = 1 - m[0][0] + m[1][1] - m[2][2];
-    auto tz = 1 - m[0][0] - m[1][1] + m[2][2];
+    // Avoid division by zero if scale is missing/corrupted
+    const float rX = (scaleX > 0.0001f) ? 1.0f / scaleX : 1.0f;
+    const float rY = (scaleY > 0.0001f) ? 1.0f / scaleY : 1.0f;
+    const float rZ = (scaleZ > 0.0001f) ? 1.0f / scaleZ : 1.0f;
 
-    auto max = std::numeric_limits<float>::min();
-    if (tw > max)
-        max = tw;
-    if (ty > max)
-        max = ty;
-    if (tx > max)
-        max = tx;
-    if (tz > max)
-        max = tz;
+    const float m00 = m[0][0] * rX; const float m10 = m[1][0] * rX; const float m20 = m[2][0] * rX;
+    const float m01 = m[0][1] * rY; const float m11 = m[1][1] * rY; const float m21 = m[2][1] * rY;
+    const float m02 = m[0][2] * rZ; const float m12 = m[1][2] * rZ; const float m22 = m[2][2] * rZ;
 
-    float _w{};
-    float _x{};
-    float _y{};
-    float _z{};
+    // 2. Compute trace elements using the clean rotation values
+    const auto tw = 1.0f + m00 + m11 + m22;
+    const auto tx = 1.0f + m00 - m11 - m22;
+    const auto ty = 1.0f - m00 + m11 - m22;
+    const auto tz = 1.0f - m00 - m11 + m22;
+
+    // Fix the initializer trap: start directly with tw
+    auto max = tw;
+    if (ty > max) max = ty;
+    if (tx > max) max = tx;
+    if (tz > max) max = tz;
+
+    float _w{}, _x{}, _y{}, _z{};
 
     if (tw == max)
     {
         _w = std::sqrt(tw) / 2.0f;
-        _x = (m[2][1] - m[1][2]) / (4.0f * _w);
-        _y = (m[0][2] - m[2][0]) / (4.0f * _w);
-        _z = (m[1][0] - m[0][1]) / (4.0f * _w);
-    }else if (tx == max)
+        _x = (m21 - m12) / (4.0f * _w);
+        _y = (m02 - m20) / (4.0f * _w);
+        _z = (m10 - m01) / (4.0f * _w);
+    }
+    else if (tx == max)
     {
         _x = std::sqrt(tx) / 2.0f;
-        _w = (m[2][1] - m[1][2]) / (4.0f * _x);
-        _y = (m[0][1] + m[1][0]) / (4.0f * _x);
-        _z = (m[0][2] + m[2][0]) / (4.0f * _x);
-    }else if (ty == max)
+        _w = (m21 - m12) / (4.0f * _x);
+        _y = (m01 + m10) / (4.0f * _x);
+        _z = (m02 + m20) / (4.0f * _x);
+    }
+    else if (ty == max)
     {
         _y = std::sqrt(ty) / 2.0f;
-        _w = (m[0][2] - m[2][0]) / (4.0f * _y);
-        _x = (m[0][1] + m[1][0]) / (4.0f * _y);
-        _z = (m[1][2] + m[2][1]) / (4.0f * _y);
-    }else
+        _w = (m02 - m20) / (4.0f * _y);
+        _x = (m01 + m10) / (4.0f * _y);
+        _z = (m12 + m21) / (4.0f * _y);
+    }
+    else
     {
         _z = std::sqrt(tz) / 2.0f;
-        _w = (m[0][2] - m[2][0]) / (4.0f * _z);
-        _x = (m[0][1] + m[1][0]) / (4.0f * _z);
-        _y = (m[1][2] + m[2][1]) / (4.0f * _z);
+        _w = (m10 - m01) / (4.0f * _z);
+        _x = (m02 + m20) / (4.0f * _z);
+        _y = (m12 + m21) / (4.0f * _z);
     }
 
     data[0] = _x;
@@ -1435,7 +1463,7 @@ inline float Quaternion::dot(const Quaternion& a, const Quaternion& b)
     return a.x() * b.x() + a.y() * b.y() + a.z() * b.z() + a.w() * b.w();
 }
 
-inline Quaternion Quaternion::slerp(Quaternion& a, Quaternion& b, const float t)
+inline Quaternion Quaternion::slerp(Quaternion a, Quaternion b, const float t)
 {
     const float angle = std::acos(std::abs(dot(a, b)));
 

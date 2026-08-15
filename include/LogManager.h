@@ -3,7 +3,6 @@
 //
 
 #pragma once
-#include "Manager.h"
 #include <fstream>
 
 /**
@@ -14,7 +13,7 @@
 /**
  * @brief Singleton class that handles all logs
  */
-class LogManager : public Manager{
+class LogManager {
     friend class GameManager;
 public:
     /**
@@ -51,11 +50,11 @@ private:
      *
      * @return 0 if successful and 1 if unsuccessful
      */
-    int initialize() override;
+    int initialize();
     /**
      * @brief Shuts down all other managers and frees necessary data
      */
-    void terminate() override;
+    void terminate();
     /**
      * @brief Private default constructor for singleton functionality
      */
@@ -63,7 +62,7 @@ private:
     /**
      * @brief Private default deconstructor for singleton functionality
      */
-    ~LogManager() override = default;
+    ~LogManager() = default;
 
     /**
      * @brief The file the manager writes to

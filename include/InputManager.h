@@ -12,6 +12,11 @@
  */
 #define Input InputManager::getInstance()
 
+// Forward declaration of callback functions
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+static void mouse_cursor_callback(GLFWwindow* window, double xPos, double yPos);
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+static void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
 
 /**
  * @brief Used to send information about GLFW keyboard input through keyboard events
@@ -41,14 +46,14 @@ public:
 	 *
 	 * @param key A code referring to which key was pressed on the keyboard
 	 * @param action A code referring to which key was pressed on the keyboard specific to OS
+	 * @param scancode A code that is non OS specific on the key pressed
 	 * @param mods A code with bit modifiers to represent the mods of the input (Held Ctrl, Shift, ect.)
 	 */
-	KeyboardContext(const int key, const int action, const int mods) {
+	KeyboardContext(const int key, const int action, const int scancode, const int mods) {
 		this->m_key = key;
 		this->m_action = action;
+		this->m_scancode = scancode;
 		this->m_mods = mods;
-
-		m_scancode = glfwGetKeyScancode(key);
 	}
 
 	/**
@@ -157,13 +162,30 @@ public:
  */
 class InputManager
 {
+	friend class GameManager;
 public:
 	/**
-	 * @brief Get Input Manager running for use in game
+	 * @brief InputManager Singleton get function
 	 *
-	 * Starts up and initializes everything the input manager needs to run. Returns 0 if successful and 1 if failed
+	 * @return static InputManager Instance
+	 */
+	static InputManager& getInstance();
+
+	EVENT_ACCESSORS(MouseMoveEvent, Vector2, Vector2)
+	EVENT_ACCESSORS(KeyboardEvent, KeyboardContext)
+	EVENT_ACCESSORS(MouseButtonEvent, MouseButtonContext)
+	EVENT_ACCESSORS(ScrollEvent, Vector2)
+
+private:
+	/**
+	 * @brief Private Constructor for singleton
+	 */
+	InputManager() = default;
+
+	/**
+	 * @brief Starts up and initializes everything the input manager needs to run.
 	 *
-	 * @return int
+	 * @return Returns 0 if successful and 1 if failed
 	 */
 	int initialize();
 
@@ -173,16 +195,7 @@ public:
 	void terminate();
 
 	/**
-	 * @brief InputManager Singleton get function
-	 *
-	 * @return static InputManager Instance
-	 */
-	static InputManager& getInstance();
-
-	/**
-	 * @brief Function called by GLFW for when the mouse moves
-	 *
-	 * Takes in position of the mouse as two floats and calls the mouseMoveEvent with a vec2 for mouse position and vec2 for the mouse delta (the change in mouse position between frames)
+	 * @brief Takes in position of the mouse and calls the mouseMoveEvent with a vec2 for mouse position and vec2 for the mouse delta (the change in mouse position between frames)
 	 *
 	 * @param posX X position of the mouse
 	 * @param posY Y position of the mouse
@@ -190,9 +203,7 @@ public:
 	void mouseMoveInput(float posX, float posY);
 
 	/**
-	 * @brief Function called by GLFW for all keyboard inputs
-	 *
-	 * Takes in the key, scancode, action, and mods and turns it into a KeyboardContext and calls the keyboardEvent sending the KeyboardContext
+	 * @brief Takes in the key, scancode, action, and mods and turns it into a KeyboardContext and calls the keyboardEvent sending the KeyboardContext
 	 *
 	 * @param key A code referring to which key was pressed on the keyboard
 	 * @param scancode A code referring to which key was pressed on the keyboard specific to OS
@@ -202,9 +213,7 @@ public:
 	void keyboardInputs(int key, int scancode, int action, int mods);
 
 	/**
-	 * @brief Function called by GLFW for all mouse button inputs
-	 *
-	 * Takes in the button, action, and mods and turns it into a MouseContext and calls the mouseButtonEvent sending the MouseContext
+	 * @brief Takes in the button, action, and mods and turns it into a MouseContext and calls the mouseButtonEvent sending the MouseContext
 	 *
 	 * @param button A code referring to the mouse button pressed
 	 * @param action A code referring to if the key was GLFW_PRESSED GLFW_RELEASED or GLFW_REPEAT
@@ -213,79 +222,36 @@ public:
 	void mouseButtonInputs(int button, int action, int mods);
 
 	/**
-	 * @brief Function called by GLFW for all scroll inputs
-	 *
-	 * Takes in the offset of the scroll through two floats, converts it to a vec2 and sends it in the scrollEvent
+	 * @brief Takes in the offset of the scroll through two floats, converts it to a vec2 and sends it in the scrollEvent
 	 *
 	 * @param xOffset The offset of the scroll on the X Axis
 	 * @param yOffset The offset of the scroll on the Y Axis
 	 */
 	void scrollInput(double xOffset, double yOffset);
 
-	/**
-	 * @brief add function to the mouseMoveEvent
-	 *
-	 * @tparam T Class of member function
-	 * @param object Pointer to the Object
-	 * @param func The function getting added as a listener
-	 */
-	template<typename T>
-	void addToMouseMoveEvent(T* object, void(T::* func)(Vector2, Vector2));
-
-	/**
-	 * @brief add function to the keyboardEvent
-	 *
-	 * @tparam T Class of member function
-	 * @param object Pointer to the Object
-	 * @param func The function getting added as a listener
-	 */
-	template<typename T>
-	void addToKeyboardEvent(T* object, void(T::* func)(KeyboardContext));
-
-	/**
-	 * @brief add function to the mouseButtonEvent
-	 *
-	 * @tparam T Class of member function
-	 * @param object Pointer to the Object
-	 * @param func The function getting added as a listener
-	 */
-	template<typename T>
-	void addToMouseButtonEvent(T* object, void(T::* func)(MouseButtonContext));
-
-	/**
-	 * @brief add function to the scrollEvent
-	 *
-	 * @tparam T Class of member function
-	 * @param object Pointer to the Object
-	 * @param func The function getting added as a listener
-	 */
-	template<typename T>
-	void addScrollEvent(T* object, void(T::* func)(Vector2));
-
-private:
-	/**
-	 * @brief Private Constructor for singleton
-	 */
-	InputManager() = default;
+	// Friend declaration of callback functions to allow private input manager calls
+	friend void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	friend void mouse_cursor_callback(GLFWwindow* window, double xPos, double yPos);
+	friend void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+	friend void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
 
 	/**
 	 * @brief Event called when based on mouse position and delta
 	 */
-	Event<Vector2, Vector2> m_mouseMoveEvent{};
+	Event<Vector2, Vector2> MouseMoveEvent{};
 	/**
 	 * @brief Event gives KeyboardContext based on key
 	 */
-	Event<KeyboardContext> m_keyboardEvent{};
+	Event<KeyboardContext> KeyboardEvent{};
 	/**
 	 * @brief Event gives MouseButtonContext on the mouse button
 	 */
-	Event<MouseButtonContext> m_mouseButtonEvent{};
+	Event<MouseButtonContext> MouseButtonEvent{};
 	/**
 	 * @brief Event give a vec2 of scroll delta
 	 */
-	Event<Vector2> m_scrollEvent{};
+	Event<Vector2> ScrollEvent{};
 
-	//mouse movement variables
 	/**
 	 * @brief mouse variable for if it's the first time the mouse moved
 	 */
@@ -294,26 +260,5 @@ private:
 	/**
 	 * @brief last position of mouse
 	 */
-	float m_lastX{};
-	float m_lastY{};
+	Vector2 m_lastMousePos;
 };
-
-template<typename T>
-void InputManager::addToMouseMoveEvent(T *object, void(T::*func)(Vector2, Vector2)){
-	m_mouseMoveEvent.add(object, func);
-}
-
-template<typename T>
-void InputManager::addToKeyboardEvent(T *object, void(T::*func)(KeyboardContext)) {
-	m_keyboardEvent.add(object, func);
-}
-
-template<typename T>
-void InputManager::addToMouseButtonEvent(T *object, void(T::*func)(MouseButtonContext)) {
-	m_mouseButtonEvent.add(object, func);
-}
-
-template<typename T>
-void InputManager::addScrollEvent(T *object, void(T::*func)(Vector2)) {
-	m_scrollEvent.add(object, func);
-}

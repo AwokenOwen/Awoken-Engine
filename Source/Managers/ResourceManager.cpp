@@ -113,9 +113,11 @@ Scene * Scene::fromJson(const nlohmann::json &j) {
     return scene;
 }
 
-void Scene::end() const {
-    for (const auto object: m_rootObjects) {
-        object->end();
+void Scene::destroy() const
+{
+    for (const auto object : m_rootObjects)
+    {
+        object->destroy();
     }
     delete this;
 }
@@ -146,7 +148,7 @@ Scene * ResourceManager::loadScene(const std::string &name) {
         return nullptr;
     }
 
-    std::string path = m_sceneMap[name];
+    const std::string path = m_sceneMap[name];
 
     std::ifstream f(path);
     nlohmann::json j = nlohmann::json::parse(f);
@@ -173,7 +175,7 @@ void ResourceManager::flushLoadedScenes(const std::vector<std::string>& keepLoad
     std::erase_if(m_loadedScenes, [&](const auto& pair) {
         // Return true if the key should be erased (not in the vector)
         if (bool e = std::find(keepLoaded.begin(), keepLoaded.end(), pair.first) == keepLoaded.end()) {
-            pair.second->end();
+            pair.second->destroy();
             return e;
         }
         return false;

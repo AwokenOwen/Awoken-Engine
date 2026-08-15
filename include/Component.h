@@ -11,9 +11,12 @@ class Component
     friend class ResourceManager;
 public:
     /**
-     * @brief Constructor necessary for all components
+     * @brief Constructor to set the parent object, necessary for all components
      */
     explicit Component(Object *parent);
+    /**
+     * @brief Default deconstructor
+     */
     virtual ~Component() = default;
 
     /**
@@ -25,15 +28,15 @@ public:
     /**
      * @brief Sets the active state and prepares the components enable/disable functions to be called
      *
-     * @param active
+     * @param active The new active state of the component
      */
     virtual void setActiveState(bool active);
 
     /**
- * @brief Getter for the parent object this component is attached to
- *
- * @return Pointer to the Parent Object
- */
+     * @brief Getter for the parent object this component is attached to
+     *
+     * @return Pointer to the Parent Object
+     */
     [[nodiscard]] Object* getParent() const;
 
 private:
@@ -64,9 +67,20 @@ private:
      * @return The JSON of the component
      */
     virtual nlohmann::json toJson() = 0;
+    /**
+     * @brief Takes in a json to build the component
+     *
+     * @param j JSON
+     */
     virtual void fromJson(nlohmann::json j) = 0;
 
+    /**
+     * @brief The active state of the component
+     */
     bool m_activeState{};
 
+    /**
+     * @brief The parent object of the component
+     */
     Object* p_parent{nullptr};
 };

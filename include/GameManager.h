@@ -5,7 +5,6 @@
 #pragma once
 #include <string>
 
-#include "Manager.h"
 #include "AL/alc.h"
 
 /**
@@ -16,20 +15,18 @@
 /**
  * @brief Singleton class that runs the engine
  */
-class GameManager : public Manager {
+class GameManager {
 public:
     /**
      * @brief Starts all other managers preparing to start the game
      *
      * @return 0 if successful and 1 if unsuccessful
      */
-    // ReSharper disable once CppOverrideWithDifferentVisibility
-    int initialize() override;
+    int initialize();
     /**
      * @brief Shuts down all other managers and frees necessary data
      */
-    // ReSharper disable once CppOverrideWithDifferentVisibility
-    void terminate() override;
+    void terminate();
     /**
      * @brief Getter for the singleton instance
      *
@@ -61,17 +58,23 @@ private:
     /**
      * @brief Private default deconstructor for singleton functionality
      */
-    ~GameManager() override = default;
+    ~GameManager() = default;
 
     /**
      * @brief The time it takes for each frame to run
      */
-    float m_deltaTime{0.0001};
+    float m_deltaTime{0.00001f};
     /**
      * @brief Maximum FPS the game loop will run at
      */
     float m_framerateFactor{};
 
+    /**
+     * @brief The OpenAL device object used to play sounds
+     */
     ALCdevice* m_device{};
+    /**
+     * @brief The OpenAL context object used to play sounds
+     */
     ALCcontext* m_context{};
 };

@@ -5,7 +5,6 @@
 #pragma once
 #include <string>
 
-#include "Manager.h"
 #include "Event.h"
 #include "nlohmann/json.hpp"
 
@@ -23,7 +22,7 @@ class Object;
 /**
  * @brief Singleton class that handles all Frame-buffers and the World events
  */
-class WorldManager : public Manager{
+class WorldManager {
     friend class GameManager;
     friend class ResourceManager;
 public:
@@ -50,11 +49,11 @@ private:
      *
      * @return 0 if successful and 1 if unsuccessful
      */
-    int initialize() override;
+    int initialize();
     /**
      * @brief Shuts down all other managers and frees necessary data
      */
-    void terminate() override;
+    void terminate();
     /**
      * @brief A setup for the scene called when a scene is loaded to make sure everything can run properly
      */
@@ -70,7 +69,7 @@ private:
     /**
     * @brief Private default deconstructor for singleton functionality
     */
-    ~WorldManager() override = default;
+    ~WorldManager() = default;
 
     void drawPostprocess() const;
 

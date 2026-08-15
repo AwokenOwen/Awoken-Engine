@@ -85,7 +85,7 @@ void TextRendererComponent::setText(const std::string& text)
             auto [index, Size, Bearing, Advance] = m_font.m_characters[*c];
 
             if (*c == '\n') {
-                y -= yLine * 1.3f;
+                y -= static_cast<int>(yLine * 1.3f);
                 x = copyX;
             }
             else
@@ -102,7 +102,7 @@ void TextRendererComponent::setText(const std::string& text)
         }
         if (x + (xSpace >> 6) > boxSize.x())
         {
-            y -= yLine * 1.3f;
+            y -= static_cast<int>(yLine * 1.3f);
             x = copyX;
         }else
         {
@@ -225,7 +225,7 @@ void TextRendererComponent::draw()
     glBindTexture(GL_TEXTURE_2D_ARRAY, m_font.m_textureArray);
 
     glBindVertexArray(VAO);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, m_instanceData.size());
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, static_cast<GLsizei>(m_instanceData.size()));
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);

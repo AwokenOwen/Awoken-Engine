@@ -5,7 +5,6 @@
 #pragma once
 #include <string>
 
-#include "Manager.h"
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
 
@@ -13,7 +12,7 @@
  * @brief Singleton Macro
  */
 #define Window WindowManager::getInstance()
-class WindowManager : public Manager{
+class WindowManager{
     friend class GameManager;
 public:
     /**
@@ -49,11 +48,11 @@ private:
      *
      * @return 0 if successful and 1 if unsuccessful
      */
-    int initialize() override;
+    int initialize();
     /**
      * @brief Shuts down the Window Manager freeing and necessary data
      */
-    void terminate() override;
+    void terminate();
     /**
      * @brief Private default constructor for singleton functionality
      */
@@ -61,7 +60,7 @@ private:
     /**
      * @brief Private default deconstructor for singleton functionality
      */
-    ~WindowManager() override = default;
+    ~WindowManager() = default;
 
     /**
      * @brief Clear the color and depth buffers
