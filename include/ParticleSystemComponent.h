@@ -5,10 +5,15 @@
 #include "Component.h"
 #include "ResourceManager.h"
 
+// Struct of arrays instead of array of structs
 struct Particles {
+    // All the positions of the particles
     std::vector<Vector3> positions {};
+    // All the speeds of the particles
     std::vector<Vector3> velocities {};
+    // All the lifetimes of the particles
     std::vector<float> lifeTimes {};
+    // The number of current particles
     int numParticles{};
 };
 

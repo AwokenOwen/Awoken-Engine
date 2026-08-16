@@ -106,14 +106,6 @@ public:
     void setActiveState(bool active = true);
 
     /**
-     * @brief Sets the active state of a component
-     *
-     * @param component The component to update the active state of
-     * @param active The new active state of the component
-     */
-    void setComponentActiveState(Component* component, bool active);
-
-    /**
      * @brief Adds a new component type to an object, only one instance of a component is allowed on an object
      *
      * @tparam T The type of component
@@ -169,14 +161,6 @@ protected:
      * @brief Called every frame
      */
     void update();
-    /**
-     * @brief Called when the object's active state is set to true
-     */
-    void enable();
-    /**
-     * @brief Called when the object's active state is set to false
-     */
-    void disable();
 
 private:
     /**
@@ -209,9 +193,18 @@ private:
      */
     Matrix4 m_localMatrix{};
 
+    /**
+    * @brief The cached world matrix
+    */
     mutable Matrix4 m_worldMatrix{};
-    mutable bool m_dirtyWorld{};
-    void makeWorldDirty() const;
+    /**
+    * @brief The dirty flag for when to update the cached world matrix
+    */
+    mutable bool m_dirtyFlag{};
+    /**
+    * @brief Function used to set the dirty flag of this object and all child objects
+    */
+    void setDirtyFlag() const;
 
     /**
      * @brief The scene the object belongs to
