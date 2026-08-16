@@ -107,6 +107,5 @@ void LightComponent::fromJson(nlohmann::json j)
 
 void LightComponent::destroy()
 {
-    //Make sure to remove light
-    delete this;
+    
 }
