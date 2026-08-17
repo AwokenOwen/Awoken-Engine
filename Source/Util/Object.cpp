@@ -304,9 +304,9 @@ Object* Object::fromJson(const nlohmann::json& j)
     // Set all the basic variables
     a->m_activeState = j["ActiveState"];
     a->m_name = j["Name"];
-    a->m_localPosition = Vector3(j["Position"]["x"].get<float>(), j["Position"]["y"].get<float>(),j["Position"]["z"].get<float>());
-    a->m_localRotation = Quaternion(j["Rotation"]["x"].get<float>(), j["Rotation"]["y"].get<float>(), j["Rotation"]["z"].get<float>(), j["Rotation"]["w"].get<float>());
-    a->m_localScale = Vector3(j["Scale"]["x"].get<float>(), j["Scale"]["y"].get<float>(), j["Scale"]["z"].get<float>());
+    a->setLocalPosition(Vector3(j["Position"]["x"].get<float>(), j["Position"]["y"].get<float>(),j["Position"]["z"].get<float>()));
+    a->setLocalRotation(Quaternion(j["Rotation"]["x"].get<float>(), j["Rotation"]["y"].get<float>(), j["Rotation"]["z"].get<float>(), j["Rotation"]["w"].get<float>()));
+    a->setLocalScale(Vector3(j["Scale"]["x"].get<float>(), j["Scale"]["y"].get<float>(), j["Scale"]["z"].get<float>()));
 
     // Loop through the components in the JSON
     for (const std::vector<nlohmann::json> components = j["Components"]; const auto& c : components) {

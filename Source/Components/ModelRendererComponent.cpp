@@ -120,6 +120,7 @@ void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
         mat.setUniform("projection", orthographic);
         break;
     }
+    glDisable(GL_CULL_FACE);
 }
 
 void ModelRendererComponent::destroy()
