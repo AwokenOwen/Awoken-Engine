@@ -4,6 +4,7 @@
 
 #pragma once
 #include <string>
+#include <thread>
 
 #include "AL/alc.h"
 

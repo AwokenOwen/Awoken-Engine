@@ -1188,6 +1188,13 @@ bool ResourceManager::load_wav(const std::string& filename, std::uint8_t& channe
     return true;
 }
 
+void ResourceManager::awake()
+{
+    makePostprocessingScreen();
+    makeBRDFMap();
+    loadMaterial("assets/defaultAssets/Materials/shadowMap.json");
+}
+
 void ResourceManager::loadSound(std::string& path)
 {
     if (m_loadedSounds.contains(path))
@@ -1382,17 +1389,26 @@ void ResourceManager::addToDraw(const std::function<void()>& function, const boo
     }
 }
 
+void ResourceManager::LoadBaseScene()
+{
+    loadScene(baseScene);
+
+    Log.log("Finished loading base scene: %s", baseScene.c_str());
+}
+
 int ResourceManager::initialize() {
     std::ifstream f("gameInit.json");
     nlohmann::json j = nlohmann::json::parse(f);
 
     // Register all scenes
     const std::string primaryPath = j["Primary"].get<std::string>();
-    World.setBaseScene(registerScene(primaryPath));
+    baseScene = registerScene(primaryPath);
 
     for (const std::vector<nlohmann::json> children = j["Scenes"]; const auto& c : children) {
         registerScene(c.get<std::string>());
     }
+
+    loadUniformMap();
 
     // Register all components to be read and added from JSON files
     registerComponent<CameraComponent>("Camera");
@@ -1401,11 +1417,6 @@ int ResourceManager::initialize() {
     registerComponent<AudioSourceComponent>("AudioSource");
     registerComponent<TextRendererComponent>("TextRenderer");
     registerComponent<ParticleSystemComponent>("ParticleSystem");
-
-    loadUniformMap();
-    makePostprocessingScreen();
-    makeBRDFMap();
-    loadMaterial("assets/defaultAssets/Materials/shadowMap.json");
 
     Log.log("Resource Manager initialized");
     return 0;

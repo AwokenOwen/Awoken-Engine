@@ -21,7 +21,7 @@ private:
     /**
      * @brief Function that runs the first frame it is initiated
      */
-    void start() override{}
+    void start() override;
     /**
      * @brief Function that runs once every frame as long as it's active
      */

@@ -17,10 +17,6 @@ WorldManager & WorldManager::getInstance() {
     return instance;
 }
 
-void WorldManager::setBaseScene(const std::string& name) {
-    m_baseScene = name;
-}
-
 void WorldManager::setMainCamera(CameraComponent* camera)
 {
     if (m_mainCamera != nullptr)
@@ -54,9 +50,11 @@ void WorldManager::awake() {
 
     Resource.loadMaterial("assets/defaultAssets/Materials/postprocess.json");
 
-    Resource.loadScene(m_baseScene);
+    Resource.LoadBaseScene();
 
-    Log.log("Finished loading base scene: %s", m_baseScene.c_str());
+    exit(0);
+
+    Resource.awake();
 }
 
 void WorldManager::update() const

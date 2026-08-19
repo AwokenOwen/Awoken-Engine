@@ -397,6 +397,8 @@ public:
 
     void addToDraw(const std::function<void()>& function, bool transparent);
 
+    void LoadBaseScene();
+
 private:
     /**
      * @brief Starts the Resource Manager
@@ -445,6 +447,8 @@ private:
     bool load_wav_file_header(std::ifstream& file, std::uint8_t& channels, std::int32_t& sampleRate, std::uint8_t& bitsPerSample, ALsizei& size);
     bool load_wav(const std::string& filename, std::uint8_t& channels, std::int32_t& sampleRate, std::uint8_t& bitsPerSample, std::vector<char>&);
 
+    void awake();
+
     std::map<std::string, std::string> m_sceneMap{};
     std::map<std::string, Scene*> m_loadedScenes{};
 
@@ -460,6 +464,8 @@ private:
 
     std::map<std::string, Sound> m_loadedSounds{};
     std::map<std::string, Font> m_loadedFonts{};
+
+    std::string baseScene{"default"};
 };
 
 template <typename T>

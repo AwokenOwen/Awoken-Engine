@@ -29,7 +29,7 @@ private:
     /**
      * @brief Runs only once on the first frame it is initiated
      */
-    void start() override{}
+    void start() override;
 
     /**
      * @brief Runs once every frame it is active

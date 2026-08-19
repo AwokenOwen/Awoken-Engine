@@ -45,6 +45,13 @@ void AudioSourceComponent::play() {
     m_state = AL_PLAYING;
 }
 
+void AudioSourceComponent::start()
+{
+    // Load and get the sound file
+    Resource.loadSound(m_soundPath);
+    m_sound = Resource.getSound(m_soundPath);
+}
+
 void AudioSourceComponent::update()
 {
     // If the state is playing
@@ -78,10 +85,6 @@ void AudioSourceComponent::fromJson(nlohmann::json j)
 {
     // Grab the sound file
     m_soundPath = j["Sound"].get<std::string>();
-
-    // Load and get the sound file
-    Resource.loadSound(m_soundPath);
-    m_sound = Resource.getSound(m_soundPath);
 
     // Generate our source
     alGenSources(1, &m_source);

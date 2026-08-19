@@ -13,6 +13,20 @@
 #include "Object.h"
 
 
+void ModelRendererComponent::start()
+{
+    // Load and get the model
+    Resource.loadModel(m_modelPath);
+    m_model = Resource.getModel(m_modelPath);
+
+    // Load and get all the materials
+    for (const auto& m : m_materialPaths)
+    {
+        Resource.loadMaterial(m);
+        m_materials.emplace_back(Resource.getMaterial(m));
+    }
+}
+
 void ModelRendererComponent::update()
 {
     // Check if mesh count is equal to the material count
@@ -61,17 +75,6 @@ void ModelRendererComponent::fromJson(nlohmann::json j)
 
     // Set the material paths
     m_materialPaths = j["Materials"].get<std::vector<std::string>>();
-
-    // Load and get the model
-    Resource.loadModel(m_modelPath);
-    m_model = Resource.getModel(m_modelPath);
-
-    // Load and get all the materials
-    for (const auto& m : m_materialPaths)
-    {
-        Resource.loadMaterial(m);
-        m_materials.emplace_back(Resource.getMaterial(m));
-    }
 }
 
 void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
@@ -120,7 +123,6 @@ void ModelRendererComponent::defaultDynamicUniformLoader(Material mat) const
         mat.setUniform("projection", orthographic);
         break;
     }
-    glDisable(GL_CULL_FACE);
 }
 
 void ModelRendererComponent::destroy()

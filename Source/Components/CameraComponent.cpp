@@ -101,6 +101,21 @@ void CameraComponent::start()
 {
     // Add this camera to the scene's list of cameras
     getParent()->getScene()->addCamera(this);
+
+    // Load and get skybox texture
+    Resource.loadTexture(m_skyboxTexturePath);
+    m_skyboxTexture = Resource.getTexture(m_skyboxTexturePath);
+
+    // Load and get skybox model
+    Resource.loadModel(m_skyboxModelPath);
+    m_skyboxModel = Resource.getModel(m_skyboxModelPath);
+
+    // Load and get skybox material
+    Resource.loadMaterial(m_skyboxMaterialPath);
+    m_skyboxMaterial = Resource.getMaterial(m_skyboxMaterialPath);
+
+    // Create the framebuffers
+    createFrameBuffers();
 }
 
 void CameraComponent::update()
@@ -180,21 +195,6 @@ void CameraComponent::fromJson(nlohmann::json j)
 
     // Set camera projection type
     m_perspective = j["Perspective"].get<bool>();
-
-    // Load and get skybox texture
-    Resource.loadTexture(m_skyboxTexturePath);
-    m_skyboxTexture = Resource.getTexture(m_skyboxTexturePath);
-
-    // Load and get skybox model
-    Resource.loadModel(m_skyboxModelPath);
-    m_skyboxModel = Resource.getModel(m_skyboxModelPath);
-
-    // Load and get skybox material
-    Resource.loadMaterial(m_skyboxMaterialPath);
-    m_skyboxMaterial = Resource.getMaterial(m_skyboxMaterialPath);
-
-    // Create the framebuffers
-    createFrameBuffers();
 }
 
 void CameraComponent::drawToFrameBuffer()

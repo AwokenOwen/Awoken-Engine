@@ -33,13 +33,6 @@ public:
      */
     static WorldManager& getInstance();
 
-    /**
-     * @brief sets the name of the base scene needed to start the engine
-     *
-     * @param name Name of the scene in the resource manager scene map
-     */
-    void setBaseScene(const std::string& name);
-
     void setMainCamera(CameraComponent* camera);
     [[nodiscard]] CameraComponent* getMainCamera() const;
 
@@ -72,8 +65,6 @@ private:
     ~WorldManager() = default;
 
     void drawPostprocess() const;
-
-    std::string m_baseScene{"default"};
 
     std::vector<LightComponent*> m_lights{};
     CameraComponent* m_mainCamera{};

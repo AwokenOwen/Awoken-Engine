@@ -5,7 +5,6 @@
 #include "GameManager.h"
 
 #include <chrono>
-#include <thread>
 
 #include "InputManager.h"
 #include "LogManager.h"
@@ -15,9 +14,10 @@
 
 int GameManager::initialize() {
     // Other Manager Initializations
-    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 || Resource.initialize() == 1/* || other manager inits == 1 */) {
+    if (Log.initialize() == 1 || Window.initialize() == 1 || World.initialize() == 1 || Input.initialize() == 1 ||  Resource.initialize()  == 1/* || other manager inits == 1 */) {
         exit(-1);
     }
+
 
     // Grab the default audio device
     m_device = alcOpenDevice(nullptr);
@@ -26,7 +26,7 @@ int GameManager::initialize() {
     {
         // Log the error
         Log.logError("Could not find a default audio device.");
-        return 1;
+        exit(-1);
     }
     // Create a context from the device
     m_context = alcCreateContext(m_device, nullptr);
@@ -35,20 +35,22 @@ int GameManager::initialize() {
     {
         // Log the error
         Log.logError("Could not create a audio context.");
-        return 1;
+        exit(-1);
     }
     // Make the created context the current context
     alcMakeContextCurrent(m_context);
     // Error check if context doesn't works
-    if (alcGetError(m_device) != ALC_NO_ERROR )
+    if (alcGetError(m_device) != ALC_NO_ERROR)
     {
         // Log the error... We have a bigger problem
         Log.logError("Could not make context the current context.");
-        return 1;
+        exit(-1);
     }
 
-    // Log all managers done
+    // Game Manager Done
     Log.log("GameManager Initialized.");
+
+    // Log all managers done
     Log.log("All Managers initialized.");
 
     // Return success
